@@ -1,0 +1,58 @@
+<?php
+
+namespace {{clientNamespace}};
+
+use Kinikit\Core\Object\SerialisableObject;
+/**
+{{comment}}
+*/
+class {{name}} extends SerialisableObject {
+
+    {{#properties}}
+    /**{{#comment}}
+{{.}}{{/comment}}
+     *
+     * @var {{clientType}} {{^comment}}{{description}}{{/comment}}
+     */
+    {{#updatable}}private{{/updatable}}{{^updatable}}protected{{/updatable}} ${{name}};
+
+    {{/properties}}
+
+
+    /**
+     * Constructor
+     *
+     {{#properties}}{{#updatable}}* @param {{varType}} ${{name}}
+     {{/updatable}}{{/properties}}*/
+    public function __construct({{#properties}}{{#updatable}}{{#updatableIndex}}, {{/updatableIndex}}${{name}} = {{#defaultValue}}{{#isString}}"{{/isString}}{{.}}{{#isString}}"{{/isString}}{{/defaultValue}}{{^defaultValue}}null{{/defaultValue}}{{/updatable}}{{/properties}}){
+
+        {{#properties}}{{#updatable}}$this->{{name}} = ${{name}};
+        {{/updatable}}{{/properties}}
+    }
+
+    {{#properties}}
+    /**
+     * Get the {{name}}
+     *
+     * @return {{clientType}}
+     */
+    public function get{{ucaseName}}(){
+        return $this->{{name}};
+    }
+    {{#updatable}}
+
+    /**
+     * Set the {{name}}
+     *
+     * @param {{clientType}} ${{name}}
+     * @return {{className}}
+     */
+    public function set{{ucaseName}}(${{name}}){
+        $this->{{name}} = ${{name}};
+        return $this;
+    }
+    {{/updatable}}
+
+    {{/properties}}
+
+}

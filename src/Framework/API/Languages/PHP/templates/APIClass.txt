@@ -1,0 +1,37 @@
+<?php
+
+namespace {{clientNamespace}};
+
+use Kinikit\Core\Util\HTTP\WebServiceProxy;
+
+/**
+{{comment}}
+*/
+class {{className}} extends WebServiceProxy {
+
+{{#methods}}
+    /**
+{{comment}}
+     *
+    {{#params}}
+     * @param {{clientType}} ${{name}}
+    {{/params}}
+    {{#clientReturnType}}
+     * @return {{.}}
+    {{/clientReturnType}}
+    {{#exceptions}}
+    * @throws {{clientType}}
+    {{/exceptions}}
+     */
+    public function {{name}}({{#params}}{{#index}}, {{/index}}${{name}}{{#isOptional}} = {{#isString}}"{{/isString}}{{defaultValue}}{{#isString}}"{{/isString}}{{/isOptional}}{{/params}}){
+        $expectedExceptions = array();
+        {{#exceptions}}
+        $expectedExceptions["{{type}}"] = "{{clientType}}";
+        {{/exceptions}}
+        {{#returnType}}return {{/returnType}}parent::callMethod("{{PHPRequestPath}}", "{{httpMethod}}", array({{#params}}{{^payloadParam}}{{^segmentParam}}{{#extraParamIndex}}, {{/extraParamIndex}}"{{name}}" => ${{name}}{{/segmentParam}}{{/payloadParam}}{{/params}}),{{#payloadParam}}${{name}}{{/payloadParam}}{{^payloadParam}}null{{/payloadParam}},{{#clientReturnType}}"{{.}}"{{/clientReturnType}}{{^clientReturnType}}null{{/clientReturnType}},$expectedExceptions);
+    }
+
+{{/methods}}
+
+}
+

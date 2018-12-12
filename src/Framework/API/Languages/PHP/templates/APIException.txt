@@ -1,0 +1,58 @@
+<?php
+
+namespace {{clientNamespace}};
+
+use Kinikit\Core\Exception\SerialisableException;
+
+/**
+{{comment}}
+*/
+class {{name}} extends SerialisableException {
+
+    {{#properties}}
+    /**{{#comment}}
+{{.}}{{/comment}}
+     *
+     * @var {{clientType}} {{^comment}}{{description}}{{/comment}}
+     */
+    {{#updatable}}private{{/updatable}}{{^updatable}}protected{{/updatable}} ${{name}};
+
+    {{/properties}}
+
+    /**
+     * Constructor
+     *
+     {{#properties}}{{^inherited}}{{#updatable}}* @param {{varType}} ${{name}}
+     {{/updatable}}{{/inherited}}{{/properties}}*/
+    public function __construct({{#properties}}{{^inherited}}{{#updatable}}{{#updatableIndex}}, {{/updatableIndex}}${{name}} = null{{/updatable}}{{/inherited}}{{/properties}}){
+
+        {{#properties}}{{^inherited}}{{#updatable}}$this->{{name}} = ${{name}};
+        {{/updatable}}{{/inherited}}{{/properties}}
+    }
+
+    {{#properties}}
+    {{^inherited}}
+    /**
+     * Get the {{name}}
+     *
+     * @return {{clientType}}
+     */
+    public function get{{ucaseName}}(){
+        return $this->{{name}};
+    }
+    {{#updatable}}
+
+    /**
+     * Set the {{name}}
+     *
+     * @param {{clientType}} ${{name}}
+     */
+    public function set{{ucaseName}}(${{name}}){
+        $this->{{name}} = ${{name}};
+    }
+    {{/updatable}}
+
+    {{/inherited}}
+    {{/properties}}
+
+}

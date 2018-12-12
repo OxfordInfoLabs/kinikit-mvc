@@ -1,0 +1,63 @@
+<?php
+
+namespace {{clientNamespace}};
+
+{{#controllerSummaries}}
+use {{clientNamespace}}\{{className}};
+{{/controllerSummaries}}
+use Kinikit\Core\Util\HTTP\WebServiceProxy;
+
+class APIProvider  {
+
+    /**
+    * @var string
+    */
+    private $apiURL;
+
+
+    /**
+    * @var string[]
+    */
+    private $globalParameters;
+
+
+    /**
+    * @var WebServiceProxy[]
+    */
+    private $instances = array();
+
+    /**
+    * Construct with the api url and the api key for access.
+    *
+    * @param string $apiURL
+      {{#globalParameters}}
+    * @param string ${{name}}
+       {{/globalParameters}}
+    */
+    public function __construct($apiURL{{#globalParameters}}, ${{name}}{{/globalParameters}}){
+        $this->apiURL = $apiURL;
+
+        $this->globalParameters = array();
+        {{#globalParameters}}
+        $this->globalParameters["{{name}}"] = ${{name}};
+        {{/globalParameters}}
+    }
+
+    {{#controllerSummaries}}
+    /**
+    * Get an instance of the {{name}} API
+    *
+    * @return \{{clientNamespace}}\{{className}}
+    */
+    public function {{className}}(){
+        if (!isset($this->instances["{{className}}"])){
+            $this->instances["{{className}}"] = new {{className}}($this->apiURL."/{{requestPath}}", $this->globalParameters);
+        }
+        return $this->instances["{{className}}"];
+    }
+
+    {{/controllerSummaries}}
+
+
+
+}

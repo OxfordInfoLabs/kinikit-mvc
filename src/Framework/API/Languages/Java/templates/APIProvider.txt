@@ -1,0 +1,49 @@
+package {{javaPackage}};
+
+import java.util.Map;
+import java.util.HashMap;
+import {{javaPackage}}.framework.WebServiceProxy;
+{{#controllerSummaries}}
+import {{javaPackage}}.{{className}};
+{{/controllerSummaries}}
+
+public class APIProvider  {
+
+    private String apiURL;
+    private String apiKey;
+    private Map<String, String> globalParameters = new HashMap<String, String>();
+    private Map<String, WebServiceProxy> instances = new HashMap<String, WebServiceProxy>();
+
+    /**
+    * Construct with the api url and the api key for access.
+    *
+    * @param String apiURL
+    {{#globalParameters}}
+    * @param String {{name}}
+    {{/globalParameters}}
+    */
+    public APIProvider(String apiURL{{#globalParameters}}, String {{name}}{{/globalParameters}}){
+        this.apiURL = apiURL;
+        {{#globalParameters}}
+        this.globalParameters.put("{{name}}", {{name}});
+        {{/globalParameters}}
+    }
+
+    {{#controllerSummaries}}
+    /**
+    * Get an instance of the {{className}} API
+    *
+    * @return {{name}}
+    */
+    public {{className}} {{className}}(){
+        if (this.instances.get("{{className}}") == null){
+            this.instances.put("{{className}}", new {{className}}(this.apiURL + "/{{requestPath}}", this.globalParameters));
+        }
+        return ({{className}})this.instances.get("{{className}}");
+    }
+
+    {{/controllerSummaries}}
+
+
+
+}

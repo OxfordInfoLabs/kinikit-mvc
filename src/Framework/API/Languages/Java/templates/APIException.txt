@@ -1,0 +1,69 @@
+package {{javaPackage}};
+
+{{#javaImports}}
+import {{.}};
+{{/javaImports}}
+import java.util.Map;
+
+
+/**
+{{comment}}
+*/
+public class {{name}} extends Exception {
+
+    {{#properties}}
+    /**{{#comment}}
+{{.}}{{/comment}}{{^comment}}{{#description}}
+     * {{.}}{{/description}}{{/comment}}
+     */
+    {{#updatable}}private{{/updatable}}{{^updatable}}protected{{/updatable}} {{javaType}} {{name}};
+
+    {{/properties}}
+
+
+
+    /**
+    * Blank Constructor
+    *
+    */
+    public {{name}}(){
+    }
+
+    {{#numberOfUpdatableProperties}}
+    /**
+     * Updatable Constructor
+     *
+    {{#properties}}{{#updatable}}* @param {{javaType}} ${{name}}
+    {{/updatable}}{{/properties}}*/
+    public {{name}}({{#properties}}{{#updatable}}{{#updatableIndex}}, {{/updatableIndex}}{{javaType}} {{name}}{{/updatable}}{{/properties}}){
+
+        {{#properties}}{{#updatable}}this.{{name}} = {{name}};
+        {{/updatable}}{{/properties}}
+    }
+    {{/numberOfUpdatableProperties}}
+
+
+    {{#properties}}
+    /**
+     * Get the {{name}}
+     *
+     * @return {{javaType}}
+     */
+    public {{javaType}} get{{ucaseName}}(){
+        return this.{{name}};
+    }
+    {{#updatable}}
+
+    /**
+     * Set the {{name}}
+     *
+     * @param {{javaType}} ${{name}}
+     */
+    public void set{{ucaseName}}({{javaType}} {{name}}){
+        this.{{name}} = {{name}};
+    }
+    {{/updatable}}
+
+    {{/properties}}
+
+}

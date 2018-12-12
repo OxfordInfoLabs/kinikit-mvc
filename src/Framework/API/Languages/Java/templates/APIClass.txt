@@ -1,0 +1,58 @@
+package {{javaPackage}};
+
+import {{rootJavaPackage}}.framework.WebServiceProxy;
+import java.util.Map;
+import java.util.HashMap;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+
+{{#javaImports}}
+import {{.}};
+{{/javaImports}}
+
+/**
+{{comment}}
+*/
+public class {{className}} extends WebServiceProxy {
+
+    public {{className}}(String webServiceURL, Map<String,String> globalParameters){
+        super(webServiceURL, globalParameters);
+    }
+
+    {{#methods}}
+    /**
+{{comment}}
+     *
+    {{#params}}
+     * @param {{javaType}} {{name}}
+    {{/params}}
+    {{#returnShortClass}}
+     * @return {{.}}
+    {{/returnShortClass}}
+     */
+    public {{#returnJavaType}}{{.}}{{/returnJavaType}}{{^returnJavaType}}void{{/returnJavaType}} {{name}}({{#params}}{{#index}}, {{/index}}{{javaType}} {{name}}{{/params}}) throws Exception{
+        Map<String, Object> params = new HashMap<String, Object>();
+        {{#params}}{{^payloadParam}}{{^segmentParam}}
+        params.put("{{name}}", {{name}});{{/segmentParam}}{{/payloadParam}}{{/params}}
+
+        Map<String, String> expectedExceptions = new HashMap<String, String>();
+        {{#exceptions}}
+        expectedExceptions.put("{{type}}","{{javaClientType}}");
+        {{/exceptions}}
+
+
+        Type returnType;
+
+        {{#returnJavaType}}
+        returnType = new TypeToken<{{returnJavaType}}>(){}.getType();
+        {{/returnJavaType}}
+        {{^returnJavaType}}
+        returnType = Object.class;
+        {{/returnJavaType}}
+
+        {{#returnJavaType}}return ({{returnJavaType}}){{/returnJavaType}}super.callMethod("{{javaRequestPath}}", "{{httpMethod}}", params, {{#payloadParam}}{{name}}{{/payloadParam}}{{^payloadParam}}null{{/payloadParam}}, returnType,expectedExceptions);
+    }
+
+    {{/methods}}
+
+}
