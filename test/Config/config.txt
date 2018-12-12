@@ -1,0 +1,25 @@
+# Configure the database connectivity
+db.host = 192.168.33.10	# YOUR HOSTNAME
+db.database = kinikittest	# YOUR DATABASE
+db.username = kinikittest 	# YOUR USERNAME
+db.password = kinikittest	# YOUR PASSWORD
+db.port = 3306				# YOUR PORT
+db.logfile = /tmp/allqueries.log
+db.socket = /Applications/MAMP/tmp/mysql/mysql.sock
+
+log.file = /tmp/ooacorelog.log
+
+sqlserver.servername = DAMS2-WINDOWS
+sqlserver.database = ooacoretest
+sqlserver.username = sa
+sqlserver.password = W1equity
+
+
+param1 = ford
+param2 = vauxhall
+param3 = bmw
+param4 = porsche
+
+application.namespace = Kinikit\MVC
+
+ratelimiter.storedir = /tmp/ratelimits
