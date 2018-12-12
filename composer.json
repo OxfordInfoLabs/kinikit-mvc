@@ -1,7 +1,7 @@
 {
   "name": "oxil/kinikit-mvc",
-  "version": "0.0.3",
-  "description": "Kinikit - PHP Application development framework",
+  "version": "0.1",
+  "description": "Kinikit - PHP Application development framework MVC component",
   "keywords": [
     "PHP",
     "application",
