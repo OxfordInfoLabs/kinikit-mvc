@@ -32,7 +32,7 @@ public class {{name}}  {
     /**
      * Updatable Constructor
      *
-    {{#properties}}{{#updatable}}* @param {{javaType}} ${{name}}
+    {{#properties}}{{#updatable}}* @param {{name}} the {{name}}
     {{/updatable}}{{/properties}}*/
     public {{name}}({{#properties}}{{#updatable}}{{#updatableIndex}}, {{/updatableIndex}}{{javaType}} {{name}}{{/updatable}}{{/properties}}){
 
@@ -46,7 +46,7 @@ public class {{name}}  {
     /**
      * Get the {{name}}
      *
-     * @return {{javaType}}
+     * @return {{name}}
      */
     public {{javaType}} get{{ucaseName}}(){
         return this.{{name}};
@@ -56,7 +56,7 @@ public class {{name}}  {
     /**
      * Set the {{name}}
      *
-     * @param {{javaType}} ${{name}}
+     * @param {{name}} the {{name}}
      * @return {{className}}
      */
     public {{className}} set{{ucaseName}}({{javaType}} {{name}}){

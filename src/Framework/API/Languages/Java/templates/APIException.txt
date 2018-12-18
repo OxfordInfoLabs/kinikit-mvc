@@ -47,7 +47,7 @@ public class {{name}} extends Exception {
     /**
      * Get the {{name}}
      *
-     * @return {{javaType}}
+     * @return {{name}}
      */
     public {{javaType}} get{{ucaseName}}(){
         return this.{{name}};

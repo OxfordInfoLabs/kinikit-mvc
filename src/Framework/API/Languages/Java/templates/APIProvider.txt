@@ -17,9 +17,9 @@ public class APIProvider  {
     /**
     * Construct with the api url and the api key for access.
     *
-    * @param String apiURL
+    * @param apiURL The URL to connect to
     {{#globalParameters}}
-    * @param String {{name}}
+    * @param {{name}} The {{name}}
     {{/globalParameters}}
     */
     public APIProvider(String apiURL{{#globalParameters}}, String {{name}}{{/globalParameters}}){
@@ -33,7 +33,7 @@ public class APIProvider  {
     /**
     * Get an instance of the {{className}} API
     *
-    * @return {{name}}
+    * @return {{className}}
     */
     public {{className}} {{className}}(){
         if (this.instances.get("{{className}}") == null){
