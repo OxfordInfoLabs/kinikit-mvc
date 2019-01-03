@@ -251,7 +251,8 @@ abstract class Controller {
 
         if ($result !== null) {
             if ($result instanceof SerialisableException) {
-                $result = $converter->convert($result, true);
+                $serialisableData = $result->returnWebServiceSerialisableData();
+                $result = $converter->convert($serialisableData, true);
             } else {
                 $result = $converter->convert($result);
             }
