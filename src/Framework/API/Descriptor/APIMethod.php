@@ -169,12 +169,32 @@ class APIMethod extends DynamicSerialisableObject {
     }
 
     /**
+     * Get the relative return type path with / removed from front
+     *
+     * @return string
+     */
+    public function getRelativeReturnTypePath() {
+        return trim($this->getReturnTypePath(), "/");
+    }
+
+
+    /**
      * @return string
      */
     public function getClientReturnType() {
         return $this->clientReturnType;
     }
 
+
+    /**
+     * Return indicator as to whether or not the return type is primitive.
+     *
+     * @return bool
+     */
+    public function getIsReturnTypePrimitive() {
+        $primitives = array("integer", "int", "boolean", "bool", "float", "mixed", "string");
+        return in_array($this->returnType, $primitives);
+    }
 
     /**
      * @return string

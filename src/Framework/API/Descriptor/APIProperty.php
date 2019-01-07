@@ -181,6 +181,11 @@ class APIProperty extends DynamicSerialisableObject {
         return $pathRewrite != $type ? "/" . ltrim($pathRewrite, "/") : null;
     }
 
+
+    public function getRelativeTypePath(){
+        return trim($this->getTypePath(), "/");
+    }
+
     /**
      * @return string
      */

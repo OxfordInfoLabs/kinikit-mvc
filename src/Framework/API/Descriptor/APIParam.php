@@ -131,6 +131,10 @@ class APIParam extends DynamicSerialisableObject {
         return $pathRewrite != $type ? "/" . ltrim($pathRewrite, "/") : null;
     }
 
+    public function getRelativeTypePath() {
+        return trim($this->getTypePath(), "/");
+    }
+
     /**
      * @return string
      */
@@ -192,5 +196,15 @@ class APIParam extends DynamicSerialisableObject {
         return $this->type == "string";
     }
 
+
+    /**
+     * Return an indicator as to whether or not this is a primitive field
+     *
+     * @return bool
+     */
+    public function getIsPrimitive() {
+        $primitives = array("integer", "int", "boolean", "bool", "float", "mixed", "string");
+        return in_array($this->type, $primitives);
+    }
 
 }

@@ -59,6 +59,10 @@ class APIMethodException extends DynamicSerialisableObject {
     }
 
 
+    public function getRelativePath() {
+        return trim($this->getPath(), "/");
+    }
+
     /**
      * @return string
      */
