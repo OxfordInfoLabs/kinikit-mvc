@@ -1,6 +1,6 @@
 {
   "name": "oxil/kinikit-mvc",
-  "version": "0.2",
+  "version": "0.3",
   "description": "Kinikit - PHP Application development framework MVC component",
   "keywords": [
     "PHP",
@@ -23,4 +23,4 @@
       "Kinikit\\MVC\\": "src/"
     }
   }
-}
+} 
