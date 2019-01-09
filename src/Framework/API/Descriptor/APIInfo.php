@@ -11,6 +11,7 @@ use Kinikit\MVC\Framework\API\APIConfiguration;
 use Kinikit\Core\Util\Logging\Logger;
 use Kinikit\MVC\Framework\Controller;
 use Kinikit\MVC\Framework\RateLimiter\RateLimiterEvaluator;
+use Kinikit\MVC\Framework\SourceBaseManager;
 
 /**
  * Descriptor for an API controller
@@ -171,157 +172,160 @@ class APIInfo {
             $this->apiControllers = array();
             $this->apiObjects = array();
 
-            $applicationNamespace = Configuration::readParameter("application.namespace");
+            $applicationNamespaces = SourceBaseManager::instance()->getApplicationNamespaces();
 
-            $apiControllerData = $this->readAPIControllerDataForDirectory("Controllers", $applicationNamespace);
+            foreach ($applicationNamespaces as $applicationNamespace) {
 
-            /**
-             * @var $controllerAnnotations ClassAnnotations
-             * @var $controllerReflectionClass \ReflectionClass
-             */
-            foreach ($apiControllerData as $path => list($controllerAnnotations, $controllerReflectionClass)) {
-
-                // Get the short name.
-                $controllerClass = $controllerReflectionClass->getShortName();
-                $controllerPath = str_replace("Controllers/", "", $path);
-
-                $controllerApiNamespace = $controllerReflectionClass->getNamespaceName();
-
-                $controllerComment = $controllerAnnotations->getClassAnnotationForMatchingTag("comment") ?
-                    $controllerAnnotations->getClassAnnotationForMatchingTag("comment")->getValue() : null;
-
-                $controllerTitle = $controllerAnnotations->getClassAnnotationForMatchingTag("title") ? $controllerAnnotations->getClassAnnotationForMatchingTag("title")->getValue() : null;
-
-
-                $requiredObjects = array();
+                $apiControllerData = $this->readAPIControllerDataForDirectory("Controllers", $applicationNamespace);
 
                 /**
-                 * Loop through the methods for the controller
-                 *
-                 * @var $reflectionMethod \ReflectionMethod
-                 *
+                 * @var $controllerAnnotations ClassAnnotations
+                 * @var $controllerReflectionClass \ReflectionClass
                  */
-                $controllerMethods = array();
-                foreach ($controllerReflectionClass->getMethods() as $reflectionMethod) {
+                foreach ($apiControllerData as $path => list($controllerAnnotations, $controllerReflectionClass)) {
 
-                    if (!$reflectionMethod->isPublic() || $reflectionMethod->getDeclaringClass() != $controllerReflectionClass || $reflectionMethod->getName() == "__construct")
-                        continue;
+                    // Get the short name.
+                    $controllerClass = $controllerReflectionClass->getShortName();
+                    $controllerPath = str_replace("Controllers/", "", $path);
 
-                    $annotations = $controllerAnnotations->getMethodAnnotations()[$reflectionMethod->getName()];
+                    $controllerApiNamespace = $controllerReflectionClass->getNamespaceName();
 
-                    $comment = isset($annotations["comment"]) ? $annotations["comment"][0]->getValue() : null;
-                    $http = isset($annotations["http"]) ? $annotations["http"][0]->getValue() : null;
-                    $segmentParams = array();
-                    $payloadIndex = -1;
-                    if ($http) {
-                        $exploded = explode(" ", $http);
-                        $httpMethod = trim($exploded[0]);
+                    $controllerComment = $controllerAnnotations->getClassAnnotationForMatchingTag("comment") ?
+                        $controllerAnnotations->getClassAnnotationForMatchingTag("comment")->getValue() : null;
 
-                        if (sizeof($exploded) > 1) {
-                            preg_match_all("/\\$[a-zA-Z0-9_]+/", $exploded[1], $matchedParams);
-                            foreach ($matchedParams[0] as $segmentParam) {
-                                $segmentParams[ltrim($segmentParam, "$")] = 1;
+                    $controllerTitle = $controllerAnnotations->getClassAnnotationForMatchingTag("title") ? $controllerAnnotations->getClassAnnotationForMatchingTag("title")->getValue() : null;
+
+
+                    $requiredObjects = array();
+
+                    /**
+                     * Loop through the methods for the controller
+                     *
+                     * @var $reflectionMethod \ReflectionMethod
+                     *
+                     */
+                    $controllerMethods = array();
+                    foreach ($controllerReflectionClass->getMethods() as $reflectionMethod) {
+
+                        if (!$reflectionMethod->isPublic() || $reflectionMethod->getDeclaringClass() != $controllerReflectionClass || $reflectionMethod->getName() == "__construct")
+                            continue;
+
+                        $annotations = $controllerAnnotations->getMethodAnnotations()[$reflectionMethod->getName()];
+
+                        $comment = isset($annotations["comment"]) ? $annotations["comment"][0]->getValue() : null;
+                        $http = isset($annotations["http"]) ? $annotations["http"][0]->getValue() : null;
+                        $segmentParams = array();
+                        $payloadIndex = -1;
+                        if ($http) {
+                            $exploded = explode(" ", $http);
+                            $httpMethod = trim($exploded[0]);
+
+                            if (sizeof($exploded) > 1) {
+                                preg_match_all("/\\$[a-zA-Z0-9_]+/", $exploded[1], $matchedParams);
+                                foreach ($matchedParams[0] as $segmentParam) {
+                                    $segmentParams[ltrim($segmentParam, "$")] = 1;
+                                }
+
+                                $requestPath = trim($exploded[1], "/ ");
+                                $requestPath = preg_replace("/\\$([a-zA-Z0-9_]+)/", "{" . "$1" . "}", $requestPath);
+                            } else {
+                                $requestPath = "";
                             }
 
-                            $requestPath = trim($exploded[1], "/ ");
-                            $requestPath = preg_replace("/\\$([a-zA-Z0-9_]+)/", "{" . "$1" . "}", $requestPath);
+                            if ($httpMethod != "GET") {
+                                $payloadIndex = sizeof($segmentParams);
+                            }
+
+
                         } else {
-                            $requestPath = "";
-                        }
-
-                        if ($httpMethod != "GET") {
-                            $payloadIndex = sizeof($segmentParams);
+                            $httpMethod = "POST";
+                            $requestPath = $reflectionMethod->getName();
                         }
 
 
-                    } else {
-                        $httpMethod = "POST";
-                        $requestPath = $reflectionMethod->getName();
-                    }
+                        $params = array();
+                        $extraParamIndex = 0;
+                        if (isset($annotations["param"])) {
+                            foreach ($annotations["param"] as $paramIndex => $parameterAnnotation) {
+
+                                $reflectionParam = $reflectionMethod->getParameters()[$paramIndex];
+
+                                $parameterLine = $parameterAnnotation->getValue();
+                                $parameterWords = explode(" ", $parameterLine);
+                                $paramName = ltrim(is_numeric(strpos($parameterWords[0], "$")) ? $parameterWords[0] : (sizeof($parameterWords) > 1 ? $parameterWords[1] : null), "$");
+                                $paramType = is_numeric(strpos($parameterWords[0], "$")) ? (sizeof($parameterWords) > 1 ? $parameterWords[1] : null) : $parameterWords[0];
+
+                                $paramDescription = sizeof($parameterWords) > 2 ? join(" ", array_slice($parameterWords, 2)) : "";
+
+                                if (is_numeric(strpos($paramType, "\\"))) {
+                                    $paramType = $this->processAPIObject($paramType, $this->apiObjects);
+                                    $requiredObjects[$this->stripArrayExtension($this->getClientNamespace($paramType))] = 1;
+                                }
 
 
-                    $params = array();
-                    $extraParamIndex = 0;
-                    if (isset($annotations["param"])) {
-                        foreach ($annotations["param"] as $paramIndex => $parameterAnnotation) {
+                                $params[] = $this->addLanguageSpecificProperties(new APIParam($paramName, $paramType, $paramDescription, isset($segmentParams[$paramName]), $paramIndex == $payloadIndex, $paramIndex, $extraParamIndex, $reflectionParam->isOptional() ? $reflectionParam->getDefaultValue() : "_UNSET", $this->getClientNamespace($paramType)));
 
-                            $reflectionParam = $reflectionMethod->getParameters()[$paramIndex];
+                                if (!isset($segmentParams[$paramName]) && ($paramIndex != $payloadIndex)) {
+                                    $extraParamIndex++;
+                                }
 
-                            $parameterLine = $parameterAnnotation->getValue();
-                            $parameterWords = explode(" ", $parameterLine);
-                            $paramName = ltrim(is_numeric(strpos($parameterWords[0], "$")) ? $parameterWords[0] : (sizeof($parameterWords) > 1 ? $parameterWords[1] : null), "$");
-                            $paramType = is_numeric(strpos($parameterWords[0], "$")) ? (sizeof($parameterWords) > 1 ? $parameterWords[1] : null) : $parameterWords[0];
 
-                            $paramDescription = sizeof($parameterWords) > 2 ? join(" ", array_slice($parameterWords, 2)) : "";
-
-                            if (is_numeric(strpos($paramType, "\\"))) {
-                                $paramType = $this->processAPIObject($paramType, $this->apiObjects);
-                                $requiredObjects[$this->stripArrayExtension($this->getClientNamespace($paramType))] = 1;
                             }
 
+                        }
 
-                            $params[] = $this->addLanguageSpecificProperties(new APIParam($paramName, $paramType, $paramDescription, isset($segmentParams[$paramName]), $paramIndex == $payloadIndex, $paramIndex, $extraParamIndex, $reflectionParam->isOptional() ? $reflectionParam->getDefaultValue() : "_UNSET", $this->getClientNamespace($paramType)));
 
-                            if (!isset($segmentParams[$paramName]) && ($paramIndex != $payloadIndex)) {
-                                $extraParamIndex++;
+                        $returnType = null;
+                        if (isset($annotations["return"])) {
+                            $returnType = $annotations["return"][0]->getValue();
+
+                            $returnTypeWords = explode(" ", $returnType);
+                            $returnType = $returnTypeWords[0];
+                            $returnDescription = sizeof($returnTypeWords) > 1 ? join(" ", array_slice($returnTypeWords, 1)) : "";
+
+
+                            if (is_numeric(strpos($returnType, "\\"))) {
+                                $returnType = $this->processAPIObject($returnType, $this->apiObjects);
+                                $requiredObjects[$this->stripArrayExtension($this->getClientNamespace($returnType))] = 1;
                             }
 
-
                         }
 
-                    }
 
+                        $exceptions = array();
 
-                    $returnType = null;
-                    if (isset($annotations["return"])) {
-                        $returnType = $annotations["return"][0]->getValue();
+                        if (isset($annotations["throws"])) {
 
-                        $returnTypeWords = explode(" ", $returnType);
-                        $returnType = $returnTypeWords[0];
-                        $returnDescription = sizeof($returnTypeWords) > 1 ? join(" ", array_slice($returnTypeWords, 1)) : "";
+                            foreach ($annotations["throws"] as $exceptionAnnotation) {
 
+                                $exceptionClass = trim($exceptionAnnotation->getValue());
+                                $exceptionClass = $this->processAPIObject($exceptionClass, $this->apiExceptions);
+                                $requiredObjects[$this->stripArrayExtension($this->getClientNamespace($exceptionClass))] = 1;
 
-                        if (is_numeric(strpos($returnType, "\\"))) {
-                            $returnType = $this->processAPIObject($returnType, $this->apiObjects);
-                            $requiredObjects[$this->stripArrayExtension($this->getClientNamespace($returnType))] = 1;
+                                $exceptions[] = $this->addLanguageSpecificProperties(new APIMethodException($exceptionClass, $this->getClientNamespace($exceptionClass)));
+                            }
                         }
 
-                    }
 
+                        list($limit, $limitMultiplier, $limitPeriod) = RateLimiterEvaluator::instance()->getRateLimitsForControllerMethod($controllerReflectionClass->getName(), $reflectionMethod->getName(), $controllerAnnotations);
 
-                    $exceptions = array();
-
-                    if (isset($annotations["throws"])) {
-
-                        foreach ($annotations["throws"] as $exceptionAnnotation) {
-
-                            $exceptionClass = trim($exceptionAnnotation->getValue());
-                            $exceptionClass = $this->processAPIObject($exceptionClass, $this->apiExceptions);
+                        if ($limitPeriod !== null) {
+                            $exceptionClass = $this->processAPIObject("\Kinikit\MVC\Exception\RateLimitExceededException", $this->apiExceptions);
                             $requiredObjects[$this->stripArrayExtension($this->getClientNamespace($exceptionClass))] = 1;
-
                             $exceptions[] = $this->addLanguageSpecificProperties(new APIMethodException($exceptionClass, $this->getClientNamespace($exceptionClass)));
                         }
+
+
+                        $controllerMethods[] = $this->addLanguageSpecificProperties(new APIMethod($reflectionMethod->getName(), $comment, $httpMethod, $requestPath, $returnType, $returnDescription, $params, $this->getClientNamespace($returnType), $exceptions, $limit, $limitMultiplier, $limitPeriod));
+
                     }
 
 
-                    list($limit, $limitMultiplier, $limitPeriod) = RateLimiterEvaluator::instance()->getRateLimitsForControllerMethod($controllerReflectionClass->getName(), $reflectionMethod->getName(), $controllerAnnotations);
-
-                    if ($limitPeriod !== null) {
-                        $exceptionClass = $this->processAPIObject("\Kinikit\MVC\Exception\RateLimitExceededException", $this->apiExceptions);
-                        $requiredObjects[$this->stripArrayExtension($this->getClientNamespace($exceptionClass))] = 1;
-                        $exceptions[] = $this->addLanguageSpecificProperties(new APIMethodException($exceptionClass, $this->getClientNamespace($exceptionClass)));
-                    }
-
-
-                    $controllerMethods[] = $this->addLanguageSpecificProperties(new APIMethod($reflectionMethod->getName(), $comment, $httpMethod, $requestPath, $returnType, $returnDescription, $params, $this->getClientNamespace($returnType), $exceptions, $limit, $limitMultiplier, $limitPeriod));
-
+                    // Add the api controller to the stack
+                    $this->apiControllers[$controllerPath] = $this->addLanguageSpecificProperties(new APIController($controllerPath, $controllerApiNamespace, $controllerClass, $controllerTitle, $controllerComment, $controllerMethods, array_keys($requiredObjects), $this->getClientNamespace($controllerApiNamespace)));
                 }
 
-
-                // Add the api controller to the stack
-                $this->apiControllers[$controllerPath] = $this->addLanguageSpecificProperties(new APIController($controllerPath, $controllerApiNamespace, $controllerClass, $controllerTitle, $controllerComment, $controllerMethods, array_keys($requiredObjects), $this->getClientNamespace($controllerApiNamespace)));
             }
-
         }
     }
 
