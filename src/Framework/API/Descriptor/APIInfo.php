@@ -362,7 +362,27 @@ class APIInfo {
         $index = 0;
         $updatableIndex = 0;
 
+
+        // Set up ordered properties arrays
+        $propertiesByClass = array();
+        $hierarchyClass = $reflectionClass;
+        while ($hierarchyClass && !$hierarchyClass->isInternal()) {
+            $propertiesByClass[$hierarchyClass->getName()] = array();
+            $hierarchyClass = $hierarchyClass->getParentClass();
+        }
+
+        // Firstly order all properties according to the class hierarchy.
         foreach ($reflectionClass->getProperties() as $property) {
+            $propertiesByClass[$property->getDeclaringClass()->getName()][] = $property;
+        }
+
+        $orderedProperties = array();
+        foreach ($propertiesByClass as $classProperties) {
+            $orderedProperties = array_merge($classProperties, $orderedProperties);
+        }
+
+
+        foreach ($orderedProperties as $property) {
             if ($property->isStatic())
                 continue;
 
