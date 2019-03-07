@@ -35,9 +35,6 @@ class Dispatcher {
 
 
 
-        $startTime = microtime(true);
-        Logger::log("Announcement Start");
-
 
         if (file_exists("ApplicationAnnouncement.php")) {
             include_once "ApplicationAnnouncement.php";
@@ -45,7 +42,6 @@ class Dispatcher {
             $appAnnouncement->announce();
         }
 
-        Logger::log("Announcement End ".(microtime(true) - $startTime));
 
 
         // Start a session early in the flow
@@ -80,9 +76,7 @@ class Dispatcher {
 
             if ($instance) {
 
-                $startTime = microtime(true);
-                Logger::log("Request Start");
-
+            
                 $requestParameters = HttpRequest::instance()->getAllValues();
 
                 $result = $instance->handleRequest($requestParameters);
@@ -95,7 +89,6 @@ class Dispatcher {
                     print $result;
                 }
 
-                Logger::log("Request End ".(microtime(true) - $startTime));
 
 
             } else {
