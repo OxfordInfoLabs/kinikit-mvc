@@ -29,6 +29,24 @@ class ControllerInterceptor extends SerialisableObject {
     public function beforeMethod($controllerInstance, $methodName, $classAnnotations) {
         return true;
     }
+
+
+    /**
+     * After method interceptor for controller.  This is called after every method
+     * is invoked.  Useful for logging etc.
+     *
+     * @param $controllerInstance
+     * @param $methodName
+     * @param $classAnnotations
+     */
+    public function afterMethod($controllerInstance, $methodName, $result, $classAnnotations) {
+        return true;
+    }
+
+
+    public function onException($controllerInstance, $methodName, $classAnnotations) {
+
+    }
 }
 
 ?>
