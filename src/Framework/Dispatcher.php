@@ -34,11 +34,19 @@ class Dispatcher {
         set_error_handler(array($this, "genericErrorHandler"), E_ALL);
 
 
+
+        $startTime = microtime(true);
+        Logger::log("Announcement Start");
+
+
         if (file_exists("ApplicationAnnouncement.php")) {
             include_once "ApplicationAnnouncement.php";
             $appAnnouncement = new \ApplicationAnnouncement ();
             $appAnnouncement->announce();
         }
+
+        Logger::log("Announcement End ".(microtime(true) - $startTime));
+
 
         // Start a session early in the flow
         HttpSession::instance();
@@ -72,6 +80,9 @@ class Dispatcher {
 
             if ($instance) {
 
+                $startTime = microtime(true);
+                Logger::log("Request Start");
+
                 $requestParameters = HttpRequest::instance()->getAllValues();
 
                 $result = $instance->handleRequest($requestParameters);
@@ -83,6 +94,8 @@ class Dispatcher {
                 } else {
                     print $result;
                 }
+
+                Logger::log("Request End ".(microtime(true) - $startTime));
 
 
             } else {
@@ -108,6 +121,8 @@ class Dispatcher {
             }
 
         }
+
+
 
     }
 
