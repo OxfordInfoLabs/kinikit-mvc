@@ -95,8 +95,6 @@ class ControllerInterceptorEvaluator extends SerialisableObject {
 
         // Evaluate each one in turn
         foreach ($interceptors as $interceptor) {
-            $interceptorClass = $interceptor->getClassName();
-            $interceptor = new $interceptorClass();
             $result = $interceptor->beforeMethod($controllerInstance, $methodName, $parameters, $annotations);
             if (!$result) return false;
         }
@@ -122,8 +120,6 @@ class ControllerInterceptorEvaluator extends SerialisableObject {
 
         // Evaluate each one in turn
         foreach ($interceptors as $interceptor) {
-            $interceptorClass = $interceptor->getClassName();
-            $interceptor = new $interceptorClass();
             $result = $interceptor->afterMethod($controllerInstance, $methodName, $parameters, $returnValue, $annotations);
             if (!$result) return false;
         }
@@ -149,8 +145,6 @@ class ControllerInterceptorEvaluator extends SerialisableObject {
 
         // Evaluate each one in turn
         foreach ($interceptors as $interceptor) {
-            $interceptorClass = $interceptor->getClassName();
-            $interceptor = new $interceptorClass();
             $result = $interceptor->onException($controllerInstance, $methodName, $parameters, $exception, $annotations);
             if (!$result) return false;
         }
@@ -179,16 +173,21 @@ class ControllerInterceptorEvaluator extends SerialisableObject {
                     || ($interceptor->getControllers() == $controllerClass)
                     || (is_array($interceptor->getControllers()) && in_array($controllerClass, $interceptor->getControllers()))) {
 
-                    $interceptors[] = $interceptor;
+                    $interceptorDefClass = $interceptor->getClassName();
+
+                    $interceptors[] = new $interceptorDefClass();
                 }
             }
 
             $classInterceptors = $annotations->getClassAnnotationForMatchingTag("interceptor");
             if ($classInterceptors) {
                 foreach ($classInterceptors->getValues() as $interceptorClass) {
-                    $interceptors[] = new ControllerInterceptorDefinition($interceptorClass);
+                    $definition = new ControllerInterceptorDefinition($interceptorClass);
+                    $definitionClass = $definition->getClassName();
+                    $interceptors[] = new $definitionClass();
                 }
             }
+
 
             $this->controllerInterceptors[$controllerClass] = $interceptors;
 

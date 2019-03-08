@@ -130,7 +130,6 @@ abstract class Controller {
             $result = $e;
         } catch (\Exception $e) {
 
-            $controllerInterceptorEvaluator->evaluateOnExceptionInterceptors($this, $methodName, $suppliedParams, $e, $annotations);
 
             if ($isWebService) {
                 header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
@@ -139,6 +138,10 @@ abstract class Controller {
                 } else {
                     $result = new SerialisableException(null, null, $e);
                 }
+
+                $controllerInterceptorEvaluator->evaluateOnExceptionInterceptors($this, $methodName, $suppliedParams, $result, $annotations);
+
+
             } else {
 
                 $params = array("referrer" => URLHelper::getCurrentURLInstance()->getURL(), "error" => $e->getMessage());
