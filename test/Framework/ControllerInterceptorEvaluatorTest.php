@@ -20,8 +20,8 @@ class ControllerInterceptorEvaluatorTest extends \PHPUnit\Framework\TestCase {
     public function testIfNoDefinedInterceptorsTheEvaluatorReturnsTrueForAnyPassedController() {
 
         $interceptorEvaluator = new ControllerInterceptorEvaluator ();
-        $this->assertTrue($interceptorEvaluator->evaluateInterceptorsForControllerMethod(new \SimpleController(), "defaultHandler"));
-        $this->assertTrue($interceptorEvaluator->evaluateInterceptorsForControllerMethod(new \AdvancedController(), "defaultHandler"));
+        $this->assertTrue($interceptorEvaluator->evaluateBeforeMethodInterceptors(new \SimpleController(), "defaultHandler"));
+        $this->assertTrue($interceptorEvaluator->evaluateBeforeMethodInterceptors(new \AdvancedController(), "defaultHandler"));
 
     }
 

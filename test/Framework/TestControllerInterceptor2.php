@@ -10,7 +10,6 @@ class TestControllerInterceptor2 extends ControllerInterceptor {
 	private $failController;
 	
 	public function __construct($controllerName = null, $succeed = null, $failController = null) {
-		$this->setController ( $controllerName );
 		$this->succeed = $succeed;
 		$this->failController = $failController;
 	}

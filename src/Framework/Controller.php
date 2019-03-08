@@ -5,6 +5,7 @@ namespace Kinikit\MVC\Framework;
 use Kinikit\Core\Object\SerialisableObject;
 use Kinikit\Core\Util\Annotation\ClassAnnotationParser;
 use Kinikit\Core\Util\ArrayUtils;
+use Kinikit\Core\Util\Caching\CachingHeaders;
 use Kinikit\Core\Util\HTTP\HttpSession;
 use Kinikit\Core\Util\HTTP\URLHelper;
 use Kinikit\Core\Configuration;
@@ -17,6 +18,7 @@ use Kinikit\MVC\Exception\ControllerMethodNotFoundException;
 use Kinikit\MVC\Exception\ControllerNotFoundException;
 use Kinikit\MVC\Exception\ControllerVetoedException;
 use Kinikit\MVC\Exception\RateLimitExceededException;
+use Kinikit\MVC\Framework\Caching\CacheEvaluator;
 use Kinikit\MVC\Framework\Controller\WebService;
 use Kinikit\MVC\Exception\TooFewControllerMethodParametersException;
 use Kinikit\Core\Util\Logging\Logger;
@@ -63,7 +65,34 @@ abstract class Controller {
         try {
 
 
-            $interceptorSuccess = ControllerInterceptorEvaluator::getInstance()->evaluateInterceptorsForControllerMethod($this, $methodName, $annotations);
+            // Now inspect the class for the method being accessed
+            $reflectionClass = new \ReflectionClass ($className);
+
+            // Throw if no method found on the service.
+            if (!$reflectionClass->hasMethod($methodName)) {
+                $methodName = "defaultHandler";
+            }
+            $method = $reflectionClass->getMethod($methodName);
+
+            $functionParams = $requestParameters;
+            $functionParams["requestParameters"] = $requestParameters;
+
+
+            // Get the supplied function parameters in either possible format
+            // supplied.
+            $suppliedParams = $this->getSuppliedFunctionParameters($functionParams, $method, $annotations);
+
+            // Now find out how many are required
+            $paramsSupplied = sizeof($suppliedParams);
+            $paramsRequired = $method->getNumberOfRequiredParameters();
+
+            if ($paramsSupplied < $paramsRequired) {
+                throw new TooFewControllerMethodParametersException ($className, $methodName, $paramsSupplied, $paramsRequired);
+            }
+
+
+            $controllerInterceptorEvaluator = ControllerInterceptorEvaluator::getInstance();
+            $interceptorSuccess = $controllerInterceptorEvaluator->evaluateBeforeMethodInterceptors($this, $methodName, $suppliedParams, $annotations);
 
 
             if (!$interceptorSuccess) {
@@ -73,40 +102,35 @@ abstract class Controller {
                 // Evaluate rate limiters for the passed controller.
                 RateLimiterEvaluator::instance()->evaluateRateLimitersForControllerMethod($this, $methodName, $annotations);
 
-                // Now inspect the class for the method being accessed
-                $reflectionClass = new \ReflectionClass ($className);
+                // Attempt to get a value from the cache.
+                $cacheEvaluator = new CacheEvaluator();
+                $result = $cacheEvaluator->getCachedResult($this, $methodName, $suppliedParams, $annotations);
 
-                // Throw if no method found on the service.
-                if (!$reflectionClass->hasMethod($methodName)) {
-                    $methodName = "defaultHandler";
-                }
-                $method = $reflectionClass->getMethod($methodName);
-
-                $functionParams = $requestParameters;
-                $functionParams["requestParameters"] = $requestParameters;
-
-
-                // Get the supplied function parameters in either possible format
-                // supplied.
-                $suppliedParams = $this->getSuppliedFunctionParameters($functionParams, $method, $annotations);
-
-
-                // Now find out how many are required
-                $paramsSupplied = sizeof($suppliedParams);
-                $paramsRequired = $method->getNumberOfRequiredParameters();
-
-                if ($paramsSupplied < $paramsRequired) {
-                    throw new TooFewControllerMethodParametersException ($className, $methodName, $paramsSupplied, $paramsRequired);
+                // If no result from the cache, make a real call.
+                if (!$result) {
+                    // Call the function in question.
+                    $result = call_user_func_array(array($this, $methodName), $suppliedParams);
                 }
 
-                $result = call_user_func_array(array($this, $methodName), $suppliedParams);
+
+                $interceptorSuccess = $controllerInterceptorEvaluator->evaluateAfterMethodInterceptors($this, $methodName, $suppliedParams, $result, $annotations);
+
+                if (!$interceptorSuccess) {
+                    throw new ControllerVetoedException($className, $methodName);
+                }
+
+                // Attempt to cache the result value
+                $cacheEvaluator->cacheResult($this, $methodName, $suppliedParams, $annotations);
 
             }
 
         } catch (RateLimitExceededException $e) {
+            $controllerInterceptorEvaluator->evaluateOnExceptionInterceptors($this, $methodName, $suppliedParams, $e, $annotations);
             header($_SERVER['SERVER_PROTOCOL'] . ' 429 Rate Limit Exceeded', true, 429);
             $result = $e;
         } catch (\Exception $e) {
+
+            $controllerInterceptorEvaluator->evaluateOnExceptionInterceptors($this, $methodName, $suppliedParams, $e, $annotations);
 
             if ($isWebService) {
                 header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);

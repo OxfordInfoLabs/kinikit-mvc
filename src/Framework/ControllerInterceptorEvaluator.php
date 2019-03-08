@@ -19,6 +19,8 @@ class ControllerInterceptorEvaluator extends SerialisableObject {
     private $interceptors = array();
     private static $instance;
 
+    private $controllerInterceptors = array();
+
 
     /**
      * Construct an evaluator statically from a configuration file.
@@ -78,50 +80,123 @@ class ControllerInterceptorEvaluator extends SerialisableObject {
     }
 
     /**
-     * Evaluate any interceptors for the controller and method.  This will evaluate any statically defined
+     * Evaluate before method interceptors for the controller and method.  This will evaluate any statically defined
      * ones in the XML file as well as any found in the controller itself.
      *
      * @param Controller $controllerInstance
      * @param string $methodName
+     * @param array $parameters
      * @param ClassAnnotations $annotations
      * @return bool
      */
-    public function evaluateInterceptorsForControllerMethod($controllerInstance, $methodName, $annotations = null) {
+    public function evaluateBeforeMethodInterceptors($controllerInstance, $methodName, $parameters = array(), $annotations = null) {
 
-        $controllerClass = get_class($controllerInstance);
-
-        if (!$annotations) {
-            $annotations = ClassAnnotationParser::instance()->parse($controllerClass);
-        }
-
-        $interceptors = array();
-        foreach ($this->interceptors as $interceptor) {
-
-            if ($interceptor->getControllers() == "*"
-                || ($interceptor->getControllers() == $controllerClass)
-                || (is_array($interceptor->getControllers()) && in_array($controllerClass, $interceptor->getControllers()))) {
-
-                $interceptors[] = $interceptor;
-            }
-        }
-
-        $classInterceptors = $annotations->getClassAnnotationForMatchingTag("interceptor");
-        if ($classInterceptors) {
-            foreach ($classInterceptors->getValues() as $interceptorClass) {
-                $interceptors[] = new ControllerInterceptorDefinition($interceptorClass);
-            }
-        }
+        $interceptors = $this->getInterceptorsForController($controllerInstance, $annotations);
 
         // Evaluate each one in turn
         foreach ($interceptors as $interceptor) {
             $interceptorClass = $interceptor->getClassName();
             $interceptor = new $interceptorClass();
-            $result = $interceptor->beforeMethod($controllerInstance, $methodName, $annotations);
+            $result = $interceptor->beforeMethod($controllerInstance, $methodName, $parameters, $annotations);
             if (!$result) return false;
         }
 
 
         return true;
+    }
+
+
+    /**
+     * Evaluate after method interceptors for the controller and method.  This will evaluate any statically defined
+     * ones in the XML file as well as any found in the controller itself.
+     *
+     * @param Controller $controllerInstance
+     * @param string $methodName
+     * @param array $parameters
+     * @param ClassAnnotations $annotations
+     * @return bool
+     */
+    public function evaluateAfterMethodInterceptors($controllerInstance, $methodName, $parameters = array(), $returnValue = null, $annotations = null) {
+
+        $interceptors = $this->getInterceptorsForController($controllerInstance, $annotations);
+
+        // Evaluate each one in turn
+        foreach ($interceptors as $interceptor) {
+            $interceptorClass = $interceptor->getClassName();
+            $interceptor = new $interceptorClass();
+            $result = $interceptor->afterMethod($controllerInstance, $methodName, $parameters, $returnValue, $annotations);
+            if (!$result) return false;
+        }
+
+
+        return true;
+    }
+
+
+    /**
+     * Evaluate on exception interceptors for the controller and method.  This will evaluate any statically defined
+     * ones in the XML file as well as any found in the controller itself.
+     *
+     * @param Controller $controllerInstance
+     * @param string $methodName
+     * @param array $parameters
+     * @param ClassAnnotations $annotations
+     * @return bool
+     */
+    public function evaluateOnExceptionInterceptors($controllerInstance, $methodName, $parameters = array(), $exception = null, $annotations = null) {
+
+        $interceptors = $this->getInterceptorsForController($controllerInstance, $annotations);
+
+        // Evaluate each one in turn
+        foreach ($interceptors as $interceptor) {
+            $interceptorClass = $interceptor->getClassName();
+            $interceptor = new $interceptorClass();
+            $result = $interceptor->onException($controllerInstance, $methodName, $parameters, $exception, $annotations);
+            if (!$result) return false;
+        }
+
+
+        return true;
+    }
+
+
+    // Get all interceptors for a controller.  Cache these for efficiency and reuse
+    private function getInterceptorsForController($controllerInstance, $annotations = null) {
+
+        $controllerClass = get_class($controllerInstance);
+
+        if (!isset($this->controllerInterceptors[$controllerClass])) {
+
+
+            if (!$annotations) {
+                $annotations = ClassAnnotationParser::instance()->parse($controllerClass);
+            }
+
+            $interceptors = array();
+            foreach ($this->interceptors as $interceptor) {
+
+                if ($interceptor->getControllers() == "*"
+                    || ($interceptor->getControllers() == $controllerClass)
+                    || (is_array($interceptor->getControllers()) && in_array($controllerClass, $interceptor->getControllers()))) {
+
+                    $interceptors[] = $interceptor;
+                }
+            }
+
+            $classInterceptors = $annotations->getClassAnnotationForMatchingTag("interceptor");
+            if ($classInterceptors) {
+                foreach ($classInterceptors->getValues() as $interceptorClass) {
+                    $interceptors[] = new ControllerInterceptorDefinition($interceptorClass);
+                }
+            }
+
+            $this->controllerInterceptors[$controllerClass] = $interceptors;
+
+        }
+
+
+        return $this->controllerInterceptors[$controllerClass];
+
     }
 
 }
