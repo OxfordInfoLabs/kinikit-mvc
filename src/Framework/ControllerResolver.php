@@ -3,6 +3,7 @@
 namespace Kinikit\MVC\Framework;
 
 use Kinikit\Core\Configuration;
+use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Util\HTTP\URLHelper;
 use Kinikit\MVC\Controllers\view;
 use Kinikit\MVC\Exception\ControllerVetoedException;
@@ -85,7 +86,7 @@ class ControllerResolver {
                 foreach (SourceBaseManager::instance()->getApplicationNamespaces() as $applicationNamespace) {
                     if (class_exists($applicationNamespace . "\\" . $folder . "\\" . str_replace("/", "\\", $cumulative), true)) {
                         $className = $applicationNamespace . "\\" . $folder . "\\" . str_replace("/", "\\", $cumulative);
-                        $controller = new $className();
+                        $controller = Container::instance()->get($className);
                         $matchFound = true;
                         break;
                     }
@@ -101,7 +102,7 @@ class ControllerResolver {
                     if (file_exists($filename)) {
 
                         include_once($filename);
-                        $controller = new $segment ();
+                        $controller = Container::instance()->get($segment);
                         $matchFound = true;
                         break;
 

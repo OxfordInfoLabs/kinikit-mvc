@@ -29,7 +29,7 @@ class ControllerResolverTest extends \PHPUnit\Framework\TestCase {
 	public function testCanGetValidControllerInstanceFromSimpleControllerURL() {
 		
 		$url = "/SimpleController";
-		$this->assertEquals ( new \SimpleController (), ControllerResolver::instance ()->resolveControllerForURL ( $url ) );
+		$this->assertEquals ( new \SimpleController (), ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject() );
 	
 	}
 	
@@ -37,33 +37,33 @@ class ControllerResolverTest extends \PHPUnit\Framework\TestCase {
 		
 		$url = "/SimpleController/extra/parameters";
 		
-		$this->assertEquals ( new \SimpleController (), ControllerResolver::instance ()->resolveControllerForURL ( $url ) );
+		$this->assertEquals ( new \SimpleController (), ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject() );
 	
 	}
 	
 	public function testControllerWithNestedFolderPathIsResolvedCorrectly() {
 		
 		$url = "/subcontroller/SimpleSubController";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url ), new \SimpleSubController () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \SimpleSubController () );
 		
 		$url = "/subcontroller/SimpleSubController/extra/guff";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url ), new \SimpleSubController () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \SimpleSubController () );
 		
 		$url = "/subcontroller/subsubcontroller/SimpleSubSubController/extra/guff";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url ), new \SimpleSubSubController () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \SimpleSubSubController () );
 	
 	}
 	
 	public function testDecoratorsFolderIsCheckedForControllersAsWell() {
 		$url = "/SimpleDecorator";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url ), new \SimpleDecorator () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \SimpleDecorator () );
 	}
 	
 	public function testAdditionalFoldersAreCheckedIfAppendedAsSearchPaths() {
 		ControllerResolver::instance ()->appendControllerFolder ( "bespokecontroller" );
 		
 		$url = "/BespokeSimpleController";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url ), new \BespokeSimpleController () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \BespokeSimpleController () );
 	}
 	
 	public function testNoControllerSuppliedExceptionIsRaisedIfNoControllerFragmentPassed() {
@@ -79,7 +79,7 @@ class ControllerResolverTest extends \PHPUnit\Framework\TestCase {
 	
 	public function testIfForcedFolderPrefixPassedAsSecondArgumentToResolverPrecedingFragmentsAreTreatedAsFolders() {
 		$url = "/SimpleController/SimpleController2";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url, 1 ), new \SimpleController2 () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url, 1 )->__getObject(), new \SimpleController2 () );
 	
 	}
 	
@@ -89,7 +89,7 @@ class ControllerResolverTest extends \PHPUnit\Framework\TestCase {
 		
 		$url = "/CleverController";
 		
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url ), new \CleverController () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \CleverController () );
 		$this->assertEquals ( array ("TestControllerInterceptor1" ), TestControllerInterceptor1::$interceptorRuns );
 	
 	}
@@ -101,7 +101,7 @@ class ControllerResolverTest extends \PHPUnit\Framework\TestCase {
 		$url = "/InterceptedController1";
 		
 		try {
-			ControllerResolver::instance ()->resolveControllerForURL ( $url );
+			ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject();
 			$this->fail ( "Should have thrown here" );
 		} catch ( ControllerVetoedException $e ) {
 			// Success
@@ -117,7 +117,7 @@ class ControllerResolverTest extends \PHPUnit\Framework\TestCase {
 		
 		$url = "/InterceptedController1";
 		
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url ), new \SimpleController () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \SimpleController () );
 		$this->assertEquals ( array ("TestControllerInterceptor1", "TestControllerInterceptor2" ), TestControllerInterceptor1::$interceptorRuns );
 	
 	}
@@ -127,7 +127,7 @@ class ControllerResolverTest extends \PHPUnit\Framework\TestCase {
 		
 		$url = "/InterceptedController2";
 		
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url ), new \AdvancedController () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \AdvancedController () );
 		$this->assertEquals ( array ("TestControllerInterceptor2" ), TestControllerInterceptor1::$interceptorRuns );
 	}
 
