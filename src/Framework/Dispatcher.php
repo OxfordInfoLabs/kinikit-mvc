@@ -34,6 +34,19 @@ class Dispatcher {
         set_error_handler(array($this, "genericErrorHandler"), E_ALL);
 
 
+        // If we have an application namespace, ensure we include this in class autoloading assuming
+        // the current working directory as the top of the namespace.
+        if (Configuration::readParameter("application.namespace")) {
+            spl_autoload_register(function ($class) {
+                $class = str_replace(Configuration::readParameter("application.namespace") . "\\", "", $class);
+                $file = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+                if (file_exists($file)) {
+                    require $file;
+                    return true;
+                } else
+                    return false;
+            });
+        }
 
 
         if (file_exists("ApplicationAnnouncement.php")) {
@@ -41,7 +54,6 @@ class Dispatcher {
             $appAnnouncement = new \ApplicationAnnouncement ();
             $appAnnouncement->announce();
         }
-
 
 
         // Start a session early in the flow
@@ -76,7 +88,7 @@ class Dispatcher {
 
             if ($instance) {
 
-            
+
                 $requestParameters = HttpRequest::instance()->getAllValues();
 
                 $result = $instance->handleRequest($requestParameters);
@@ -88,7 +100,6 @@ class Dispatcher {
                 } else {
                     print $result;
                 }
-
 
 
             } else {
@@ -114,7 +125,6 @@ class Dispatcher {
             }
 
         }
-
 
 
     }
