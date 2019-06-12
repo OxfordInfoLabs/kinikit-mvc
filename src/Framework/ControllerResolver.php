@@ -95,6 +95,8 @@ class ControllerResolver {
 
             }
 
+            exit();
+
             if (!$matchFound) {
 
                 foreach ($this->controllerFolders as $folder) {
