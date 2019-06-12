@@ -40,6 +40,9 @@ class Dispatcher {
             spl_autoload_register(function ($class) {
                 $class = str_replace(Configuration::readParameter("application.namespace") . "\\", "", $class);
                 $file = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+                echo getcwd()."\n".$file;
+                exit();
+
                 if (file_exists($file)) {
                     require $file;
                     return true;
