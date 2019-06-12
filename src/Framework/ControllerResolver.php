@@ -85,8 +85,6 @@ class ControllerResolver {
 
                 foreach (SourceBaseManager::instance()->getApplicationNamespaces() as $applicationNamespace) {
 
-                    echo "<br>Attempting " . $applicationNamespace . "\\" . $folder . "\\" . str_replace("/", "\\", $cumulative);
-
                     if (class_exists($applicationNamespace . "\\" . $folder . "\\" . str_replace("/", "\\", $cumulative), true)) {
                         $className = $applicationNamespace . "\\" . $folder . "\\" . str_replace("/", "\\", $cumulative);
                         $controller = Container::instance()->get($className);

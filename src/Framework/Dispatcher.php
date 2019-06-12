@@ -34,16 +34,12 @@ class Dispatcher {
         set_error_handler(array($this, "genericErrorHandler"), E_ALL);
 
 
-        var_dump(Configuration::instance()->getAllParameters());
-
-
         // If we have an application namespace, ensure we include this in class autoloading assuming
         // the current working directory as the top of the namespace.
         if (Configuration::readParameter("application.namespace")) {
             spl_autoload_register(function ($class) {
                 $class = str_replace(Configuration::readParameter("application.namespace") . "\\", "", $class);
                 $file = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
-                echo "<br />" . getcwd() . "\n" . $file;
                 if (file_exists($file)) {
                     require $file;
                     return true;
