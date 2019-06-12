@@ -34,6 +34,9 @@ class Dispatcher {
         set_error_handler(array($this, "genericErrorHandler"), E_ALL);
 
 
+        var_dump(Configuration::instance()->getAllParameters());
+
+
         // If we have an application namespace, ensure we include this in class autoloading assuming
         // the current working directory as the top of the namespace.
         if (Configuration::readParameter("application.namespace")) {
