@@ -97,8 +97,6 @@ class ControllerResolver {
 
             }
 
-            echo "Match found = " . $matchFound;
-            exit();
 
             if (!$matchFound) {
 
