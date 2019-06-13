@@ -2,6 +2,8 @@
 
 namespace Kinikit\MVC\Framework;
 
+use Kinicart\Services\Application\BootstrapService;
+use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Object\SerialisableObject;
 use Kinikit\Core\Util\Annotation\ClassAnnotationParser;
 use Kinikit\Core\Util\ArrayUtils;
@@ -108,8 +110,9 @@ abstract class Controller {
 
                 // If no result from the cache, make a real call.
                 if (!$result) {
-                    // Call the function in question.
-                    $result = call_user_func_array(array($this, $methodName), $suppliedParams);
+                    // Call the function in question - ensuring we invoke proxy interceptor.
+                    $proxyInstance = Container::instance()->get(get_class($this));
+                    $result = call_user_func_array(array($proxyInstance, $methodName), $suppliedParams);
                 }
 
 
