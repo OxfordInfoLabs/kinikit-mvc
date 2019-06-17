@@ -5,7 +5,7 @@ use Kinikit\MVC\Controllers\view;
 
 include_once "autoloader.php";
 
-include_once __DIR__ . "/../../src/Controllers/View.php";
+include_once __DIR__ . "/../../src/Controllers/view.php";
 
 
 /**
