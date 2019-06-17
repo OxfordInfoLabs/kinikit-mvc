@@ -134,9 +134,11 @@ class RateLimiterEvaluator {
             $numberOfRequests = $rateLimiter->getNumberOfRequestsInWindow($windowStart, $sourceIp, $controllerClass, $methodName);
 
             // Set headers
-            header("X-RateLimit-Limit: $rateLimit");
-            header("X-RateLimit-Remaining: " . max($rateLimit - $numberOfRequests, 0));
-            header("X-RateLimit-Reset: " . ($windowStart + $windowSizeInSeconds));
+            if (!headers_sent()) {
+                header("X-RateLimit-Limit: $rateLimit");
+                header("X-RateLimit-Remaining: " . max($rateLimit - $numberOfRequests, 0));
+                header("X-RateLimit-Reset: " . ($windowStart + $windowSizeInSeconds));
+            }
 
             if ($numberOfRequests > $rateLimit) {
                 throw new RateLimitExceededException($sourceIp, $rateLimit, $windowStart + $windowSizeInSeconds);

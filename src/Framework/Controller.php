@@ -260,7 +260,8 @@ abstract class Controller {
         }
 
 
-        header('Access-Control-Allow-Origin: ' . $accessControlOrigin);
+        if (!headers_sent())
+            header('Access-Control-Allow-Origin: ' . $accessControlOrigin);
 
         if ($result !== null) {
             if ($result instanceof SerialisableException) {
@@ -272,7 +273,8 @@ abstract class Controller {
         }
 
         // Set the content type header.
-        header("Content-Type: {$contentHeader}; charset=utf8");
+        if (!headers_sent())
+            header("Content-Type: {$contentHeader}; charset=utf8");
 
         // Handle JSONP case separately.
         if ($JSONPCallback) {
