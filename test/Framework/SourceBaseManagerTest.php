@@ -11,7 +11,7 @@ include_once "autoloader.php";
  */
 class SourceBaseManagerTest extends \PHPUnit\Framework\TestCase {
 
-    public function tearDown() {
+    public function tearDown(): void {
         SourceBaseManager::instance()->setSourceBases(array(".", __DIR__ . "/..", __DIR__ . "/../../WebServices"));
     }
 
