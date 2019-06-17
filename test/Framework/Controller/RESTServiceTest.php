@@ -20,7 +20,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
     private $converter;
 
 
-    public function setUp() {
+    public function setUp(): void {
 
         $this->converter = new ObjectToJSONConverter();
         parent::setUp();
