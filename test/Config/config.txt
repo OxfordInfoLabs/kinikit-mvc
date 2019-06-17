@@ -22,4 +22,4 @@ param4 = porsche
 
 application.namespace = Kinikit\MVC
 
-ratelimiter.storedir = /tmp/ratelimits
+ratelimiter.storedir = ratelimits

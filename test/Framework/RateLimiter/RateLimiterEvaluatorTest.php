@@ -13,6 +13,14 @@ include_once "autoloader.php";
  */
 class RateLimiterEvaluatorTest extends \PHPUnit\Framework\TestCase {
 
+
+    public function setUp(): void {
+        if (!file_exists("ratelimits"))
+            mkdir("ratelimits");
+
+    }
+
+
     public function testRateLimitsAreAppliedAndHeadersReturnedWhenControllerWithRateLimitsSuppliedToEvaluator() {
 
         $rateLimited = new TestRateLimited();
