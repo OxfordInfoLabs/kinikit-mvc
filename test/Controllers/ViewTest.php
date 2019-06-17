@@ -1,6 +1,7 @@
 <?php
 
 use Kinikit\Core\Util\HTTP\URLHelper;
+use Kinikit\MVC\Controllers\view;
 
 include_once "autoloader.php";
 

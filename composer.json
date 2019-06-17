@@ -14,9 +14,7 @@
   "homepage": "https://kinikit.com",
   "type": "library",
   "require": {
-    "oxil/kinikit-core": "*",
-    "mustache/mustache": "*",
-    "twig/twig": "*"
+    "oxil/kinikit-core": "dev-master"
   },
   "autoload": {
     "psr-4": {
