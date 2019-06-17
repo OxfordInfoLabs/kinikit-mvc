@@ -3,8 +3,15 @@
 namespace Kinikit\MVC\Framework;
 
 use Kinikit\Core\Configuration;
+use Kinikit\MVC\bespokecontroller\BespokeSimpleController;
+use Kinikit\MVC\Controllers\SimpleController;
+use Kinikit\MVC\Controllers\SimpleController\SimpleController2;
+use Kinikit\MVC\Controllers\subcontroller\SimpleSubController;
+use Kinikit\MVC\Controllers\subcontroller\subsubcontroller\SimpleSubSubController;
+use Kinikit\MVC\Decorators\SimpleDecorator;
 use Kinikit\MVC\Exception\ControllerVetoedException;
 use Kinikit\MVC\Exception\NoControllerSuppliedException;
+
 
 include_once "autoloader.php";
 
@@ -29,7 +36,7 @@ class ControllerResolverTest extends \PHPUnit\Framework\TestCase {
 	public function testCanGetValidControllerInstanceFromSimpleControllerURL() {
 		
 		$url = "/SimpleController";
-		$this->assertEquals ( new \SimpleController (), ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject() );
+		$this->assertEquals ( new SimpleController (), ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject() );
 	
 	}
 	
@@ -37,33 +44,33 @@ class ControllerResolverTest extends \PHPUnit\Framework\TestCase {
 		
 		$url = "/SimpleController/extra/parameters";
 		
-		$this->assertEquals ( new \SimpleController (), ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject() );
+		$this->assertEquals ( new SimpleController (), ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject() );
 	
 	}
 	
 	public function testControllerWithNestedFolderPathIsResolvedCorrectly() {
 		
 		$url = "/subcontroller/SimpleSubController";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \SimpleSubController () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new SimpleSubController () );
 		
 		$url = "/subcontroller/SimpleSubController/extra/guff";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \SimpleSubController () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new SimpleSubController () );
 		
 		$url = "/subcontroller/subsubcontroller/SimpleSubSubController/extra/guff";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \SimpleSubSubController () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new SimpleSubSubController () );
 	
 	}
 	
 	public function testDecoratorsFolderIsCheckedForControllersAsWell() {
 		$url = "/SimpleDecorator";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \SimpleDecorator () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new SimpleDecorator () );
 	}
 	
 	public function testAdditionalFoldersAreCheckedIfAppendedAsSearchPaths() {
 		ControllerResolver::instance ()->appendControllerFolder ( "bespokecontroller" );
 		
 		$url = "/BespokeSimpleController";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \BespokeSimpleController () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new BespokeSimpleController () );
 	}
 	
 	public function testNoControllerSuppliedExceptionIsRaisedIfNoControllerFragmentPassed() {
@@ -79,57 +86,10 @@ class ControllerResolverTest extends \PHPUnit\Framework\TestCase {
 	
 	public function testIfForcedFolderPrefixPassedAsSecondArgumentToResolverPrecedingFragmentsAreTreatedAsFolders() {
 		$url = "/SimpleController/SimpleController2";
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url, 1 )->__getObject(), new \SimpleController2 () );
+		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url, 1 )->__getObject(), new SimpleController2 () );
 	
 	}
 	
-	public function testIfAttemptToAccessControllerWithDefinedSuccessfulInterceptorFromConfigFileTheInterceptorIsCalled() {
-		
-		TestControllerInterceptor1::$interceptorRuns = array ();
-		
-		$url = "/CleverController";
-		
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \CleverController () );
-		$this->assertEquals ( array ("TestControllerInterceptor1" ), TestControllerInterceptor1::$interceptorRuns );
-	
-	}
-	
-	public function testIfAttemptToAccessControllersWithDefinedBooleanFailingInterceptorsFromConfigFileAnExceptionIsRaised() {
-        self::assertTrue(true);
-		TestControllerInterceptor1::$interceptorRuns = array ();
-		
-		$url = "/InterceptedController1";
-		
-		try {
-			ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject();
-			$this->fail ( "Should have thrown here" );
-		} catch ( ControllerVetoedException $e ) {
-			// Success
-		}
-	
-	}
-	
-	public function testIfAttemptToAccessControllersWithDefinedBooleanFailingInterceptorsFromConfigFileWithVeotedControllerConfigParameterSetTheVetoedControllerIsCreatedAndReturned() {
-		
-		Configuration::instance ()->addParameter ( "vetoed.controller", "SimpleController" );
-		
-		TestControllerInterceptor1::$interceptorRuns = array ();
-		
-		$url = "/InterceptedController1";
-		
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \SimpleController () );
-		$this->assertEquals ( array ("TestControllerInterceptor1", "TestControllerInterceptor2" ), TestControllerInterceptor1::$interceptorRuns );
-	
-	}
-	
-	public function testIfAttemptToAccessControllerWithDefinedInterceptorWhichReturnsAControllerThisControllerIsReturnedFromResolver() {
-		TestControllerInterceptor1::$interceptorRuns = array ();
-		
-		$url = "/InterceptedController2";
-		
-		$this->assertEquals ( ControllerResolver::instance ()->resolveControllerForURL ( $url )->__getObject(), new \AdvancedController () );
-		$this->assertEquals ( array ("TestControllerInterceptor2" ), TestControllerInterceptor1::$interceptorRuns );
-	}
 
 }
 

@@ -4,6 +4,7 @@ namespace Kinikit\MVC\Framework;
 
 use ErrorException;
 use Kinikit\Core\Configuration;
+use Kinikit\Core\Exception\SerialisableException;
 use Kinikit\Core\Util\Annotation\ClassAnnotationParser;
 use Kinikit\Core\Util\ArrayUtils;
 use Kinikit\Core\Util\HTTP\HttpRequest;
@@ -84,7 +85,14 @@ class Dispatcher {
         // Grab the first segment and dispatch the controller if found
         if ($currentURL->getSegmentCount() > 0) {
 
-            $instance = ControllerResolver::instance()->resolveControllerForURL($currentURL->getURL());
+            try {
+                $instance = ControllerResolver::instance()->resolveControllerForURL($currentURL->getURL());
+            } catch (SerialisableException $e) {
+                header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
+                print Controller::convertToWebServiceOutput($e);
+                exit();
+            }
+
 
             if ($instance) {
 
@@ -118,8 +126,6 @@ class Dispatcher {
 
                     return;
                 } else {
-
-
                     throw new ControllerNotFoundException ($currentURL->getURL());
                 }
             }

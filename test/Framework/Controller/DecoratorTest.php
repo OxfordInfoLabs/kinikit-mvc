@@ -4,6 +4,8 @@ namespace Kinikit\MVC\Framework\Controller;
 
 use Kinikit\Core\Util\HTTP\HttpSession;
 use Kinikit\Core\Util\HTTP\URLHelper;
+use Kinikit\MVC\Controllers\SimpleController;
+use Kinikit\MVC\Controllers\TestDecorator;
 use Kinikit\MVC\Exception\ControllerNotFoundException;
 use Kinikit\MVC\Framework\ModelAndView;
 
@@ -22,7 +24,7 @@ class DecoratorTest extends \PHPUnit\Framework\TestCase {
     public function testHandleDecoratorRequestIsCalledAndItsModelAndViewIsReturnedOnHandleRequestIfDecoratorOnlyFragmentPassed() {
         URLHelper::setTestURL("/TestDecorator");
 
-        $decorator = new \TestDecorator ();
+        $decorator = new TestDecorator ();
         $modelAndView = $decorator->handleRequest(array());
 
         $this->assertEquals(new ModelAndView ("banana", array("test" => "Bodger", "test2" => "Badger", "request" => array(), "session" => array())), $modelAndView);
@@ -32,7 +34,7 @@ class DecoratorTest extends \PHPUnit\Framework\TestCase {
         self::assertTrue(true);
         URLHelper::setTestURL("/TestDecorator/MyMonkey");
 
-        $decorator = new \TestDecorator ();
+        $decorator = new TestDecorator ();
 
         try {
             $decorator->handleRequest(array());
@@ -43,7 +45,7 @@ class DecoratorTest extends \PHPUnit\Framework\TestCase {
 
         URLHelper::setTestURL("/TestDecorator/NoSuchController");
 
-        $decorator = new \TestDecorator ();
+        $decorator = new TestDecorator ();
 
         try {
             $decorator->handleRequest(array());
@@ -55,15 +57,15 @@ class DecoratorTest extends \PHPUnit\Framework\TestCase {
 
     public function testIfValidContentControllerIsPassedItIsInvokedDuringMainDecoratorHandleRequest() {
 
-        \SimpleController::$executed = false;
+        SimpleController::$executed = false;
 
         URLHelper::setTestURL("/TestDecorator/SimpleController");
 
-        $decorator = new \TestDecorator ();
+        $decorator = new TestDecorator ();
 
         $decorator->handleRequest(array());
 
-        $this->assertTrue(\SimpleController::$executed);
+        $this->assertTrue(SimpleController::$executed);
 
     }
 

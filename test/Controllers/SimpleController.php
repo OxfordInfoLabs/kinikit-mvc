@@ -1,5 +1,7 @@
 <?php
 
+namespace Kinikit\MVC\Controllers;
+
 use Kinikit\MVC\Framework\Controller;
 
 // Simple test controller 

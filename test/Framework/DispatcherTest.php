@@ -6,6 +6,7 @@ use Kinikit\Core\Configuration;
 use Kinikit\Core\Util\HTTP\HttpRequest;
 use Kinikit\Core\Util\HTTP\HttpSession;
 use Kinikit\Core\Util\HTTP\URLHelper;
+use Kinikit\MVC\Controllers\SimpleController;
 use Kinikit\MVC\Exception\ControllerNotFoundException;
 use Kinikit\MVC\Exception\NoControllerSuppliedException;
 
@@ -52,13 +53,13 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
     public function testControllerIsInvokedFromControllersDirectoryIfSimpleURLPassedThrough() {
 
         URLHelper::setTestURL("/SimpleController");
-        \SimpleController::$executed = false;
-        $this->assertFalse(\SimpleController::$executed);
+        SimpleController::$executed = false;
+        $this->assertFalse(SimpleController::$executed);
 
         $dispatcher = new Dispatcher ();
         $dispatcher->dispatch();
 
-        $this->assertTrue(\SimpleController::$executed);
+        $this->assertTrue(SimpleController::$executed);
     }
 
     public function testIfModelAndViewReturnedFromControllerOutputFromViewIsPrintedToStdOut() {
@@ -76,19 +77,19 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
     public function testWelcomePathIsEvaluatedIfPresentIfNoControllerSupplied() {
         URLHelper::setTestURL("/");
-        \SimpleController::$executed = false;
+        SimpleController::$executed = false;
         Configuration::instance()->addParameter("welcome.path", "/SimpleController");
 
         $dispatcher = new Dispatcher ();
         $dispatcher->dispatch();
 
-        $this->assertTrue(\SimpleController::$executed);
+        $this->assertTrue(SimpleController::$executed);
     }
 
     public function testUnknownPathIsEvaluatedIfPresentIfUnknownControllerAccessedAnd404HeaderIsSet() {
 
         URLHelper::setTestURL("/ImaginaryPath");
-        \SimpleController::$executed = false;
+        SimpleController::$executed = false;
         Configuration::instance()->addParameter("unknown.path", "/CleverController");
 
         $dispatcher = new Dispatcher ();
@@ -105,7 +106,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
     public function testControllerNotFoundExceptionRaisedIfUnknownPathIsUnknown() {
         self::assertTrue(true);
         URLHelper::setTestURL("/ImaginaryPath");
-        \SimpleController::$executed = false;
+        SimpleController::$executed = false;
         Configuration::instance()->addParameter("unknown.path", "/DodgyUnknown");
 
         $dispatcher = new Dispatcher ();
@@ -119,66 +120,6 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
     }
 
-    /*
-     *
-     * NONE CLI FUNCTION
-     *
-	public function testIfNoContentTypeHasBeenSpecifiedByTheControllerTheDefaultTextHtmlTypeIsSet() {
-		header_remove ( "Content-Type" );
-		
-		URLHelper::setTestURL ( "/StandardController" );
-		$dispatcher = new Dispatcher ();
-		ob_start ();
-		$dispatcher->dispatch ();
-		$output = ob_get_contents ();
-		ob_end_clean ();
-
-
-		// Check we get the default....
-		$this->assertTrue ( is_numeric ( array_search ( "Content-Type: text/html", headers_list () ) ) );
-
-
-		header_remove ( "Content-Type" );
-		
-		URLHelper::setTestURL ( "/CleverController" );
-		
-		$dispatcher = new Dispatcher ();
-		
-		ob_start ();
-		$dispatcher->dispatch ();
-		$output = ob_get_contents ();
-		ob_end_clean ();
-		
-		// Check we get the controller one.
-		$this->assertTrue ( is_numeric ( array_search ( "Content-Type: text/xml", headers_list () ) ) );
-	
-	} */
-
-    public function testCanDispatchToControllersAndViewsDefinedInMultipleSourceBasesIfSourceBaseManagerIsConfigured() {
-
-        SourceBaseManager::instance()->setSourceBases(array("Framework/resourcepath1", "Framework/resourcepath2"));
-
-        URLHelper::setTestURL("/Path1Controller");
-        $dispatcher = new Dispatcher ();
-        ob_start();
-        $dispatcher->dispatch();
-        $output = ob_get_contents();
-        ob_end_clean();
-
-        $this->assertEquals("Path 1", $output);
-
-        URLHelper::setTestURL("/Path2Controller");
-        $dispatcher = new Dispatcher ();
-        ob_start();
-        $dispatcher->dispatch();
-        $output = ob_get_contents();
-        ob_end_clean();
-
-        $this->assertEquals("PATH 2", $output);
-
-        SourceBaseManager::instance()->setSourceBases(array("."));
-
-    }
 
     public function testAllSessionAndRequestParametersAreInjectedIntoModelAndViewUsingNamespacesBeforeEvaluation() {
 
@@ -188,8 +129,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
         HttpSession::instance()->setValue("user", "Marko");
         HttpSession::instance()->setValue("count", 55);
 
-        $_REQUEST ["baby"] = "Show me";
-        $_REQUEST ["page"] = "URL Combination";
+        $_GET ["baby"] = "Show me";
+        $_GET ["page"] = "URL Combination";
 
         HttpRequest::instance(true);
 
@@ -233,13 +174,13 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/");
         Configuration::instance()->addParameter("welcome.path", "/SimpleController");
 
-        \SimpleController::$executed = false;
-        $this->assertFalse(\SimpleController::$executed);
+        SimpleController::$executed = false;
+        $this->assertFalse(SimpleController::$executed);
 
         $dispatcher = new Dispatcher ();
         $dispatcher->dispatch();
 
-        $this->assertTrue(\SimpleController::$executed);
+        $this->assertTrue(SimpleController::$executed);
     }
 
 }

@@ -1,5 +1,7 @@
 <?php
 
+namespace Kinikit\MVC\Decorators;
+
 // Simple test controller 
 use Kinikit\MVC\Framework\Controller;
 

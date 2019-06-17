@@ -93,42 +93,28 @@ abstract class Controller {
             }
 
 
-            $controllerInterceptorEvaluator = ControllerInterceptorEvaluator::getInstance();
-            $interceptorSuccess = $controllerInterceptorEvaluator->evaluateBeforeMethodInterceptors($this, $methodName, $suppliedParams, $annotations);
+            // Evaluate rate limiters for the passed controller.
+            RateLimiterEvaluator::instance()->evaluateRateLimitersForControllerMethod($this, $methodName, $annotations);
+
+            // Attempt to get a value from the cache.
+            $cacheEvaluator = new CacheEvaluator();
+            $result = $cacheEvaluator->getCachedResult($this, $methodName, $suppliedParams, $annotations);
+
+            // If no result from the cache, make a real call.
+            if (!$result) {
 
 
-            if (!$interceptorSuccess) {
-                throw new ControllerVetoedException($className, $methodName);
-            } else {
-
-                // Evaluate rate limiters for the passed controller.
-                RateLimiterEvaluator::instance()->evaluateRateLimitersForControllerMethod($this, $methodName, $annotations);
-
-                // Attempt to get a value from the cache.
-                $cacheEvaluator = new CacheEvaluator();
-                $result = $cacheEvaluator->getCachedResult($this, $methodName, $suppliedParams, $annotations);
-
-                // If no result from the cache, make a real call.
-                if (!$result) {
-                    // Call the function in question - ensuring we invoke proxy interceptor.
-                    $proxyInstance = Container::instance()->get(get_class($this));
-                    $result = call_user_func_array(array($proxyInstance, $methodName), $suppliedParams);
-                }
-
-
-                $interceptorSuccess = $controllerInterceptorEvaluator->evaluateAfterMethodInterceptors($this, $methodName, $suppliedParams, $result, $annotations);
-
-                if (!$interceptorSuccess) {
-                    throw new ControllerVetoedException($className, $methodName);
-                }
-
-                // Attempt to cache the result value
-                $cacheEvaluator->cacheResult($this, $methodName, $suppliedParams, $annotations);
-
+                // Call the function in question - ensuring we invoke proxy interceptor.
+                $proxyInstance = Container::instance()->get(get_class($this));
+                $result = call_user_func_array(array($proxyInstance, $methodName), $suppliedParams);
             }
 
+
+            // Attempt to cache the result value
+            $cacheEvaluator->cacheResult($this, $methodName, $suppliedParams, $annotations);
+
+
         } catch (RateLimitExceededException $e) {
-            $controllerInterceptorEvaluator->evaluateOnExceptionInterceptors($this, $methodName, $suppliedParams, $e, $annotations);
             header($_SERVER['SERVER_PROTOCOL'] . ' 429 Rate Limit Exceeded', true, 429);
             $result = $e;
         } catch (\Exception $e) {
@@ -141,9 +127,6 @@ abstract class Controller {
                 } else {
                     $result = new SerialisableException(null, null, $e);
                 }
-
-                $controllerInterceptorEvaluator->evaluateOnExceptionInterceptors($this, $methodName, $suppliedParams, $result, $annotations);
-
 
             } else {
 
@@ -177,7 +160,7 @@ abstract class Controller {
             return $result;
         } else {
 
-            return $this->convertToWebServiceOutput($result);
+            return self::convertToWebServiceOutput($result);
         }
 
     }
@@ -240,7 +223,7 @@ abstract class Controller {
      * @return false|null|string
      * @throws \Kinikit\Core\Exception\ClassNotSerialisableException
      */
-    protected function convertToWebServiceOutput($result) {
+    public static function convertToWebServiceOutput($result) {
 
         $acceptHeader = isset($_SERVER["HTTP_ACCEPT"]) ? $_SERVER["HTTP_ACCEPT"] : null;
         $isXML = is_numeric(strpos($acceptHeader, "application/xml")) && !is_numeric(strpos($acceptHeader, "text/html"));

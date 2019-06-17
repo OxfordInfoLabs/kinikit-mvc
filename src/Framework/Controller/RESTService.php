@@ -147,7 +147,7 @@ class RESTService extends WebService {
 
 
             header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
-            return $this->convertToWebServiceOutput($exception);
+            return self::convertToWebServiceOutput($exception);
         }
 
 

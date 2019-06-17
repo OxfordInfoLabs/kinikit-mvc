@@ -4,6 +4,7 @@ namespace Kinikit\MVC\Framework;
 
 use Kinikit\Core\Configuration;
 use Kinikit\Core\DependencyInjection\Container;
+use Kinikit\Core\Exception\SerialisableException;
 use Kinikit\Core\Util\HTTP\URLHelper;
 use Kinikit\MVC\Controllers\view;
 use Kinikit\MVC\Exception\ControllerVetoedException;
@@ -78,6 +79,7 @@ class ControllerResolver {
             $matchFound = false;
             $controller = null;
 
+
             foreach ($this->controllerFolders as $folder) {
 
                 if ($matchFound)
@@ -95,22 +97,6 @@ class ControllerResolver {
 
             }
 
-
-            if (!$matchFound) {
-
-                foreach ($this->controllerFolders as $folder) {
-
-                    $filename = SourceBaseManager::resolvePath($folder . "/" . $cumulative . ".php");
-                    if (file_exists($filename)) {
-
-                        include_once($filename);
-                        $controller = Container::instance()->get($segment);
-                        $matchFound = true;
-                        break;
-
-                    }
-                }
-            }
 
             if (!$matchFound) {
                 // If this doesn't work, attempt a view directly
