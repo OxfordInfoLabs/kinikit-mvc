@@ -1,0 +1,76 @@
+/**
+* Web service proxy object.  Implements calls to the backend REST service.
+*/
+
+var syncRequest = require('sync-request');
+var asyncRequest = require('then-request');
+
+export default class WebServiceProxy {
+
+    private _webServiceURL: string;
+    private _globalParameters: any[];
+    private _synchronous: boolean;
+
+    constructor(webServiceURL:string, globalParameters: any[], synchronous: boolean) {
+        this._webServiceURL = webServiceURL;
+        this._globalParameters = globalParameters;
+        this._synchronous = synchronous;
+    }
+
+
+   /**
+    * Call a method on the remote web service, using the passed options.
+    */
+   protected callMethod(requestPath: string, method: string = "GET", params: any = {}, payload: any = null, returnClass: string = ""): any {
+
+
+       let url = this._webServiceURL + "/" + requestPath;
+
+       let getParams: any = Object.assign({}, this._globalParameters);
+
+       let paramsAsStrings: string[] = [];
+       Object.keys(getParams).forEach(function (key) {
+           paramsAsStrings.push(key + "=" + getParams[key]);
+       });
+
+       if (paramsAsStrings.length > 0)
+           url += "?" + paramsAsStrings.join("&");
+
+
+       if (this._synchronous) {
+
+
+           var res = syncRequest(method, url);
+
+           var body = JSON.parse(res.body.toString());
+
+           if (res.statusCode != 200) {
+               throw (body.message);
+           } else {
+               return body;
+           }
+
+
+       } else {
+
+           return new Promise((resolve, reject) => {
+
+               asyncRequest(method, url, function(res:any){
+                   var body = JSON.parse(res.body.toString());
+
+                   if (res.statusCode != 200) {
+                       reject (body.message);
+                   } else {
+                       resolve(body);
+                   }
+               });
+
+           });
+
+       }
+
+   }
+
+
+
+}

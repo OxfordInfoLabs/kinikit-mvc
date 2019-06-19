@@ -316,7 +316,7 @@ class APIInfo {
                         }
 
 
-                        $controllerMethods[] = $this->addLanguageSpecificProperties(new APIMethod($reflectionMethod->getName(), $comment, $httpMethod, $requestPath, $returnType, $returnDescription, $params, $this->getClientNamespace($returnType), $exceptions, $limit, $limitMultiplier, $limitPeriod));
+                        $controllerMethods[] = $this->addLanguageSpecificProperties(new APIMethod($reflectionMethod->getName(), $comment, $httpMethod, $requestPath, $returnType, isset($returnDescription) ? $returnDescription : null, $params, $this->getClientNamespace($returnType), $exceptions, $limit, $limitMultiplier, $limitPeriod));
 
                     }
 
@@ -455,6 +455,7 @@ class APIInfo {
 
             $explodedFilename = explode(".", $file->getFilename());
             $className = array_shift($explodedFilename);
+
 
             // Attempt to construct the class annotations for this controller
             if (class_exists($currentNamespace . "\\" . $className)) {

@@ -1,0 +1,52 @@
+/**
+{{comment}}
+*/
+
+import WebServiceProxy from "./{{javascriptPathBackToSource}}/Framework/WebServiceProxy";
+
+export class {{className}}Sync extends WebServiceProxy {
+
+{{#methods}}
+    /**
+{{comment}}
+     *
+    {{#params}}
+     * @param {{name}}
+    {{/params}}
+    {{#clientReturnType}}
+     * @return {{.}}
+    {{/clientReturnType}}
+     */
+    public {{name}}({{#params}}{{#index}}, {{/index}}{{name}}{{#isOptional}}? = {{#isString}}"{{/isString}}{{defaultValue}}{{#isString}}"{{/isString}}{{/isOptional}}{{/params}}):{{#clientReturnType}}{{.}}{{/clientReturnType}}{{^clientReturnType}}void{{/clientReturnType}}{
+        {{#returnType}}return {{/returnType}}this.callMethod("{{requestPath}}", "{{httpMethod}}", [{{#params}}{{^payloadParam}}{{^segmentParam}}{{#extraParamIndex}}, {{/extraParamIndex}}"{{name}}" => ${{name}}{{/segmentParam}}{{/payloadParam}}{{/params}}],{{#payloadParam}}${{name}}{{/payloadParam}}{{^payloadParam}}null{{/payloadParam}},{{#clientReturnType}}"{{.}}"{{/clientReturnType}}{{^clientReturnType}}null{{/clientReturnType}});
+    }
+
+{{/methods}}
+
+}
+
+
+export class {{className}}ASync extends WebServiceProxy {
+
+{{#methods}}
+    /**
+{{comment}}
+     *
+    {{#params}}
+     * @param {{name}}
+    {{/params}}
+    {{#clientReturnType}}
+     * @return {{.}}
+    {{/clientReturnType}}
+     */
+    public {{name}}({{#params}}{{#index}}, {{/index}}{{name}}{{#isOptional}}? = {{#isString}}"{{/isString}}{{defaultValue}}{{#isString}}"{{/isString}}{{/isOptional}}{{/params}}):Promise<{{#clientReturnType}}{{.}}{{/clientReturnType}}{{^clientReturnType}}void{{/clientReturnType}}>{
+        {{#returnType}}return {{/returnType}}this.callMethod("{{requestPath}}", "{{httpMethod}}", [{{#params}}{{^payloadParam}}{{^segmentParam}}{{#extraParamIndex}}, {{/extraParamIndex}}"{{name}}" => ${{name}}{{/segmentParam}}{{/payloadParam}}{{/params}}],{{#payloadParam}}${{name}}{{/payloadParam}}{{^payloadParam}}null{{/payloadParam}},{{#clientReturnType}}"{{.}}"{{/clientReturnType}}{{^clientReturnType}}null{{/clientReturnType}});
+    }
+
+{{/methods}}
+
+}
+
+
+
+

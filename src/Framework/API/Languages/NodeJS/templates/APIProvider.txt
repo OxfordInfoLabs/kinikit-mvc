@@ -1,0 +1,99 @@
+/**
+* Main api provider
+*/
+{{#controllerSummaries}}
+import { {{className}}Sync, {{className}}ASync } from "./{{javascriptPathFromSource}}/{{className}}";
+
+{{/controllerSummaries}}
+
+/**
+* Synchronous version of the API
+*/
+export class APIProviderSync  {
+
+    private _apiURL:string = "";
+    private _globalParameters:any;
+    private _instances: any = {};
+
+    /**
+    * Construct with the api url and the api key for access.  In javascript we also allow a synchronous flag to
+    * be passed to allow for synchronous or asynchronous calling of the api depending upon the application flow required.
+    *
+    * @param apiURL
+      {{#globalParameters}}
+    * @param {{name}}
+       {{/globalParameters}}
+    */
+    constructor(apiURL:string{{#globalParameters}}, {{name}}:any{{/globalParameters}}){
+        this._apiURL = apiURL;
+
+        this._globalParameters = {};
+        {{#globalParameters}}
+        this._globalParameters["{{name}}"] = {{name}};
+        {{/globalParameters}}
+
+    }
+
+    {{#controllerSummaries}}
+    /**
+    * Get an instance of the {{name}} API
+    *
+    * @return {{className}}
+    */
+    public {{className}}():{{className}}Sync{
+        if (!this._instances["{{className}}"]){
+            this._instances["{{className}}"] = new {{className}}Sync(this._apiURL + "/{{requestPath}}", this._globalParameters, true);
+        }
+        return this._instances["{{className}}"];
+    }
+
+    {{/controllerSummaries}}
+
+
+}
+
+/**
+* Asynchronous version of the API.
+*/
+export class APIProviderASync  {
+
+    private _apiURL:string = "";
+    private _globalParameters:any;
+    private _instances: any = {};
+
+    /**
+    * Construct with the api url and the api key for access.  In javascript we also allow a synchronous flag to
+    * be passed to allow for synchronous or asynchronous calling of the api depending upon the application flow required.
+    *
+    * @param apiURL
+      {{#globalParameters}}
+    * @param {{name}}
+       {{/globalParameters}}
+    */
+    constructor(apiURL:string{{#globalParameters}}, {{name}}:any{{/globalParameters}}){
+        this._apiURL = apiURL;
+
+        this._globalParameters = {};
+        {{#globalParameters}}
+        this._globalParameters["{{name}}"] = {{name}};
+        {{/globalParameters}}
+
+    }
+
+    {{#controllerSummaries}}
+    /**
+    * Get an instance of the {{name}} API
+    *
+    * @return {{className}}
+    */
+    public {{className}}():{{className}}ASync{
+        if (!this._instances["{{className}}"]){
+            this._instances["{{className}}"] = new {{className}}ASync(this._apiURL + "/{{requestPath}}", this._globalParameters, false);
+        }
+        return this._instances["{{className}}"];
+    }
+
+    {{/controllerSummaries}}
+
+
+}

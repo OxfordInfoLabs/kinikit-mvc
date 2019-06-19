@@ -74,9 +74,10 @@ class ClientLanguageConfiguration extends SerialisableObject {
      * Overridable method for rewriting the output path if required (e.g. lowercasing in Java).
      *
      * @param $outputPath
+     * @param $model
      * @return mixed
      */
-    public function rewriteFileOutputPath($outputPath) {
+    public function rewriteFileOutputPath($outputPath, $model) {
         return $outputPath;
     }
 

@@ -17,7 +17,7 @@ class JavaLanguageConfiguration extends ClientLanguageConfiguration {
         parent::__construct(APIConfiguration::CLIENT_JAVA, ".java", $outputPath);
     }
 
-    public function rewriteFileOutputPath($outputPath) {
+    public function rewriteFileOutputPath($outputPath, $model) {
         return str_replace(dirname($outputPath), strtolower(dirname($outputPath)), $outputPath);
     }
 

@@ -14,6 +14,7 @@ use Kinikit\Core\Object\SerialisableObject;
 use Kinikit\Core\Util\SerialisableArrayUtils;
 use Kinikit\Core\Util\Serialisation\JSON\JSONToObjectConverter;
 use Kinikit\MVC\Framework\API\Languages\Java\JavaLanguageConfiguration;
+use Kinikit\MVC\Framework\API\Languages\NodeJS\NodeJSLanguageConfiguration;
 use Kinikit\MVC\Framework\API\Languages\PHP\PHPLanguageConfiguration;
 
 class APIConfiguration extends SerialisableObject {
@@ -63,7 +64,8 @@ class APIConfiguration extends SerialisableObject {
      *
      * @var string[string]
      */
-    protected $generatedClients = array(self::CLIENT_PHP => "../clientapi/php", self::CLIENT_JAVA => "../clientapi/java");
+    protected $generatedClients = array(self::CLIENT_PHP => "../clientapi/php", self::CLIENT_JAVA => "../clientapi/java",
+        self::CLIENT_NODEJS => "../clientapi/nodejs");
 
 
     /**
@@ -79,6 +81,7 @@ class APIConfiguration extends SerialisableObject {
 
     const CLIENT_PHP = "PHP";
     const CLIENT_JAVA = "Java";
+    const CLIENT_NODEJS = "NodeJS";
 
     /**
      * APIConfiguration constructor.
@@ -171,6 +174,8 @@ class APIConfiguration extends SerialisableObject {
                 case self::CLIENT_JAVA:
                     $config[] = new JavaLanguageConfiguration($path);
                     break;
+                case self::CLIENT_NODEJS:
+                    $config[] = new NodeJSLanguageConfiguration($path);
             }
         }
 

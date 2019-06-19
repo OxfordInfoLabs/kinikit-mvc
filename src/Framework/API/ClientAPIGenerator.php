@@ -3,6 +3,7 @@
 namespace Kinikit\MVC\Framework\API;
 
 use Kinikit\Core\Configuration;
+use Kinikit\Core\Init;
 use Kinikit\Core\Object\SerialisableObject;
 use Kinikit\Core\Template\Parser\MustacheTemplateParser;
 use Kinikit\Core\Util\Annotation\ClassAnnotationParser;
@@ -29,6 +30,21 @@ class ClientAPIGenerator {
     }
 
 
+    // Run the client API generator from composer.
+    public static function runFromComposer($event) {
+
+        new Init();
+
+        $sourceDirectory = $event && isset($event->getComposer()->getPackage()->getConfig()["source-directory"]) ?
+            $event->getComposer()->getPackage()->getConfig()["source-directory"] : ".";
+
+        chdir($sourceDirectory);
+
+        $generator = new ClientAPIGenerator();
+        $generator->generate();
+    }
+
+
     /**
      * Main entry point.  Loops through configurations generating as appropriate
      */
@@ -36,6 +52,7 @@ class ClientAPIGenerator {
 
         // Loop through all defined API configurations and make Client APIs where applicable
         $configurations = APIConfiguration::getAPIConfigs();
+
 
         foreach ($configurations as $configuration) {
 
@@ -54,6 +71,7 @@ class ClientAPIGenerator {
 
         // Grab the info object
         $apiInfo = new APIInfo($configuration);
+
 
         // Now loop through each client language we are building for
         foreach ($configuration->getGeneratedClientConfiguration() as $clientLanguageConfiguration) {
@@ -113,7 +131,7 @@ class ClientAPIGenerator {
             }
 
 
-            // Now copy any static root files straight to base path
+            // Now copy any static files straight to base path
             if (file_exists(__DIR__ . "/Languages/$language/static/root")) {
                 FileUtils::copy(__DIR__ . "/Languages/$language/static/root", $outputPath);
             }
@@ -122,6 +140,9 @@ class ClientAPIGenerator {
                 FileUtils::copy(__DIR__ . "/Languages/$language/static/src", $sourceBase);
             }
 
+            if (file_exists(__DIR__ . "/Languages/$language/example")) {
+                FileUtils::copy(__DIR__ . "/Languages/$language/example", $outputPath, false);
+            }
 
         }
 
@@ -151,13 +172,13 @@ class ClientAPIGenerator {
 
 
         if ($model instanceof SerialisableObject) {
-            $model = $model->__getSerialisablePropertyMap();
+            $passedModel = $model->__getSerialisablePropertyMap();
         }
 
         $templateText = file_get_contents($templatePath);
-        $output = $this->templateParser->parseTemplateText($templateText, $model);
+        $output = $this->templateParser->parseTemplateText($templateText, $passedModel);
 
-        $outputPath = $clientLanguageConfiguration->rewriteFileOutputPath($outputPath);
+        $outputPath = $clientLanguageConfiguration->rewriteFileOutputPath($outputPath, $model);
 
 
         if (!file_exists(dirname($outputPath))) mkdir(dirname($outputPath), 0777, true);
@@ -167,9 +188,6 @@ class ClientAPIGenerator {
 
 }
 
-
-$generator = new ClientAPIGenerator();
-$generator->generate();
 
 
 

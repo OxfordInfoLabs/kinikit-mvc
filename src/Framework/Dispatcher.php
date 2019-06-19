@@ -5,6 +5,7 @@ namespace Kinikit\MVC\Framework;
 use ErrorException;
 use Kinikit\Core\Configuration;
 use Kinikit\Core\Exception\SerialisableException;
+use Kinikit\Core\Init;
 use Kinikit\Core\Util\Annotation\ClassAnnotationParser;
 use Kinikit\Core\Util\ArrayUtils;
 use Kinikit\Core\Util\HTTP\HttpRequest;
@@ -27,39 +28,8 @@ class Dispatcher {
      */
     public function dispatch() {
 
-
-        // Set the default timezone to prevent issues with dates
-        date_default_timezone_set("Europe/London");
-
-        // Set a catch all error handler
-        set_error_handler(array($this, "genericErrorHandler"), E_ALL);
-
-
-        // If we have an application namespace, ensure we include this in class autoloading assuming
-        // the current working directory as the top of the namespace.
-        if (Configuration::readParameter("application.namespace")) {
-            spl_autoload_register(function ($class) {
-                $class = str_replace(Configuration::readParameter("application.namespace") . "\\", "", $class);
-                $file = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
-                if (file_exists($file)) {
-                    require $file;
-                    return true;
-                } else
-                    return false;
-            });
-        }
-
-
-        if (file_exists("ApplicationAnnouncement.php")) {
-            include_once "ApplicationAnnouncement.php";
-            $appAnnouncement = new \ApplicationAnnouncement ();
-            $appAnnouncement->announce();
-        }
-
-
-        // Start a session early in the flow
-        HttpSession::instance();
-
+        // Call the core init to bootstrap framework.
+        new Init();
 
         // Lookup the current url and dispatch to the controller identified.
         $currentURL = URLHelper::getCurrentURLInstance();
@@ -133,20 +103,6 @@ class Dispatcher {
         }
 
 
-    }
-
-    /**
-     * Generic Exception handler for fatal errors
-     *
-     * @param $severity
-     * @param $message
-     * @param $file
-     * @param $line
-     * @throws ErrorException
-     */
-    function genericErrorHandler($severity, $message, $file, $line) {
-        Logger::log($message . ": at line $line in file $file");
-        throw new ErrorException($message, 0, $severity, $file, $line);
     }
 
 
