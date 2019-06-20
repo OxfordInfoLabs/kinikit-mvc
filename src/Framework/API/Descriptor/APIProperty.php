@@ -140,8 +140,18 @@ class APIProperty extends DynamicSerialisableObject {
      * @return bool
      */
     public function getIsObject() {
-        $primitives = array("boolean", "integer", "int", "string");
+        $primitives = array("boolean", "integer", "int", "string", "float");
         return !is_numeric(array_search($this->getType(), $primitives));
+    }
+
+    /**
+     * Indicator as to whether or not this property is numeric
+     *
+     * @return bool
+     */
+    public function getIsNumeric() {
+        $numerics = array("float", "integer", "int");
+        return is_numeric(array_search($this->getType(), $numerics));
     }
 
     /**
@@ -182,7 +192,7 @@ class APIProperty extends DynamicSerialisableObject {
     }
 
 
-    public function getRelativeTypePath(){
+    public function getRelativeTypePath() {
         return trim($this->getTypePath(), "/");
     }
 

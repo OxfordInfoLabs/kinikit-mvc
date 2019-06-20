@@ -50,15 +50,56 @@ class NodeJSLanguageConfiguration extends ClientLanguageConfiguration {
      */
     public function addLanguagePropertiesToAPIDescriptorObject($objectClass, $object) {
 
-        if ($objectClass == "APIController" || $objectClass == "APIControllerSummary") {
+        if ($objectClass == "APIController" || $objectClass == "APIControllerSummary" || $objectClass == "APIObject") {
             $explodedNamespace = explode($object->getRootNamespace(), $object->getClientNamespace());
-            $path = trim(str_replace("\\", "/", $explodedNamespace[1]), "/");
+            $remainingNamespace = isset($explodedNamespace[1]) ? $explodedNamespace[1] : $explodedNamespace[0];
+            $path = trim(str_replace("\\", "/", $remainingNamespace), "/");
             $object->setJavascriptPathFromSource($path);
 
             $pathBackToSource = preg_replace("/[a-zA-Z0-9_]+/", "..", $path);
             $object->setJavascriptPathBackToSource($pathBackToSource);
 
+            $javascriptImports = array();
+            if ($object->getRequiredObjects()) {
+                foreach ($object->getRequiredObjects() as $requiredObject) {
+                    $explodedObject = explode("\\", $requiredObject);
+                    $className = array_pop($explodedObject);
+                    $javascriptImports[] = "import $className from \"$pathBackToSource" . join("/", $explodedObject) . "/" . $className . '"';
+                }
+            }
+
+            $object->setJavascriptImports($javascriptImports);
+
+
         }
+        if ($objectClass == "APIParam" || $objectClass == "APIProperty") {
+            $object->setJavascriptType($this->convertToJavascriptType($object->getShortType()));
+        }
+
+        if ($objectClass == "APIMethod") {
+            $object->setJavascriptReturnType($this->convertToJavascriptType($object->getShortReturnType()));
+        }
+
+    }
+
+
+    public function convertToJavascriptType($phpType) {
+
+
+        switch ($phpType) {
+            case "integer":
+            case "int":
+            case "float":
+                $javascriptType = "number";
+                break;
+            case "mixed":
+                $javascriptType = "any";
+                break;
+            default:
+                $javascriptType = $phpType;
+        }
+
+        return $javascriptType;
 
     }
 

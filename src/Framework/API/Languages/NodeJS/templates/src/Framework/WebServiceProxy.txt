@@ -1,6 +1,6 @@
 /**
-* Web service proxy object.  Implements calls to the backend REST service.
-*/
+ * Web service proxy object.  Implements calls to the backend REST service.
+ */
 
 var syncRequest = require('sync-request');
 var asyncRequest = require('then-request');
@@ -11,66 +11,84 @@ export default class WebServiceProxy {
     private _globalParameters: any[];
     private _synchronous: boolean;
 
-    constructor(webServiceURL:string, globalParameters: any[], synchronous: boolean) {
+
+    constructor(webServiceURL: string, globalParameters: any[], synchronous: boolean) {
         this._webServiceURL = webServiceURL;
         this._globalParameters = globalParameters;
         this._synchronous = synchronous;
     }
 
 
-   /**
-    * Call a method on the remote web service, using the passed options.
-    */
-   protected callMethod(requestPath: string, method: string = "GET", params: any = {}, payload: any = null, returnClass: string = ""): any {
+    /**
+     * Call a method on the remote web service, using the passed options.
+     */
+    protected callMethod(requestPath: string, method: string = "GET", params: any = {}, payload: any = null, returnClass: any): any {
 
 
-       let url = this._webServiceURL + "/" + requestPath;
+        let url = this._webServiceURL + "/" + requestPath;
 
-       let getParams: any = Object.assign({}, this._globalParameters);
+        let getParams: any = Object.assign({}, this._globalParameters);
 
-       let paramsAsStrings: string[] = [];
-       Object.keys(getParams).forEach(function (key) {
-           paramsAsStrings.push(key + "=" + getParams[key]);
-       });
+        let paramsAsStrings: string[] = [];
+        Object.keys(getParams).forEach(function (key) {
+            paramsAsStrings.push(key + "=" + getParams[key]);
+        });
 
-       if (paramsAsStrings.length > 0)
-           url += "?" + paramsAsStrings.join("&");
-
-
-       if (this._synchronous) {
+        if (paramsAsStrings.length > 0)
+            url += "?" + paramsAsStrings.join("&");
 
 
-           var res = syncRequest(method, url);
-
-           var body = JSON.parse(res.body.toString());
-
-           if (res.statusCode != 200) {
-               throw (body.message);
-           } else {
-               return body;
-           }
+        if (this._synchronous) {
 
 
-       } else {
+            var res = syncRequest(method, url);
 
-           return new Promise((resolve, reject) => {
+            var body = JSON.parse(res.body.toString());
 
-               asyncRequest(method, url, function(res:any){
-                   var body = JSON.parse(res.body.toString());
+            if (res.statusCode != 200) {
+                throw (body.message);
+            } else {
+                return this._processReturnValue(body, returnClass);
+            }
 
-                   if (res.statusCode != 200) {
-                       reject (body.message);
-                   } else {
-                       resolve(body);
-                   }
-               });
 
-           });
+        } else {
 
-       }
+            return new Promise((resolve, reject) => {
 
-   }
+                asyncRequest(method, url).done((res: any) => {
+                    var body = JSON.parse(res.body.toString());
 
+                    if (res.statusCode != 200) {
+                        reject(body.message);
+                    } else {
+                        resolve(this._processReturnValue(body, returnClass));
+                    }
+                });
+
+            });
+
+        }
+
+    }
+
+
+    // Process a return value and ensure we get the correct class.
+    private _processReturnValue(returnValue: any, returnValueClass: any) {
+
+        // If we are primitive, quit
+        if (typeof returnValueClass == "string") {
+            return returnValue;
+        } else {
+
+            var newObject = new returnValueClass();
+            newObject.__setData(returnValue);
+            return newObject;
+
+        }
+
+
+    }
 
 
 }

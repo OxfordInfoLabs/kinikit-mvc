@@ -1,0 +1,59 @@
+/**
+{{comment}}
+*/
+
+import SerialisableObject from "{{javascriptPathBackToSource}}/Framework/SerialisableObject";
+
+export default class {{name}} extends SerialisableObject {
+
+    {{#properties}}
+    /**{{#comment}}
+{{.}}{{/comment}}
+     *
+     * @var {{clientType}} {{^comment}}{{description}}{{/comment}}
+     */
+    private _{{name}}?:{{javascriptType}};
+
+    {{/properties}}
+
+
+    /**
+     * Constructor
+     *
+     {{#properties}}{{#updatable}}* @param {{varType}} ${{name}}
+     {{/updatable}}{{/properties}}*/
+    public __construct({{#properties}}{{#updatable}}{{#updatableIndex}}, {{/updatableIndex}}${{name}} = {{#defaultValue}}{{#isString}}"{{/isString}}{{.}}{{#isString}}"{{/isString}}{{/defaultValue}}{{^defaultValue}}null{{/defaultValue}}{{/updatable}}{{/properties}}){
+
+        {{#properties}}{{#updatable}}$this->{{name}} = ${{name}};
+        {{/updatable}}{{/properties}}
+    }
+
+    {{#properties}}
+    /**
+     * Get the {{name}}
+     *
+     * @return {{javascriptType}}
+     */
+    public get {{name}}():{{javascriptType}} | undefined{
+
+        {{#isNumeric}}return Number(this._{{name}});{{/isNumeric}}
+        {{^isNumeric}}return this._{{name}};{{/isNumeric}}
+    }
+
+    {{#updatable}}
+
+    /**
+     * Set the {{name}}
+     *
+     * @param {{javascriptType}} {{name}}
+     * @return {{className}}
+     */
+    public set {{ucaseName}}({{name}}:{{javascriptType}} | undefined){
+        $this._{{name}} = {{name}};
+        return this;
+    }
+    {{/updatable}}
+
+    {{/properties}}
+
+}
