@@ -21,8 +21,8 @@ export class {{className}}Sync extends WebServiceProxy {
      * @return {{.}}
     {{/javascriptReturnType}}
      */
-    public {{name}}({{#params}}{{#index}}, {{/index}}{{name}}{{#isOptional}}? = {{#isString}}"{{/isString}}{{defaultValue}}{{#isString}}"{{/isString}}{{/isOptional}}{{/params}}):{{#javascriptReturnType}}{{.}}{{/javascriptReturnType}}{{^javascriptReturnType}}void{{/javascriptReturnType}}{
-        {{#returnType}}return {{/returnType}}this.callMethod("{{requestPath}}", "{{httpMethod}}", [{{#params}}{{^payloadParam}}{{^segmentParam}}{{#extraParamIndex}}, {{/extraParamIndex}}"{{name}}" => ${{name}}{{/segmentParam}}{{/payloadParam}}{{/params}}],{{#payloadParam}}${{name}}{{/payloadParam}}{{^payloadParam}}null{{/payloadParam}},{{#javascriptReturnType}}{{#isReturnTypePrimitive}}"{{/isReturnTypePrimitive}}{{.}}{{#isReturnTypePrimitive}}"{{/isReturnTypePrimitive}}{{/javascriptReturnType}}{{^javascriptReturnType}}""{{/javascriptReturnType}});
+    public {{name}}({{#params}}{{#index}}, {{/index}}{{name}}{{#isOptional}}?{{/isOptional}}:{{javascriptType}}{{/params}}):{{#javascriptReturnType}}{{.}}{{/javascriptReturnType}}{{^javascriptReturnType}}void{{/javascriptReturnType}}{
+        {{#returnType}}return {{/returnType}}this.callMethod("{{requestPath}}", "{{httpMethod}}", { {{#params}}{{^payloadParam}}{{^segmentParam}}{{#extraParamIndex}}, {{/extraParamIndex}}"{{name}}" : {{name}}{{/segmentParam}}{{/payloadParam}}{{/params}} },{{#payloadParam}}{{name}}{{/payloadParam}}{{^payloadParam}}null{{/payloadParam}},{{#javascriptReturnType}}{{#isReturnTypePrimitive}}"{{/isReturnTypePrimitive}}{{.}}{{#isReturnTypePrimitive}}"{{/isReturnTypePrimitive}}{{/javascriptReturnType}}{{^javascriptReturnType}}""{{/javascriptReturnType}});
     }
 
 {{/methods}}
@@ -43,8 +43,8 @@ export class {{className}}ASync extends WebServiceProxy {
      * @return {{.}}
     {{/javascriptReturnType}}
      */
-    public {{name}}({{#params}}{{#index}}, {{/index}}{{name}}{{#isOptional}}? = {{#isString}}"{{/isString}}{{defaultValue}}{{#isString}}"{{/isString}}{{/isOptional}}{{/params}}):Promise<{{#javascriptReturnType}}{{.}}{{/javascriptReturnType}}{{^javascriptReturnType}}void{{/javascriptReturnType}}>{
-        {{#returnType}}return {{/returnType}}this.callMethod("{{requestPath}}", "{{httpMethod}}", [{{#params}}{{^payloadParam}}{{^segmentParam}}{{#extraParamIndex}}, {{/extraParamIndex}}"{{name}}" => ${{name}}{{/segmentParam}}{{/payloadParam}}{{/params}}],{{#payloadParam}}${{name}}{{/payloadParam}}{{^payloadParam}}null{{/payloadParam}},{{#javascriptReturnType}}{{#isReturnTypePrimitive}}"{{/isReturnTypePrimitive}}{{.}}{{#isReturnTypePrimitive}}"{{/isReturnTypePrimitive}}{{/javascriptReturnType}}{{^javascriptReturnType}}""{{/javascriptReturnType}});
+    public {{name}}({{#params}}{{#index}}, {{/index}}{{name}}{{#isOptional}}?{{/isOptional}}:{{javascriptType}}{{/params}}):Promise<{{#javascriptReturnType}}{{.}}{{/javascriptReturnType}}{{^javascriptReturnType}}void{{/javascriptReturnType}}>{
+        return this.callMethod("{{requestPath}}", "{{httpMethod}}", { {{#params}}{{^payloadParam}}{{^segmentParam}}{{#extraParamIndex}}, {{/extraParamIndex}}"{{name}}" : {{name}}{{/segmentParam}}{{/payloadParam}}{{/params}} },{{#payloadParam}}{{name}}{{/payloadParam}}{{^payloadParam}}null{{/payloadParam}},{{#javascriptReturnType}}{{#isReturnTypePrimitive}}"{{/isReturnTypePrimitive}}{{.}}{{#isReturnTypePrimitive}}"{{/isReturnTypePrimitive}}{{/javascriptReturnType}}{{^javascriptReturnType}}""{{/javascriptReturnType}});
     }
 
 {{/methods}}

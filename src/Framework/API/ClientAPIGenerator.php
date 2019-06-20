@@ -105,11 +105,14 @@ class ClientAPIGenerator {
             }
 
 
-            foreach ($apiInfo->getAllAPIExceptionSummaryInfo() as $info) {
+            if (file_exists(__DIR__ . "/Languages/$language/templates/APIException.txt")) {
 
-                $exception = $apiInfo->getAPIExceptionByPath($info->getPath());
+                foreach ($apiInfo->getAllAPIExceptionSummaryInfo() as $info) {
 
-                $this->processTemplate(__DIR__ . "/Languages/$language/templates/APIException.txt", $exception, $basePath . "/" . $exception->getClientPath() . $fileExtension, $clientLanguageConfiguration);
+                    $exception = $apiInfo->getAPIExceptionByPath($info->getPath());
+
+                    $this->processTemplate(__DIR__ . "/Languages/$language/templates/APIException.txt", $exception, $basePath . "/" . $exception->getClientPath() . $fileExtension, $clientLanguageConfiguration);
+                }
             }
 
 

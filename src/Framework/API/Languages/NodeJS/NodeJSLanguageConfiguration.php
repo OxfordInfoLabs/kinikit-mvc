@@ -51,8 +51,14 @@ class NodeJSLanguageConfiguration extends ClientLanguageConfiguration {
     public function addLanguagePropertiesToAPIDescriptorObject($objectClass, $object) {
 
         if ($objectClass == "APIController" || $objectClass == "APIControllerSummary" || $objectClass == "APIObject") {
-            $explodedNamespace = explode($object->getRootNamespace(), $object->getClientNamespace());
-            $remainingNamespace = isset($explodedNamespace[1]) ? $explodedNamespace[1] : $explodedNamespace[0];
+
+            if ($objectClass != "APIObject") {
+                $explodedNamespace = explode($object->getRootNamespace(), $object->getClientNamespace());
+                $remainingNamespace = isset($explodedNamespace[1]) ? $explodedNamespace[1] : $explodedNamespace[0];
+            } else {
+                $remainingNamespace = $object->getClientNamespace();
+            }
+
             $path = trim(str_replace("\\", "/", $remainingNamespace), "/");
             $object->setJavascriptPathFromSource($path);
 
@@ -64,7 +70,8 @@ class NodeJSLanguageConfiguration extends ClientLanguageConfiguration {
                 foreach ($object->getRequiredObjects() as $requiredObject) {
                     $explodedObject = explode("\\", $requiredObject);
                     $className = array_pop($explodedObject);
-                    $javascriptImports[] = "import $className from \"$pathBackToSource" . join("/", $explodedObject) . "/" . $className . '"';
+                    if (!strpos($className, "Exception"))
+                        $javascriptImports[] = "import $className from \"$pathBackToSource" . join("/", $explodedObject) . "/" . $className . '"';
                 }
             }
 
@@ -92,6 +99,9 @@ class NodeJSLanguageConfiguration extends ClientLanguageConfiguration {
             case "float":
                 $javascriptType = "number";
                 break;
+            case "bool":
+                $javascriptType = "boolean";
+                break;
             case "mixed":
                 $javascriptType = "any";
                 break;
@@ -99,7 +109,7 @@ class NodeJSLanguageConfiguration extends ClientLanguageConfiguration {
                 $javascriptType = $phpType;
         }
 
-        return $javascriptType;
+        return str_replace(array("[", "]"), array("", ""), $javascriptType);
 
     }
 
