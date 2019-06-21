@@ -20,9 +20,11 @@ export default class {{name}} extends SerialisableObject {
     /**
      * Constructor
      *
-     {{#properties}}{{#updatable}}* @param {{varType}} ${{name}}
+     {{#properties}}{{#updatable}}* @param {{name}}
      {{/updatable}}{{/properties}}*/
-    public __construct({{#properties}}{{#updatable}}{{#updatableIndex}}, {{/updatableIndex}}{{name}}?:{{javascriptType}}{{/updatable}}{{/properties}}){
+    constructor({{#properties}}{{#updatable}}{{#updatableIndex}}, {{/updatableIndex}}{{name}}?:{{javascriptType}}{{/updatable}}{{/properties}}){
+
+        super();
 
         {{#properties}}{{#updatable}}this._{{name}} = {{name}};
         {{/updatable}}{{/properties}}

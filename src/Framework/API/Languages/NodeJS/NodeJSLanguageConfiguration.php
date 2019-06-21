@@ -84,13 +84,19 @@ class NodeJSLanguageConfiguration extends ClientLanguageConfiguration {
         }
 
         if ($objectClass == "APIMethod") {
+
+            // Convert the request path to java version
+            $javascriptRequestPath = preg_replace("/\\{([a-zA-Z0-9_]+)}/", '" + $1 + "', $object->getRequestPath());
+            $object->setJavascriptRequestPath($javascriptRequestPath);
+
             $object->setJavascriptReturnType($this->convertToJavascriptType($object->getShortReturnType()));
+            $object->setJavascriptReturnTypeClass($this->convertToJavascriptType($object->getShortReturnType(), true));
         }
 
     }
 
 
-    public function convertToJavascriptType($phpType) {
+    public function convertToJavascriptType($phpType, $stripArrays = false) {
 
 
         switch ($phpType) {
@@ -109,7 +115,11 @@ class NodeJSLanguageConfiguration extends ClientLanguageConfiguration {
                 $javascriptType = $phpType;
         }
 
-        return str_replace(array("[", "]"), array("", ""), $javascriptType);
+        if ($stripArrays)
+            return str_replace(array("[", "]"), array("", ""), $javascriptType);
+
+        else
+            return $javascriptType;
 
     }
 

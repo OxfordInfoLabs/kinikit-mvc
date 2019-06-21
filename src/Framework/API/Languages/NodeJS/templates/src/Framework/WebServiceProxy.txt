@@ -1,6 +1,7 @@
 /**
  * Web service proxy object.  Implements calls to the backend REST service.
  */
+import SerialisableObject from "./SerialisableObject";
 
 var syncRequest = require('sync-request');
 var asyncRequest = require('then-request');
@@ -29,19 +30,29 @@ export default class WebServiceProxy {
 
         let getParams: any = Object.assign({}, this._globalParameters);
 
+        // Also assign any params to the object.
+        getParams = Object.assign(getParams, params);
+
         let paramsAsStrings: string[] = [];
         Object.keys(getParams).forEach(function (key) {
-            paramsAsStrings.push(key + "=" + getParams[key]);
+            if (getParams[key] !== undefined)
+                paramsAsStrings.push(key + "=" + getParams[key]);
         });
 
         if (paramsAsStrings.length > 0)
             url += "?" + paramsAsStrings.join("&");
 
+        // If we have a payload, ensure we remap _ properties back in object modes
+        if (payload) {
+            payload = this._processPayload(payload);
+        }
+
 
         if (this._synchronous) {
 
-
-            var res = syncRequest(method, url);
+            var res = syncRequest(method, url, payload ? {
+                json: payload
+            } : null);
 
             var body = JSON.parse(res.body.toString());
 
@@ -56,7 +67,9 @@ export default class WebServiceProxy {
 
             return new Promise((resolve, reject) => {
 
-                asyncRequest(method, url).done((res: any) => {
+                asyncRequest(method, url, payload ? {
+                    json: payload
+                } : null).done((res: any) => {
                     var body = JSON.parse(res.body.toString());
 
                     if (res.statusCode != 200) {
@@ -81,9 +94,22 @@ export default class WebServiceProxy {
             return returnValue;
         } else {
 
-            var newObject = new returnValueClass();
-            newObject.__setData(returnValue);
-            return newObject;
+            if (Array.isArray(returnValue)) {
+
+                let newArray: any[] = [];
+                returnValue.forEach((entry) => {
+                    newArray.push(this._processReturnValue(entry, returnValueClass));
+                });
+
+                return newArray;
+
+            } else {
+
+                var newObject = new returnValueClass();
+                newObject.__setData(returnValue);
+                return newObject;
+
+            }
 
         }
 
@@ -91,4 +117,19 @@ export default class WebServiceProxy {
     }
 
 
+    // Process the payload getting data
+    private _processPayload(payload: any): any {
+
+        if (Array.isArray(payload)) {
+            let newPayload: any[] = [];
+            payload.forEach(entry => {
+                newPayload.push(this._processPayload(entry));
+            });
+            return newPayload;
+        } else if (payload instanceof SerialisableObject) {
+            return payload.__getData();
+        } else {
+            return payload;
+        }
+    }
 }
