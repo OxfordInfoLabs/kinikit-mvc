@@ -1,12 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2015",
     "module": "commonjs",
-    "lib": [
-      "es6",
-      "es2015",
-      "dom"
-    ],
     "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
@@ -14,9 +9,7 @@
     "types": [
       "node",
       "jasmine"
-    ],
-    "esModuleInterop": true,
-    "resolveJsonModule": true
+    ]
   },
   "include": [
     "src/**/*"

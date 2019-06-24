@@ -16,6 +16,7 @@ use Kinikit\Core\Util\ObjectUtils;
 use Kinikit\Core\Util\SerialisableArrayUtils;
 use Kinikit\Core\Util\Serialisation\JSON\ObjectToJSONConverter;
 use Kinikit\Core\Util\Serialisation\XML\ObjectToXMLConverter;
+use Kinikit\MVC\Exception\AccessDeniedException;
 use Kinikit\MVC\Exception\ControllerMethodNotFoundException;
 use Kinikit\MVC\Exception\ControllerNotFoundException;
 use Kinikit\MVC\Exception\ControllerVetoedException;
@@ -132,8 +133,8 @@ abstract class Controller {
 
                 $params = array("referrer" => URLHelper::getCurrentURLInstance()->getURL(), "error" => $e->getMessage());
 
-                if ($e instanceof ControllerVetoedException && Configuration::instance()->getParameter("vetoed.path")) {
-                    $result = new Redirection(Configuration::instance()->getParameter("vetoed.path"), $params);
+                if ($e instanceof AccessDeniedException && Configuration::instance()->getParameter("access.denied.path")) {
+                    $result = new Redirection(Configuration::instance()->getParameter("access.denied.path"), $params);
                 } else if (Configuration::instance()->getParameter("error.path")) {
                     $result = new Redirection(Configuration::instance()->getParameter("error.path"), $params);
                 } else {

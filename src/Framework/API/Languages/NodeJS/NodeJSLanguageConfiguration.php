@@ -71,7 +71,7 @@ class NodeJSLanguageConfiguration extends ClientLanguageConfiguration {
                     $explodedObject = explode("\\", $requiredObject);
                     $className = array_pop($explodedObject);
                     if (!strpos($className, "Exception"))
-                        $javascriptImports[] = "import $className from \"$pathBackToSource" . join("/", $explodedObject) . "/" . $className . '"';
+                        $javascriptImports[] = "import { $className } from \"$pathBackToSource" . join("/", $explodedObject) . "/" . $className . '"';
                 }
             }
 

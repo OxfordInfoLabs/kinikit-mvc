@@ -4,7 +4,7 @@
 
 import SerialisableObject from "{{javascriptPathBackToSource}}/Framework/SerialisableObject";
 
-export default class {{name}} extends SerialisableObject {
+export class {{name}} extends SerialisableObject {
 
     {{#properties}}
     /**{{#comment}}
