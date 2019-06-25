@@ -59,7 +59,6 @@ class RESTService extends WebService {
 
                 if (sizeof($matches) > 0) {
 
-
                     preg_match_all("/\\$[0-9a-zA-Z_]+/", $matches[0], $segmentVars);
                     $segmentVars = $segmentVars[0];
 
@@ -99,11 +98,10 @@ class RESTService extends WebService {
 
                 } else {
 
-                    $newMatchString = "/" . $shortClassName . "\\/*$/";
+                    // split on short class name
+                    $requestPath = explode($shortClassName, $urlHelper->getRequestPath(), 2);
 
-                    preg_match($newMatchString, $urlHelper->getRequestPath(), $urlMatch);
-
-                    if (sizeof($urlMatch) > 0) {
+                    if (sizeof($requestPath) > 1 && trim($requestPath[1], "/") == "") {
                         $methodFound = $methodName;
                         $foundSegmentParams = array();
                     }

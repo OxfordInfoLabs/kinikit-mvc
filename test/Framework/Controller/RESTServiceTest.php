@@ -39,6 +39,19 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
     }
 
 
+    public function testCanCallSingleGetMethodWithRepeatedPattern() {
+
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        URLHelper::setTestURL("/api/TestREST/TestREST");
+
+        $service = new TestREST();
+        $result = $service->handleRequest(HttpRequest::instance(true)->getAllValues());
+
+        $this->assertEquals($this->converter->convert(new TestRESTObject("TestREST", "TEST TestREST", "testTestREST@test.com", "GET SINGLE")), $result);
+
+    }
+
+
     public function testCanCallOtherGetMethodWithOverlappingPattern() {
 
         $_SERVER["REQUEST_METHOD"] = "GET";
@@ -169,7 +182,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
 
     }
 
-    public function testCanCallMethodsWithMultipleVariablePaths(){
+    public function testCanCallMethodsWithMultipleVariablePaths() {
 
 
         $_SERVER["REQUEST_METHOD"] = "GET";

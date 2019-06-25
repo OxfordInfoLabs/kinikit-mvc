@@ -54,7 +54,8 @@ export default class WebServiceProxy {
                 json: payload
             } : null);
 
-            var body = JSON.parse(res.body.toString());
+            var rawBody = res.body.toString();
+            var body = rawBody ? JSON.parse(res.body.toString()) : {message: null};
 
             if (res.statusCode != 200) {
                 throw (body.message);
@@ -70,7 +71,9 @@ export default class WebServiceProxy {
                 asyncRequest(method, url, payload ? {
                     json: payload
                 } : null).done((res: any) => {
-                    var body = JSON.parse(res.body.toString());
+
+                     var rawBody = res.body.toString();
+                     var body = rawBody ? JSON.parse(res.body.toString()) : {message: null};
 
                     if (res.statusCode != 200) {
                         reject(body.message);
