@@ -5,10 +5,11 @@ namespace Kinikit\MVC\Framework;
 use Kinikit\Core\Configuration;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\SerialisableException;
-use Kinikit\Core\Util\HTTP\URLHelper;
+
 use Kinikit\MVC\Controllers\view;
 use Kinikit\MVC\Exception\ControllerVetoedException;
 use Kinikit\MVC\Exception\NoControllerSuppliedException;
+use Kinikit\MVC\Framework\HTTP\URLHelper;
 
 
 /**

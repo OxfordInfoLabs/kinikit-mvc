@@ -9,14 +9,11 @@
 namespace Kinikit\MVC\Framework\Controller;
 
 
-use Kinikit\Core\Exception\NoneExistentMethodException;
-use Kinikit\Core\Exception\SerialisableException;
 use Kinikit\Core\Util\Annotation\ClassAnnotationParser;
-use Kinikit\Core\Util\HTTP\HttpRemoteRequest;
-use Kinikit\Core\Util\HTTP\HttpRequest;
-use Kinikit\Core\Util\HTTP\URLHelper;
-use Kinikit\Core\Util\Logging\Logger;
+
 use Kinikit\MVC\Exception\ControllerMethodNotFoundException;
+use Kinikit\MVC\Framework\HTTP\HttpRequest;
+use Kinikit\MVC\Framework\HTTP\URLHelper;
 
 class RESTService extends WebService {
 
@@ -25,10 +22,10 @@ class RESTService extends WebService {
      * Handle request method for rest service.  This essentially inspects the incoming request and
      * looks for methods which match by annotation.
      *
-     * @param $requestParameters
+     * @param HttpRequest $request
      * @return \Kinikit\MVC\Framework\ModelAndView|void
      */
-    public function handleRequest($requestParameters) {
+    public function handleRequest($request) {
 
         $className = get_class($this);
         $explodedClass = explode("\\", $className);
@@ -115,19 +112,16 @@ class RESTService extends WebService {
 
         if ($methodFound) {
 
-            $requestParameters = array_merge($requestParameters, $foundSegmentParams);
+            $requestParameters = array_merge($request->getAllParameters(), $foundSegmentParams);
 
-            if (isset($requestParameters["payload"])) {
+            if ($request->getPayload()) {
                 $reflectionClass = new \ReflectionClass($className);
                 $method = $reflectionClass->getMethod($methodFound);
                 $params = $method->getParameters();
 
-                if ($requestParameters["payload"]) {
-                    if (sizeof($params) > sizeof($foundSegmentParams)) {
-                        $requestParameters[$params[sizeof($foundSegmentParams)]->getName()] = $requestParameters["payload"];
-                    }
+                if (sizeof($params) > sizeof($foundSegmentParams)) {
+                    $requestParameters[$params[sizeof($foundSegmentParams)]->getName()] = $request->getPayload();
                 }
-
 
             }
 
@@ -136,7 +130,7 @@ class RESTService extends WebService {
             $newURL = "/" . $className . "/" . $methodFound;
             URLHelper::setTestURL($newURL);
 
-            return parent::handleRequest($requestParameters);
+            return parent::handleRequest(new HttpRequest(null, $requestParameters, $request->getPayload()));
 
 
         } else {

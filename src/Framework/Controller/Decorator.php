@@ -5,10 +5,11 @@ namespace Kinikit\MVC\Framework\Controller;
 use Kinikit\Core\Util\ArrayUtils;
 use Kinikit\Core\Util\HTTP\HttpRequest;
 use Kinikit\Core\Util\HTTP\HttpSession;
-use Kinikit\Core\Util\HTTP\URLHelper;
 use Kinikit\MVC\Exception\ControllerNotFoundException;
 use Kinikit\MVC\Framework\Controller;
 use Kinikit\MVC\Framework\ControllerResolver;
+use Kinikit\MVC\Framework\HTTP\URLHelper;
+use Kinikit\MVC\Framework\ModelAndView;
 use Kinikit\MVC\Framework\Redirection;
 
 /**
@@ -24,7 +25,7 @@ abstract class Decorator extends Controller {
     /**
      * Handle the request for the decorator.
      *
-     * @param $requestParameters
+     * @param HttpRequest $request
      * @return ModelAndView
      * @throws ControllerNotFoundException
      * @throws \Kinikit\MVC\Exception\ControllerVetoedException
@@ -32,7 +33,7 @@ abstract class Decorator extends Controller {
      * @throws \Kinikit\MVC\Exception\NoViewSuppliedException
      * @throws \Kinikit\MVC\Exception\ViewNotFoundException
      */
-    public function defaultHandler($requestParameters) {
+    public function defaultHandler($request) {
 
         $currentURLHelper = URLHelper::getCurrentURLInstance();
 
@@ -63,7 +64,7 @@ abstract class Decorator extends Controller {
 
 
             // Pass the decorator model and view to the content controller for convenience.
-            $contentModelAndView = $contentController->handleRequest($requestParameters);
+            $contentModelAndView = $contentController->handleRequest($request);
 
 
             // Merge both models accordingly and evaluate the view
@@ -74,7 +75,7 @@ abstract class Decorator extends Controller {
                 if ($contentModelAndView) {
 
                     // Merge into the model all request and session parameters suitably prefixed.
-                    $contentModelAndView->injectAdditionalModel(array("request" => HttpRequest::instance()->getAllValues()));
+                    $contentModelAndView->injectAdditionalModel(array("request" => HttpRequest::instance()->getAllParameters()));
                     $contentModelAndView->injectAdditionalModel(array("session" => HttpSession::instance()->getAllValues()));
 
                     // Merge both models accordingly

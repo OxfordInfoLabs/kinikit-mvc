@@ -2,17 +2,14 @@
 
 namespace Kinikit\MVC\Framework;
 
-use ErrorException;
 use Kinikit\Core\Configuration;
+use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\SerialisableException;
 use Kinikit\Core\Init;
-use Kinikit\Core\Util\Annotation\ClassAnnotationParser;
-use Kinikit\Core\Util\ArrayUtils;
-use Kinikit\Core\Util\HTTP\HttpRequest;
-use Kinikit\Core\Util\HTTP\HttpSession;
-use Kinikit\Core\Util\HTTP\URLHelper;
-use Kinikit\Core\Util\Logging\Logger;
+
 use Kinikit\MVC\Exception\ControllerNotFoundException;
+use Kinikit\MVC\Framework\HTTP\HttpRequest;
+use Kinikit\MVC\Framework\HTTP\URLHelper;
 
 /**
  * Main entry point into the MVC Framework from the outside.  Bootstrapping index.php files should instantiate one of these in order to
@@ -66,10 +63,10 @@ class Dispatcher {
 
             if ($instance) {
 
+                // Obtain the singleton http request object and pass it to handleRequest method on controller.
+                $request = Container::instance()->get(HttpRequest::class);
 
-                $requestParameters = HttpRequest::instance()->getAllValues();
-
-                $result = $instance->handleRequest($requestParameters);
+                $result = $instance->handleRequest($request);
 
                 if ($result instanceof ModelAndView) {
                     print $result->evaluate();

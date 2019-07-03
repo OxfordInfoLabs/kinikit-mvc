@@ -2,29 +2,25 @@
 
 namespace Kinikit\MVC\Framework;
 
-use Kinicart\Services\Application\BootstrapService;
+
 use Kinikit\Core\DependencyInjection\Container;
-use Kinikit\Core\Object\SerialisableObject;
 use Kinikit\Core\Util\Annotation\ClassAnnotationParser;
-use Kinikit\Core\Util\ArrayUtils;
-use Kinikit\Core\Util\Caching\CachingHeaders;
-use Kinikit\Core\Util\HTTP\HttpSession;
-use Kinikit\Core\Util\HTTP\URLHelper;
+
 use Kinikit\Core\Configuration;
 use Kinikit\Core\Exception\SerialisableException;
-use Kinikit\Core\Util\ObjectUtils;
+
 use Kinikit\Core\Util\SerialisableArrayUtils;
 use Kinikit\Core\Util\Serialisation\JSON\ObjectToJSONConverter;
 use Kinikit\Core\Util\Serialisation\XML\ObjectToXMLConverter;
 use Kinikit\MVC\Exception\AccessDeniedException;
-use Kinikit\MVC\Exception\ControllerMethodNotFoundException;
-use Kinikit\MVC\Exception\ControllerNotFoundException;
-use Kinikit\MVC\Exception\ControllerVetoedException;
+
 use Kinikit\MVC\Exception\RateLimitExceededException;
 use Kinikit\MVC\Framework\Caching\CacheEvaluator;
 use Kinikit\MVC\Framework\Controller\WebService;
 use Kinikit\MVC\Exception\TooFewControllerMethodParametersException;
-use Kinikit\Core\Util\Logging\Logger;
+use Kinikit\MVC\Framework\HTTP\HttpRequest;
+use Kinikit\MVC\Framework\HTTP\HttpSession;
+use Kinikit\MVC\Framework\HTTP\URLHelper;
 use Kinikit\MVC\Framework\RateLimiter\RateLimiterEvaluator;
 
 /**
@@ -40,13 +36,13 @@ abstract class Controller {
      * Handle request, called by the MVC dispatcher to execute the controller.
      * Should return a suitable model and view object.
      *
-     * @param $requestParameters
+     * @param HttpRequest $request
      * @return ModelAndView
      * @throws TooFewControllerMethodParametersException
      * @throws \Kinikit\Core\Exception\ClassNotSerialisableException
      * @throws \ReflectionException
      */
-    public function handleRequest($requestParameters) {
+    public function handleRequest($request) {
 
         // Grab current url
         $currentURLHelper = URLHelper::getCurrentURLInstance();
@@ -77,8 +73,10 @@ abstract class Controller {
             }
             $method = $reflectionClass->getMethod($methodName);
 
+            $requestParameters = $request->getAllParameters();
+
             $functionParams = $requestParameters;
-            $functionParams["requestParameters"] = $requestParameters;
+            $functionParams["request"] = $request;
 
 
             // Get the supplied function parameters in either possible format
@@ -166,7 +164,14 @@ abstract class Controller {
 
     }
 
-    public abstract function defaultHandler($requestParameters);
+
+    /**
+     * Default handler
+     *
+     * @param HttpRequest $request
+     * @return mixed
+     */
+    public abstract function defaultHandler($request);
 
 
     /**

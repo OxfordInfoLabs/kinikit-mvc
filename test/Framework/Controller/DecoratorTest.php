@@ -3,10 +3,11 @@
 namespace Kinikit\MVC\Framework\Controller;
 
 use Kinikit\Core\Util\HTTP\HttpSession;
-use Kinikit\Core\Util\HTTP\URLHelper;
 use Kinikit\MVC\Controllers\SimpleController;
 use Kinikit\MVC\Controllers\TestDecorator;
 use Kinikit\MVC\Exception\ControllerNotFoundException;
+use Kinikit\MVC\Framework\HTTP\HttpRequest;
+use Kinikit\MVC\Framework\HTTP\URLHelper;
 use Kinikit\MVC\Framework\ModelAndView;
 
 include_once "autoloader.php";
@@ -25,7 +26,7 @@ class DecoratorTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/TestDecorator");
 
         $decorator = new TestDecorator ();
-        $modelAndView = $decorator->handleRequest(array());
+        $modelAndView = $decorator->handleRequest(new HttpRequest());
 
         $this->assertEquals(new ModelAndView ("banana", array("test" => "Bodger", "test2" => "Badger", "request" => array(), "session" => array())), $modelAndView);
     }
@@ -37,7 +38,7 @@ class DecoratorTest extends \PHPUnit\Framework\TestCase {
         $decorator = new TestDecorator ();
 
         try {
-            $decorator->handleRequest(array());
+            $decorator->handleRequest(new HttpRequest());
             $this->fail("Should have thrown here");
         } catch (ControllerNotFoundException $e) {
             // Success
@@ -48,7 +49,7 @@ class DecoratorTest extends \PHPUnit\Framework\TestCase {
         $decorator = new TestDecorator ();
 
         try {
-            $decorator->handleRequest(array());
+            $decorator->handleRequest(new HttpRequest());
             $this->fail("Should have thrown here");
         } catch (ControllerNotFoundException $e) {
             // Success
@@ -63,7 +64,7 @@ class DecoratorTest extends \PHPUnit\Framework\TestCase {
 
         $decorator = new TestDecorator ();
 
-        $decorator->handleRequest(array());
+        $decorator->handleRequest(new HttpRequest());
 
         $this->assertTrue(SimpleController::$executed);
 

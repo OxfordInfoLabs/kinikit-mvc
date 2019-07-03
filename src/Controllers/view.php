@@ -2,8 +2,9 @@
 
 namespace Kinikit\MVC\Controllers;
 
-use Kinikit\Core\Util\HTTP\URLHelper;
+
 use Kinikit\MVC\Framework\Controller;
+use Kinikit\MVC\Framework\HTTP\URLHelper;
 use Kinikit\MVC\Framework\ModelAndView;
 
 /**

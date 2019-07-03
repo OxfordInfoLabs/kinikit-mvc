@@ -8,9 +8,10 @@
 
 namespace Kinikit\MVC\Framework\Controller;
 
-use Kinikit\Core\Util\HTTP\HttpRequest;
-use Kinikit\Core\Util\HTTP\URLHelper;
+
 use Kinikit\Core\Util\Serialisation\JSON\ObjectToJSONConverter;
+use Kinikit\MVC\Framework\HTTP\HttpRequest;
+use Kinikit\MVC\Framework\HTTP\URLHelper;
 
 include_once "autoloader.php";
 
@@ -24,6 +25,8 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
 
         $this->converter = new ObjectToJSONConverter();
         parent::setUp();
+
+
     }
 
     public function testCanCallSingleGetMethod() {
@@ -32,7 +35,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/api/TestREST/3");
 
         $service = new TestREST();
-        $result = $service->handleRequest(HttpRequest::instance(true)->getAllValues());
+        $result = $service->handleRequest(new HttpRequest());
 
         $this->assertEquals($this->converter->convert(new TestRESTObject("3", "TEST 3", "test3@test.com", "GET SINGLE")), $result);
 
@@ -45,7 +48,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/api/TestREST/TestREST");
 
         $service = new TestREST();
-        $result = $service->handleRequest(HttpRequest::instance(true)->getAllValues());
+        $result = $service->handleRequest(new HttpRequest());
 
         $this->assertEquals($this->converter->convert(new TestRESTObject("TestREST", "TEST TestREST", "testTestREST@test.com", "GET SINGLE")), $result);
 
@@ -58,7 +61,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/api/TestREST/count");
 
         $service = new TestREST();
-        $result = $service->handleRequest(HttpRequest::instance(true)->getAllValues());
+        $result = $service->handleRequest(new HttpRequest());
 
         $this->assertEquals(50, $result);
 
@@ -70,7 +73,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/api/TestREST");
 
         $service = new TestREST();
-        $result = $service->handleRequest(HttpRequest::instance(true)->getAllValues());
+        $result = $service->handleRequest(new HttpRequest());
 
         $expectedList = array();
         for ($i = 0; $i < 10; $i++) {
@@ -89,8 +92,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/api/TestREST");
 
         $service = new TestREST();
-        $requestParameters = HttpRequest::instance(true)->getAllValues();
-        $requestParameters["payload"] = array("id" => 11, "name" => "TEST 11", "email" => "test11@test.com");
+        $requestParameters = new HttpRequest(null, array(), array("id" => 11, "name" => "TEST 11", "email" => "test11@test.com"));
 
         $result = $service->handleRequest($requestParameters);
 
@@ -106,13 +108,12 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/api/TestREST/11");
 
         $service = new TestREST();
-        $requestParameters = HttpRequest::instance(true)->getAllValues();
+        $requestParameters = new HttpRequest();
         $requestParameters["payload"] = array("id" => 11, "name" => "NEWTEST 11", "email" => "newtest11@test.com");
 
         $result = $service->handleRequest($requestParameters);
 
         $this->assertEquals($this->converter->convert(new TestRESTObject(11, "NEWTEST 11", "newtest11@test.com", "PUT 11")), $result);
-
 
     }
 
@@ -123,7 +124,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/api/TestREST/11");
 
         $service = new TestREST();
-        $requestParameters = HttpRequest::instance(true)->getAllValues();
+        $requestParameters = new HttpRequest();
         $requestParameters["payload"] = array("name" => "PATCHEDTEST 11", "email" => "patchedtest11@test.com");
 
         $result = $service->handleRequest($requestParameters);
@@ -140,7 +141,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
 
         $service = new TestREST();
 
-        $result = $service->handleRequest(HttpRequest::instance(true)->getAllValues());
+        $result = $service->handleRequest(new HttpRequest());
 
         $this->assertEquals($this->converter->convert(new TestRESTObject("5", "TEST 5", "test5@test.com", "DELETED 5")), $result);
 
@@ -154,7 +155,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/api/TestREST/nested/3");
 
         $service = new TestREST();
-        $result = $service->handleRequest(HttpRequest::instance(true)->getAllValues());
+        $result = $service->handleRequest(new HttpRequest());
 
         $this->assertEquals($this->converter->convert(new TestRESTObject("3", "TEST 3", "test3@test.com", "GET NESTED SINGLE")), $result);
 
@@ -163,7 +164,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/api/TestREST/nested");
 
         $service = new TestREST();
-        $requestParameters = HttpRequest::instance(true)->getAllValues();
+        $requestParameters = new HttpRequest();
         $requestParameters["payload"] = array("id" => 11, "name" => "TEST 11", "email" => "test11@test.com");
 
         $result = $service->handleRequest($requestParameters);
@@ -175,7 +176,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/api/TestREST/nested/count");
 
         $service = new TestREST();
-        $result = $service->handleRequest(HttpRequest::instance(true)->getAllValues());
+        $result = $service->handleRequest(new HttpRequest());
 
         $this->assertEquals(100, $result);
 
@@ -189,7 +190,7 @@ class RESTServiceTest extends \PHPUnit\Framework\TestCase {
         URLHelper::setTestURL("/api/TestREST/nested/3/mark");
 
         $service = new TestREST();
-        $result = $service->handleRequest(HttpRequest::instance(true)->getAllValues());
+        $result = $service->handleRequest(new HttpRequest());
 
         $this->assertEquals($this->converter->convert(new TestRESTObject("3", "mark", "test3@test.com", "GET NESTED VARIABLE SINGLE")), $result);
 

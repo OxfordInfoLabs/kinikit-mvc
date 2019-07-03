@@ -3,12 +3,13 @@
 namespace Kinikit\MVC\Framework;
 
 use Kinikit\Core\Configuration;
-use Kinikit\Core\Util\HTTP\HttpRequest;
-use Kinikit\Core\Util\HTTP\HttpSession;
-use Kinikit\Core\Util\HTTP\URLHelper;
+;
 use Kinikit\MVC\Controllers\SimpleController;
 use Kinikit\MVC\Exception\ControllerNotFoundException;
 use Kinikit\MVC\Exception\NoControllerSuppliedException;
+use Kinikit\MVC\Framework\HTTP\HttpRequest;
+use Kinikit\MVC\Framework\HTTP\HttpSession;
+use Kinikit\MVC\Framework\HTTP\URLHelper;
 
 include_once "autoloader.php";
 
