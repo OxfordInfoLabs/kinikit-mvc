@@ -59,6 +59,7 @@ abstract class Controller {
         $isXML = is_numeric(strpos($acceptHeader, "application/xml")) && !is_numeric(strpos($acceptHeader, "text/html"));
         $isWebService = ($this instanceof WebService) || $isJSON || $isXML || $annotations->getMethodAnnotationsForMatchingTag("webservice", $methodName);
 
+
         // Initialise result
         $result = null;
 
@@ -173,8 +174,7 @@ abstract class Controller {
             // Evaluate the model and view.
             return $result;
         } else {
-
-            return $this->convertToWebServiceOutput($result);
+            return $this->convertToWebServiceOutput($result, isset($requestParameters["HEADERS_ONLY"]));
         }
 
     }
@@ -237,7 +237,7 @@ abstract class Controller {
      * @return false|null|string
      * @throws \Kinikit\Core\Exception\ClassNotSerialisableException
      */
-    protected function convertToWebServiceOutput($result) {
+    protected function convertToWebServiceOutput($result, $headersOnly = false) {
 
         $acceptHeader = isset($_SERVER["HTTP_ACCEPT"]) ? $_SERVER["HTTP_ACCEPT"] : null;
         $isXML = is_numeric(strpos($acceptHeader, "application/xml")) && !is_numeric(strpos($acceptHeader, "text/html"));
@@ -286,13 +286,19 @@ abstract class Controller {
         }
 
         // Set the content type header.
-        header("Content-Type: {$contentHeader}; charset=utf8");
+        // If no content type specified yet, set the default one.
+        if (!headers_sent() && !preg_grep("/Content-Type/", headers_list()))
+            header("Content-Type: {$contentHeader}; charset=utf8");
+
+        if (!headers_sent() && !preg_grep("/Content-Length/", headers_list()))
+            header("Content-Length: " . strlen($result));
+
 
         // Handle JSONP case separately.
         if ($JSONPCallback) {
-            return $JSONPCallback . '(' . $result . ');';
+            return $JSONPCallback . '(' . $headersOnly ? "" : $result . ');';
         } else if ($result !== null) {
-            return $result;
+            return $headersOnly ? "" : $result;
         }
     }
 }
