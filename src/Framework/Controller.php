@@ -294,6 +294,16 @@ abstract class Controller {
             header("Content-Length: " . strlen($result));
 
 
+        // Strip out duplicate set cookie headers
+        $headers = headers_list();
+        for ($i = sizeof($headers) - 1; $i >= 0; $i--) {
+            if (substr($headers[$i], 0, 10) == "Set-Cookie") {
+                header_remove("Set-Cookie");
+                header($headers[$i]);
+                break;
+            }
+        }
+
         // Handle JSONP case separately.
         if ($JSONPCallback) {
             return $JSONPCallback . '(' . $headersOnly ? "" : $result . ');';
