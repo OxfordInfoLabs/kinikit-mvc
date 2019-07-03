@@ -37,6 +37,11 @@ class RESTService extends WebService {
         // Inspect the request method.  Look for Override for Java or native request method.
         $requestMethod = isset($_SERVER["HTTP_X_HTTP_METHOD_OVERRIDE"]) ? $_SERVER["HTTP_X_HTTP_METHOD_OVERRIDE"] : $_SERVER["REQUEST_METHOD"];
 
+        if ($requestMethod == "HEAD") {
+            $requestMethod = "GET";
+            $requestParameters["HEADERS_ONLY"] = 1;
+        }
+
         // Check the URL fragments going backwards
         $urlHelper = URLHelper::getCurrentURLInstance();
 
