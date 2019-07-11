@@ -39,11 +39,17 @@ class Request {
      * @var mixed[string]
      */
     private $parameters = array();
-    
+
     /**
      * @var string
      */
     private $payload;
+
+
+    /**
+     * @var FileUpload[string]
+     */
+    private $fileUploads = array();
 
 
     const METHOD_HEAD = "HEAD";
@@ -116,10 +122,40 @@ class Request {
     }
 
     /**
+     * Get a single parameter by key
+     *
+     * @param $key
+     * @return string
+     */
+    public function getParameter($key) {
+        return isset($this->parameters[$key]) ? $this->parameters[$key] : null;
+    }
+
+
+    /**
      * @return string
      */
     public function getPayload() {
         return $this->payload;
+    }
+
+    /**
+     * Get all file uploads keyed in by
+     *
+     * @return FileUpload[string]
+     */
+    public function getFileUploads() {
+        return $this->fileUploads;
+    }
+
+    /**
+     * Get a single file upload using the parameter name (usually set in a form).
+     *
+     * @param $parameterName
+     * @return FileUpload
+     */
+    public function getFileUpload($parameterName) {
+        return isset($this->fileUploads[$parameterName]) ? $this->fileUploads[$parameterName] : null;
     }
 
 
@@ -190,6 +226,14 @@ class Request {
             }
 
             $this->parameters[urldecode($key)] = $decoded;
+        }
+
+
+        // Finally handle File uploads
+        if (isset($_FILES) && sizeof($_FILES) > 0) {
+            foreach ($_FILES as $key => $file) {
+                $this->fileUploads[$key] = new FileUpload($key, $file);
+            }
         }
 
 

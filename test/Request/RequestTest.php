@@ -133,4 +133,36 @@ class RequestTest extends \PHPUnit\Framework\TestCase {
     }
 
 
+    public function testFileUploadsGetCorrectlyAddedAsFileUploadObjectsToRequest() {
+        $_FILES = [
+            "test1" => ["name" => "mytest.pdf", "type" => "application/pdf", "size" => 32344, "tmp_name" => "/tmp/bingo.test", "error" => 0],
+            "test2" => ["name" => "mytest2.pdf", "type" => "application/pdf", "size" => 45, "tmp_name" => "/tmp/bingo.test", "error" => UPLOAD_ERR_PARTIAL]
+        ];
+
+        $request = new Request();
+        $this->assertEquals(2, sizeof($request->getFileUploads()));
+        $fileupload1 = $request->getFileUpload("test1");
+        $fileupload2 = $request->getFileUpload("test2");
+        $this->assertEquals(["test1" => $fileupload1, "test2" => $fileupload2], $request->getFileUploads());
+
+        $this->assertEquals("test1", $fileupload1->getParameterName());
+        $this->assertEquals("mytest.pdf", $fileupload1->getClientFilename());
+        $this->assertEquals("application/pdf", $fileupload1->getMimeType());
+        $this->assertEquals(32344, $fileupload1->getSize());
+        $this->assertEquals("/tmp/bingo.test", $fileupload1->getTemporaryFilePath());
+        $this->assertEquals(FileUpload::STATUS_SUCCESS, $fileupload1->getStatus());
+        $this->assertNull($fileupload1->getFailureReason());
+
+        $this->assertEquals("test2", $fileupload2->getParameterName());
+        $this->assertEquals("mytest2.pdf", $fileupload2->getClientFilename());
+        $this->assertEquals("application/pdf", $fileupload2->getMimeType());
+        $this->assertEquals(45, $fileupload2->getSize());
+        $this->assertEquals("/tmp/bingo.test", $fileupload2->getTemporaryFilePath());
+        $this->assertEquals(FileUpload::STATUS_FAILURE, $fileupload2->getStatus());
+        $this->assertEquals(FileUpload::FAILED_PARTIALLY_UPLOADED, $fileupload2->getFailureReason());
+
+
+    }
+
+
 }
