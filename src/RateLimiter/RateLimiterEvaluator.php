@@ -22,14 +22,24 @@ use Kinikit\Core\Annotation\ClassAnnotations;
  */
 class RateLimiterEvaluator {
 
+    /**
+     * @var RateLimiter
+     */
+    private $defaultRateLimiter;
+
+    /**
+     * @var ClassAnnotationParser
+     */
     private $classAnnotationParser;
 
     /**
      * RateLimiterEvaluator constructor.
      *
+     * @param RateLimiter $defaultRateLimiter
      * @param ClassAnnotationParser $classAnnotationParser
      */
-    public function __construct($classAnnotationParser) {
+    public function __construct($defaultRateLimiter, $classAnnotationParser) {
+        $this->defaultRateLimiter = $defaultRateLimiter;
         $this->classAnnotationParser = $classAnnotationParser;
     }
 
@@ -39,36 +49,44 @@ class RateLimiterEvaluator {
             $annotations = $this->classAnnotationParser->parse($controllerName);
         }
 
-        // Look for an annotation based rate limiter
-        $classRateLimiters = $annotations->getClassAnnotationForMatchingTag("ratelimiter");
 
-        if ($classRateLimiters) {
+        $rateLimit = null;
+        $rateLimitMultiplier = null;
 
-            $rateLimit = null;
-            $rateLimitMultiplier = 1;
+        if ($annotations->getClassAnnotationForMatchingTag("ratelimit")) {
+            $rateLimit = $annotations->getClassAnnotationForMatchingTag("ratelimit")->getValue();
+            $rateLimitMultiplier = null;
+        } else if ($annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")) {
+            $rateLimitMultiplier = $annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")->getValue();
+        }
 
-            if ($annotations->getClassAnnotationForMatchingTag("ratelimit")) {
-                $rateLimit = $annotations->getClassAnnotationForMatchingTag("ratelimit")->getValue();
-                $rateLimitMultiplier = null;
-            } else if ($annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")) {
-                $rateLimitMultiplier = $annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")->getValue();
+        if ($annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)) {
+            $rateLimit = $annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)[0]->getValue();
+            $rateLimitMultiplier = null;
+        } else if ($annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)) {
+            $rateLimitMultiplier = $annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)[0]->getValue();
+        }
+
+
+        // Only carry on if there is a configuration.
+        if ($rateLimit || $rateLimitMultiplier) {
+
+            // Look for an annotation based rate limiter
+            $classRateLimiters = $annotations->getClassAnnotationForMatchingTag("ratelimiter");
+
+            if ($classRateLimiters) {
+
+                $rateLimiterClass = $classRateLimiters->getValue();
+                $rateLimiter = new $rateLimiterClass();
+            } else {
+                $rateLimiter = $this->defaultRateLimiter;
             }
-
-            if ($annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)) {
-                $rateLimit = $annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)[0]->getValue();
-                $rateLimitMultiplier = null;
-            } else if ($annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)) {
-                $rateLimitMultiplier = $annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)[0]->getValue();
-            }
-
-            $rateLimiterClass = $classRateLimiters->getValue();
-            $rateLimiter = new $rateLimiterClass();
 
             return array($rateLimit, $rateLimitMultiplier, $rateLimiter->getTimeWindowInMinutes());
-
         } else {
             return null;
         }
+
 
     }
 
@@ -97,48 +115,48 @@ class RateLimiterEvaluator {
 
             // Create the rate limiter.
             $rateLimiter = new $rateLimiterClass();
+        } else {
+            $rateLimiter = $this->defaultRateLimiter;
+        }
 
-            // Grab the window size and default rate
-            $windowSizeInSeconds = $rateLimiter->getTimeWindowInMinutes() * 60;
+        // Grab the window size and default rate
+        $windowSizeInSeconds = $rateLimiter->getTimeWindowInMinutes() * 60;
 
-            // Work out the start of the window.
-            $startOfDay = date_create_from_format("d/m/Y H:i:s", date("d/m/Y 00:00:00"))->format("U");
-            $secondsSinceStart = time() - $startOfDay;
-            $windowStart = time() - ($secondsSinceStart % $windowSizeInSeconds);
+        // Work out the start of the window.
+        $startOfDay = date_create_from_format("d/m/Y H:i:s", date("d/m/Y 00:00:00"))->format("U");
+        $secondsSinceStart = time() - $startOfDay;
+        $windowStart = time() - ($secondsSinceStart % $windowSizeInSeconds);
 
-            // Derive the appropriate rate limit depending upon how specific this has been defined.
-            $defaultRateLimit = $rateLimit = $rateLimiter->getDefaultRateLimit();
+        // Derive the appropriate rate limit depending upon how specific this has been defined.
+        $defaultRateLimit = $rateLimit = $rateLimiter->getDefaultRateLimit();
 
-            if ($annotations->getClassAnnotationForMatchingTag("ratelimit")) {
-                $rateLimit = $annotations->getClassAnnotationForMatchingTag("ratelimit")->getValue();
-            } else if ($annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")) {
-                $rateLimit = $defaultRateLimit * $annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")->getValue();
-            }
+        if ($annotations->getClassAnnotationForMatchingTag("ratelimit")) {
+            $rateLimit = $annotations->getClassAnnotationForMatchingTag("ratelimit")->getValue();
+        } else if ($annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")) {
+            $rateLimit = $defaultRateLimit * $annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")->getValue();
+        }
 
-            if ($annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)) {
-                $rateLimit = $annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)[0]->getValue();
-            } else if ($annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)) {
-                $rateLimit = $defaultRateLimit * $annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)[0]->getValue();
-            }
+        if ($annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)) {
+            $rateLimit = $annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)[0]->getValue();
+        } else if ($annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)) {
+            $rateLimit = $defaultRateLimit * $annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)[0]->getValue();
+        }
 
-            // Now get the number of requests from the current IP address since
-            $sourceIp = isset($_SERVER["HTTP_X_FORWARDED_FOR"]) ? $_SERVER["HTTP_X_FORWARDED_FOR"] : (isset($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : "");
+        // Now get the number of requests from the current IP address since
+        $sourceIp = isset($_SERVER["HTTP_X_FORWARDED_FOR"]) ? $_SERVER["HTTP_X_FORWARDED_FOR"] : (isset($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : "");
 
-            // Get current rate
-            $numberOfRequests = $rateLimiter->getNumberOfRequestsInWindow($windowStart, $sourceIp, $controllerClass, $methodName);
+        // Get current rate
+        $numberOfRequests = $rateLimiter->getNumberOfRequestsInWindow($windowStart, $sourceIp, $controllerClass, $methodName);
 
-            // Set headers
-            if (!headers_sent()) {
-                header("X-RateLimit-Limit: $rateLimit");
-                header("X-RateLimit-Remaining: " . max($rateLimit - $numberOfRequests, 0));
-                header("X-RateLimit-Reset: " . ($windowStart + $windowSizeInSeconds));
-            }
+        // Set headers
+        if (!headers_sent()) {
+            header("X-RateLimit-Limit: $rateLimit");
+            header("X-RateLimit-Remaining: " . max($rateLimit - $numberOfRequests, 0));
+            header("X-RateLimit-Reset: " . ($windowStart + $windowSizeInSeconds));
+        }
 
-            if ($numberOfRequests > $rateLimit) {
-                throw new RateLimitExceededException($sourceIp, $rateLimit, $windowStart + $windowSizeInSeconds);
-            }
-
-
+        if ($numberOfRequests > $rateLimit) {
+            throw new RateLimitExceededException($sourceIp, $rateLimit, $windowStart + $windowSizeInSeconds);
         }
 
 

@@ -11,7 +11,7 @@ namespace Kinikit\MVC\RateLimiter;
 /**
  * Generic rate limiter interface for all rate limiters.
  *
- * @defaultImplementation Kinikit\MVC\RateLimiter\DefaultRateLimiter
+ * @defaultImplementation Kinikit\MVC\RateLimiter\FileStoreRateLimiter
  *
  * Interface RateLimiter
  * @package Kinikit\MVC\Framework\RateLimiter

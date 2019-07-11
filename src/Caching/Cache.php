@@ -1,6 +1,6 @@
 <?php
 
-namespace Kinikit\MVC\Framework\Caching;
+namespace Kinikit\MVC\Caching;
 
 /**
  * Interface for a cache provider

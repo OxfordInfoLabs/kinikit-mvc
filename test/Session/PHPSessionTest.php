@@ -13,7 +13,7 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
 
     private $session;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->session = new PHPSession();
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Kinikit\MVC\Framework\Caching;
+namespace Kinikit\MVC\Caching;
 
 
 use Kinikit\Core\Util\Caching\CachingHeaders;

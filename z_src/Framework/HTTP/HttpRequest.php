@@ -78,6 +78,7 @@ class HttpRequest {
             }
 
 
+
             // If only one param and not a key value pair, assume payload.
             if (sizeof($explodedParams) == 1 && !preg_match("/^[a-z0-9A-Z]+\=/", $explodedParams[0])) {
                 $this->payload = $converter->convert(rawurldecode($explodedParams[0]));

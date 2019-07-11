@@ -1,6 +1,6 @@
 <?php
 
-namespace Kinikit\MVC\Framework\Caching;
+namespace Kinikit\MVC\Caching;
 
 use Kinikit\Core\Util\Annotation\ClassAnnotations;
 
@@ -11,8 +11,24 @@ use Kinikit\Core\Util\Annotation\ClassAnnotations;
  */
 class CacheEvaluator {
 
+    /**
+     * @var Cache
+     */
+    private $defaultCache;
 
     private $controllerCaches = array();
+
+
+    /**
+     * Construct with default cache implementation.
+     *
+     * CacheEvaluator constructor.
+     *
+     * @param Cache $defaultCache
+     */
+    public function __construct($defaultCache) {
+        $this->defaultCache = $defaultCache;
+    }
 
 
     /**
@@ -76,7 +92,7 @@ class CacheEvaluator {
                 $cacheClass = $cacheProvider->getValue();
                 $cache = new $cacheClass();
             } else {
-                $cache = new HeadersOnlyCache();
+                $cache = $this->defaultCache;
             }
 
             $this->controllerCaches[$controllerName] = $cache;
