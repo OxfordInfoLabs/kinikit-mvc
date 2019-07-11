@@ -76,7 +76,7 @@ class CacheEvaluator {
                 $cacheClass = $cacheProvider->getValue();
                 $cache = new $cacheClass();
             } else {
-                $cache = new DefaultCache();
+                $cache = new HeadersOnlyCache();
             }
 
             $this->controllerCaches[$controllerName] = $cache;

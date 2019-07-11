@@ -11,7 +11,7 @@ namespace Kinikit\MVC\Framework\API;
 use Kinikit\Core\Configuration;
 use Kinikit\Core\Object\KeyValue;
 use Kinikit\Core\Object\SerialisableObject;
-use Kinikit\Core\Util\SerialisableArrayUtils;
+use Kinikit\Core\Util\ObjectArrayUtils;
 use Kinikit\Core\Util\Serialisation\JSON\JSONToObjectConverter;
 use Kinikit\MVC\Framework\API\Languages\Java\JavaLanguageConfiguration;
 use Kinikit\MVC\Framework\API\Languages\NodeJS\NodeJSLanguageConfiguration;
@@ -193,7 +193,7 @@ class APIConfiguration extends SerialisableObject {
             if (file_exists("Config/api.json")) {
                 $converter = new JSONToObjectConverter();
                 $configs = $converter->convert(file_get_contents("Config/api.json"), "\Kinikit\MVC\Framework\API\APIConfiguration[]");
-                self::$apiConfigs = SerialisableArrayUtils::indexArrayOfObjectsByMember("identifier", $configs);
+                self::$apiConfigs = ObjectArrayUtils::indexArrayOfObjectsByMember("identifier", $configs);
             }
 
             if (!self::$apiConfigs) {

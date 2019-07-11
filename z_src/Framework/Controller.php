@@ -9,7 +9,7 @@ use Kinikit\Core\Util\Annotation\ClassAnnotationParser;
 use Kinikit\Core\Configuration;
 use Kinikit\Core\Exception\SerialisableException;
 
-use Kinikit\Core\Util\SerialisableArrayUtils;
+use Kinikit\Core\Util\ObjectArrayUtils;
 use Kinikit\Core\Util\Serialisation\JSON\ObjectToJSONConverter;
 use Kinikit\Core\Util\Serialisation\XML\ObjectToXMLConverter;
 use Kinikit\MVC\Exception\AccessDeniedException;
@@ -202,7 +202,7 @@ abstract class Controller {
                         $paramClass = $paramClass[0];
 
                         if ($paramClass && isset($parameterArray[$key])) {
-                            $parameterArray[$key] = SerialisableArrayUtils::convertArrayToSerialisableObjects($parameterArray[$key], $paramClass);
+                            $parameterArray[$key] = ObjectArrayUtils::convertArrayToSerialisableObjects($parameterArray[$key], $paramClass);
                         }
                     }
                 }

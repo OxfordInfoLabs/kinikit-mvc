@@ -5,7 +5,7 @@ namespace Kinikit\MVC\Framework\API\Descriptor;
 use Kinikit\Core\Configuration;
 use Kinikit\Core\Util\Annotation\ClassAnnotationParser;
 use Kinikit\Core\Util\Annotation\ClassAnnotations;
-use Kinikit\Core\Util\SerialisableArrayUtils;
+use Kinikit\Core\Util\ObjectArrayUtils;
 use Kinikit\Core\Validation\Validator;
 use Kinikit\MVC\Framework\API\APIConfiguration;
 use Kinikit\Core\Util\Logging\Logger;
@@ -94,7 +94,7 @@ class APIInfo {
 
         $summaries = array();
         foreach ($this->apiControllers as $path => $controller) {
-            $methodNames = SerialisableArrayUtils::getMemberValueArrayForObjects("name", $controller->getMethods());
+            $methodNames = ObjectArrayUtils::getMemberValueArrayForObjects("name", $controller->getMethods());
             $summaries[] = $this->addLanguageSpecificProperties(new APIControllerSummary($path, $controller->getNamespace(), $controller->getClassName(), $controller->getTitle(), $methodNames, $controller->getClientNamespace()));
         }
 
