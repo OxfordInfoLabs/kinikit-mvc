@@ -7,7 +7,7 @@ namespace Kinikit\MVC\ContentSource;
  * Simple content source where the content is supplied as a string.
  * The content type defaults to text/html but can be overridden and the size is auto derived.
  */
-class StringContentSource implements ContentSource {
+class StringContentSource extends ContentSource {
 
     /**
      * @var string

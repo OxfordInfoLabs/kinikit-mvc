@@ -12,7 +12,7 @@ use Kinikit\Core\Exception\FileNotFoundException;
  *
  * @package Kinikit\MVC\ContentSource
  */
-class FileContentSource implements ContentSource {
+class FileContentSource extends ContentSource {
 
     private $filepath;
 
