@@ -35,6 +35,7 @@ class Headers {
     const HEADER_EXPIRES = "expires";
     const HEADER_LAST_MODIFIED = "last-modified";
     const HEADER_RETRY_AFTER = "retry-after";
+    const HEADER_LOCATION = "location";
 
     // Rate Limiting
     const HEADER_RATELIMIT_LIMIT = "x-ratelimit-limit";

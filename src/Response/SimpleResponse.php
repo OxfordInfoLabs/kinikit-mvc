@@ -5,7 +5,6 @@ namespace Kinikit\MVC\Response;
 
 
 use Kinikit\MVC\ContentSource\ContentSource;
-use Kinikit\MVC\ContentSource\StringContentSource;
 
 /**
  * Simple response which accepts a content source which can either be a ContentSource object or
