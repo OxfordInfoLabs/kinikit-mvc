@@ -64,8 +64,10 @@ class Request {
      * Construct and parse current request straight away.
      *
      * Request constructor.
+     * @param Headers $headers
      */
-    public function __construct() {
+    public function __construct($headers) {
+        $this->headers = $headers;
         $this->parseCurrentRequest();
     }
 
@@ -171,8 +173,6 @@ class Request {
         }
         $this->url = new URL($url);
 
-        // Now add headers.
-        $this->headers = new Headers();
 
         // Now add other properties
         $this->requestMethod = isset($_SERVER["REQUEST_METHOD"]) ? $_SERVER["REQUEST_METHOD"] : null;

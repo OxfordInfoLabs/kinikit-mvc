@@ -16,7 +16,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase {
         $_SERVER['REQUEST_URI'] = "/home/myshop";
         $_SERVER['QUERY_STRING'] = "hello=mark&test=11";
 
-        $request = new Request();
+        $request = new Request(new Headers());
 
         $this->assertEquals(new URL("https://www.myspace.com/home/myshop?hello=mark&test=11"), $request->getUrl());
 
@@ -27,7 +27,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase {
         $_SERVER['REQUEST_URI'] = "/";
         unset($_SERVER['QUERY_STRING']);
 
-        $request = new Request();
+        $request = new Request(new Headers());
 
         $this->assertEquals(new URL("http://www.myspace.com:8080/"), $request->getUrl());
 
@@ -49,7 +49,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase {
         $_SERVER["HTTP_CONNECTION"] = "Keep-Alive";
         $_SERVER["HTTP_USER_AGENT"] = "Mozilla/4.5";
 
-        $request = new Request();
+        $request = new Request(new Headers());
 
         $this->assertEquals("PUT", $request->getRequestMethod());
         $this->assertEquals("33.55.77.65", $request->getRemoteIPAddress());
@@ -69,7 +69,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase {
         $_SERVER["HTTP_X_FORWARDED_FOR"] = "22.11.33.44";
         unset($_SERVER["REMOTE_ADDR"]);
 
-        $request = new Request();
+        $request = new Request(new Headers());
         $this->assertEquals("22.11.33.44", $request->getRemoteIPAddress());
     }
 
@@ -80,14 +80,14 @@ class RequestTest extends \PHPUnit\Framework\TestCase {
 
         $_GET = array("mark" => "Hello monkey", "jane" => "Big boy");
 
-        $request = new Request();
+        $request = new Request(new Headers());
         $this->assertEquals(array("mark" => "Hello monkey", "jane" => "Big boy"), $request->getParameters());
         $this->assertNull($request->getPayload());
 
 
         $_GET = array("mark" => "Hello%20monkey", "jane" => "Big%20boy");
 
-        $request = new Request();
+        $request = new Request(new Headers());
         $this->assertEquals(array("mark" => "Hello monkey", "jane" => "Big boy"), $request->getParameters());
         $this->assertNull($request->getPayload());
 
@@ -105,7 +105,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase {
         stream_wrapper_register("php", "Kinikit\MVC\Request\MockPHPInputStream");
         file_put_contents("php://input", "PAYLOAD");
 
-        $request = new Request();
+        $request = new Request(new Headers());
 
         // Check payload and data.
         $this->assertEquals("PAYLOAD", $request->getPayload());
@@ -123,7 +123,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase {
         stream_wrapper_register("php", "Kinikit\MVC\Request\MockPHPInputStream");
         file_put_contents("php://input", "james=XXX%203&paul=112");
 
-        $request = new Request();
+        $request = new Request(new Headers());
 
         $this->assertNull($request->getPayload());
 
@@ -139,7 +139,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase {
             "test2" => ["name" => "mytest2.pdf", "type" => "application/pdf", "size" => 45, "tmp_name" => "/tmp/bingo.test", "error" => UPLOAD_ERR_PARTIAL]
         ];
 
-        $request = new Request();
+        $request = new Request(new Headers());
         $this->assertEquals(2, sizeof($request->getFileUploads()));
         $fileupload1 = $request->getFileUpload("test1");
         $fileupload2 = $request->getFileUpload("test2");
