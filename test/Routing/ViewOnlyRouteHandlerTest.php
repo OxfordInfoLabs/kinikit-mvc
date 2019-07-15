@@ -6,6 +6,7 @@ namespace Kinikit\MVC\Routing;
 
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Template\MustacheTemplateParser;
+use Kinikit\MVC\Response\View;
 
 class ViewOnlyRouteHandlerTest extends \PHPUnit\Framework\TestCase {
 
@@ -15,13 +16,7 @@ class ViewOnlyRouteHandlerTest extends \PHPUnit\Framework\TestCase {
     public function testExecuteAndStreamResponseSimplyProcessesViewForStaticView() {
 
         $routeHandler = new ViewOnlyRouteHandler("TestStaticView");
-
-        ob_start();
-        $routeHandler->executeAndSendResponse();
-        $this->assertEquals(file_get_contents("./Views/TestStaticView.php"), ob_get_contents());
-        ob_end_clean();
-
-
+        $this->assertEquals(new View("TestStaticView"), $routeHandler->handleRoute());
     }
 
     /**
@@ -30,14 +25,7 @@ class ViewOnlyRouteHandlerTest extends \PHPUnit\Framework\TestCase {
     public function testExecuteAndStreamResponseProcessesViewWithParamsIfPassed() {
 
         $routeHandler = new ViewOnlyRouteHandler("TestModelView", ["name" => "People", "hobby" => "Maths"]);
-
-        $mustacheParser = Container::instance()->get(MustacheTemplateParser::class);
-
-        ob_start();
-        $routeHandler->executeAndSendResponse();
-        $model = ["name" => "People", "hobby" => "Maths"];
-        $this->assertEquals($mustacheParser->parseTemplateText(file_get_contents("./Views/TestModelView.php"), $model), ob_get_contents());
-        ob_end_clean();
+        $this->assertEquals(new View("TestModelView", ["name" => "People", "hobby" => "Maths"]), $routeHandler->handleRoute());
 
     }
 

@@ -4,6 +4,7 @@
 namespace Kinikit\MVC\Routing;
 
 
+use Kinikit\MVC\Response\Response;
 use Kinikit\MVC\Response\View;
 use Kinikit\MVC\Response\ViewNotFoundException;
 
@@ -29,9 +30,9 @@ class ViewOnlyRouteHandler extends RouteHandler {
     /**
      * For view only routes we simply echo the view with no further processing.
      *
-     * @return mixed
+     * @return Response
      */
-    public function executeAndSendResponse() {
-        $this->view->send();
+    public function handleRoute() {
+        return $this->view;
     }
 }

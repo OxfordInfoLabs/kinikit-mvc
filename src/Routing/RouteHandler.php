@@ -5,6 +5,7 @@ namespace Kinikit\MVC\Routing;
 
 
 use Kinikit\MVC\RateLimiter\RateLimitConfig;
+use Kinikit\MVC\Response\Response;
 
 abstract class RouteHandler {
 
@@ -54,14 +55,11 @@ abstract class RouteHandler {
 
 
     /**
-     * Execute any route logic and stream the response straight to
-     * stdout.  Typically route handlers should defer any heavy lifting
-     * to this method as the framework will optimise for rate limiting
-     * prior to calling this method.
+     * Handle the route including any exception handling and return a response object.
      *
-     * @return mixed
+     * @return Response
      */
-    public abstract function executeAndSendResponse();
+    public abstract function handleRoute();
 
 
 }

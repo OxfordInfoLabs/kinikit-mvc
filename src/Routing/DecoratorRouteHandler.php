@@ -6,6 +6,7 @@ namespace Kinikit\MVC\Routing;
 
 use Kinikit\Core\Reflection\Method;
 use Kinikit\MVC\Request\Request;
+use Kinikit\MVC\Response\Response;
 
 class DecoratorRouteHandler extends RouteHandler {
 
@@ -40,14 +41,11 @@ class DecoratorRouteHandler extends RouteHandler {
 
 
     /**
-     * Execute any route logic and stream the response straight to
-     * stdout.  Typically route handlers should defer any heavy lifting
-     * to this method as the framework will optimise for rate limiting
-     * prior to calling this method.
+     * Handle this route and return a response
      *
-     * @return mixed
+     * @return Response
      */
-    public function executeAndSendResponse() {
+    public function handleRoute() {
         // TODO: Implement executeAndSendResponse() method.
     }
 

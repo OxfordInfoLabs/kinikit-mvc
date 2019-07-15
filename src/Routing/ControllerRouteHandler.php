@@ -4,8 +4,11 @@
 namespace Kinikit\MVC\Routing;
 
 
+use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\MVC\Request\Request;
+use Kinikit\MVC\Response\JSONResponse;
+use Kinikit\MVC\Response\Response;
 
 class ControllerRouteHandler extends RouteHandler {
 
@@ -33,14 +36,20 @@ class ControllerRouteHandler extends RouteHandler {
 
 
     /**
-     * Execute any route logic and stream the response straight to
-     * stdout.  Typically route handlers should defer any heavy lifting
-     * to this method as the framework will optimise for rate limiting
-     * prior to calling this method.
+     * Handle the route and return a response
      *
-     * @return mixed
+     * @return Response
      */
-    public function executeAndSendResponse() {
-        // TODO: Implement executeAndSendResponse() method.
+    public function handleRoute() {
+
+        // Get an instance of the class represented by this method.
+        $instance = Container::instance()->get($this->targetMethod->getDeclaringClassInspector()->getClassName());
+
+        // Execute the method
+        $result = $this->targetMethod->call($instance, []);
+
+        return new JSONResponse($result);
+
+
     }
 }
