@@ -70,6 +70,14 @@ class URL {
 
 
     /**
+     * Get the request path without leading /
+     */
+    public function getPath() {
+        return join("/", $this->pathSegments);
+    }
+
+
+    /**
      * Get the total number of path segments
      *
      * @return int
