@@ -224,6 +224,26 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
     }
 
 
+    public function testMissingDecoratorHandlerExceptionThrownIfNoHandleRequestMethodInDecorator() {
+
+
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_URI"] = "/baddecorator/sub/nestedsimple";
+
+        $request = new Request(new Headers());
+        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
+
+        try {
+            $resolved = $resolver->resolve();
+            $this->fail("Should have thrown here");
+        } catch (MissingDecoratorHandlerException $e) {
+            $this->assertTrue(true);
+        }
+
+
+    }
+
+
     public function testCanResolveViewOnlyRequestsToViewRouteHandler() {
 
 

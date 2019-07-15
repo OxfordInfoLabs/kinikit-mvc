@@ -84,10 +84,14 @@ class RouteResolver {
                     list($decoratorClassInspector, $remainingSegments) = $this->resolveController("Decorators", $decoratorSegs);
 
                     if ($decoratorClassInspector) {
-                        $decoratorMethod = $decoratorClassInspector->getPublicMethod("handleRequest");
-                        if ($decoratorMethod) {
-                            return new DecoratorRouteHandler($decoratorMethod, $method, $this->request);
+                        try {
+                            $decoratorMethod = $decoratorClassInspector->getPublicMethod("handleRequest");
+                        } catch (\ReflectionException $e) {
+                            throw new MissingDecoratorHandlerException(join("/", $url->getPathSegments()));
                         }
+
+                        return new DecoratorRouteHandler($decoratorMethod, $method, $this->request);
+
                     }
                 }
 
@@ -99,16 +103,21 @@ class RouteResolver {
         // Check for any explicit decorators now.
         list($decoratorClassInspector, $remainingSegments) = $this->resolveController("Decorators", $url->getPathSegments());
         if ($decoratorClassInspector) {
-            $decoratorMethod = $decoratorClassInspector->getPublicMethod("handleRequest");
-            if ($decoratorMethod) {
-                list($controllerClassInspector, $remainingSegments) = $this->resolveController("Controllers", $remainingSegments);
-                if ($controllerClassInspector) {
-                    $controllerMethod = $this->resolveMethod($controllerClassInspector, $remainingSegments);
-                    if ($controllerMethod) {
-                        return new DecoratorRouteHandler($decoratorMethod, $controllerMethod, $this->request);
-                    }
+
+            try {
+                $decoratorMethod = $decoratorClassInspector->getPublicMethod("handleRequest");
+            } catch (\ReflectionException $e) {
+                throw new MissingDecoratorHandlerException(join("/", $url->getPathSegments()));
+            }
+
+            list($controllerClassInspector, $remainingSegments) = $this->resolveController("Controllers", $remainingSegments);
+            if ($controllerClassInspector) {
+                $controllerMethod = $this->resolveMethod($controllerClassInspector, $remainingSegments);
+                if ($controllerMethod) {
+                    return new DecoratorRouteHandler($decoratorMethod, $controllerMethod, $this->request);
                 }
             }
+
         }
 
 
