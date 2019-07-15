@@ -3,10 +3,19 @@
 namespace Kinikit\MVC\ContentSource;
 
 
+use Kinikit\Core\Configuration\Configuration;
+use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\Exception\FileNotFoundException;
 
 class FileContentSourceTest extends \PHPUnit\Framework\TestCase {
 
+
+    public function setUp(): void {
+
+        // Add mixture of configured paths
+        Configuration::instance()->addParameter("search.paths", "../src;../vendor/symfony");
+
+    }
 
     public function testCanCreateFileContentSource() {
 
@@ -32,6 +41,20 @@ class FileContentSourceTest extends \PHPUnit\Framework\TestCase {
             $this->assertTrue(true);
         }
 
+    }
+
+    public function testFileResolverUsedToResolveFilesNotSuppliedWithAbsolutePaths() {
+
+
+        $source = new FileContentSource("polyfill-ctype/bootstrap.php");
+        $this->assertEquals("text/x-php", $source->getContentType());
+        $this->assertTrue($source->getContentLength() > 0);
+
+        // Check content.
+        ob_start();
+        $source->streamContent();
+        $this->assertEquals(file_get_contents("../vendor/symfony/polyfill-ctype/bootstrap.php"), ob_get_contents());
+        ob_end_clean();
     }
 
 }

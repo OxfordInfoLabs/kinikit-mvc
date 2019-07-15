@@ -4,6 +4,8 @@
 namespace Kinikit\MVC\ContentSource;
 
 
+use Kinikit\Core\Configuration\FileResolver;
+use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\FileNotFoundException;
 
 /**
@@ -22,11 +24,27 @@ class FileContentSource extends ContentSource {
      * @param $filepath
      */
     public function __construct($filepath) {
-        if (!file_exists($filepath))
-            throw new FileNotFoundException($filepath);
+        if (!file_exists($filepath)) {
+            $fileResolver = Container::instance()->get(FileResolver::class);
+            $resolvedFilePath = $fileResolver->resolveFile($filepath);
+            if (!$resolvedFilePath)
+                throw new FileNotFoundException($filepath);
+            else
+                $filepath = $resolvedFilePath;
+        }
+
         $this->filepath = $filepath;
     }
 
+
+    /**
+     * Get the resolved file path for this source.
+     *
+     * @return mixed
+     */
+    public function getFilePath() {
+        return $this->filepath;
+    }
 
     /**
      * Return the content type.

@@ -29,6 +29,15 @@ class SimpleResponse extends Response {
     }
 
     /**
+     * Get the content source used for this response
+     *
+     * @return ContentSource
+     */
+    public function getContentSource() {
+        return $this->contentSource;
+    }
+
+    /**
      * Return the content type.  This must be implemented by all Responses.
      *
      * @return string
