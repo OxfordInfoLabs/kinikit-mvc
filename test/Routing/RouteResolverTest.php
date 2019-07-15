@@ -3,12 +3,17 @@
 namespace Kinikit\MVC\Routing;
 
 
+use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\MVC\Controllers\REST;
+use Kinikit\MVC\Decorators\BespokeDecorator;
+use Kinikit\MVC\Decorators\DefaultDecorator;
 use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\Request;
+
+include_once "autoloader.php";
 
 class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
@@ -150,7 +155,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
     }
 
 
-    public function testImplicitHandleRequestMethodCalledIfExistsAndNoOtherMatch() {
+    public function testImplicitHandleRequestMethodResolvedIfExistsAndNoOtherMatch() {
 
 
         $_SERVER["REQUEST_METHOD"] = "GET";
@@ -176,6 +181,45 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
         $targetMethod = $this->classInspectorProvider->getClassInspector(\NestedSimple::class)->getPublicMethod("handleRequest");
 
         $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolved);
+
+    }
+
+
+    public function testExplicitDecoratorRequestsAreResolvedToDecoratorRouteHandlerWithDecoratorAndControllerMethodInfo() {
+
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_URI"] = "/bespoke/sub/nestedsimple";
+
+        $request = new Request(new Headers());
+        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
+        $resolved = $resolver->resolve();
+
+
+        $targetDecoratorMethod = $this->classInspectorProvider->getClassInspector(BespokeDecorator::class)->getPublicMethod("handleRequest");
+        $targetControllerMethod = $this->classInspectorProvider->getClassInspector(\NestedSimple::class)->getPublicMethod("handleRequest");
+
+        $this->assertEquals(new DecoratorRouteHandler($targetDecoratorMethod, $targetControllerMethod, $request), $resolved);
+
+
+    }
+
+
+    public function testImplicitDecoratoRequestsAreResolvedToDecoratorHandleIfDefaultDecoratorConfigParameterSet() {
+
+        Configuration::instance()->addParameter("default.decorator", "DefaultDecorator");
+
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_URI"] = "/sub/nestedsimple";
+
+        $request = new Request(new Headers());
+        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
+        $resolved = $resolver->resolve();
+
+
+        $targetDecoratorMethod = $this->classInspectorProvider->getClassInspector(DefaultDecorator::class)->getPublicMethod("handleRequest");
+        $targetControllerMethod = $this->classInspectorProvider->getClassInspector(\NestedSimple::class)->getPublicMethod("handleRequest");
+
+        $this->assertEquals(new DecoratorRouteHandler($targetDecoratorMethod, $targetControllerMethod, $request), $resolved);
 
     }
 

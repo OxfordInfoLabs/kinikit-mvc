@@ -2,12 +2,15 @@
 
 namespace Kinikit\MVC\Routing;
 
+use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Reflection\ClassInspector;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\MVC\Request\Request;
+use Kinikit\MVC\Response\JSONResponse;
+use Kinikit\MVC\Response\Response;
 use Kinikit\MVC\Response\ViewNotFoundException;
 
 /**
@@ -63,15 +66,51 @@ class RouteResolver {
             $url = $this->request->getUrl();
 
 
-        // Check for any controllers matching partials of request path
+        // Check for any controllers matching direct partials of request path first.
+        // This is prioritised because it is the most usual scenario for REST APIs etc.
         list($controllerClassInspector, $remainingSegments) = $this->resolveController("Controllers", $url->getPathSegments());
         if ($controllerClassInspector) {
             $method = $this->resolveMethod($controllerClassInspector, $remainingSegments);
             if ($method) {
+
+                // If the controller method returns a response which is not a JSON response, assume this
+                // will be a web response and implement a default decorator if required.
+                if ($method->getReturnType() &&
+                    $method->getReturnType()->isInstanceOf(Response::class) &&
+                    !$method->getReturnType()->isInstanceOf(JSONResponse::class)
+                    && $defaultDecorator = Configuration::readParameter("default.decorator")) {
+
+                    $decoratorSegs = explode("/", $defaultDecorator);
+                    list($decoratorClassInspector, $remainingSegments) = $this->resolveController("Decorators", $decoratorSegs);
+
+                    if ($decoratorClassInspector) {
+                        $decoratorMethod = $decoratorClassInspector->getPublicMethod("handleRequest");
+                        if ($decoratorMethod) {
+                            return new DecoratorRouteHandler($decoratorMethod, $method, $this->request);
+                        }
+                    }
+                }
+
                 return new ControllerRouteHandler($method, $this->request);
             }
-
         }
+
+
+        // Check for any explicit decorators now.
+        list($decoratorClassInspector, $remainingSegments) = $this->resolveController("Decorators", $url->getPathSegments());
+        if ($decoratorClassInspector) {
+            $decoratorMethod = $decoratorClassInspector->getPublicMethod("handleRequest");
+            if ($decoratorMethod) {
+                list($controllerClassInspector, $remainingSegments) = $this->resolveController("Controllers", $remainingSegments);
+                if ($controllerClassInspector) {
+                    $controllerMethod = $this->resolveMethod($controllerClassInspector, $remainingSegments);
+                    if ($controllerMethod) {
+                        return new DecoratorRouteHandler($decoratorMethod, $controllerMethod, $this->request);
+                    }
+                }
+            }
+        }
+
 
         // Finally, check for view only routes.
         $requestPath = $url->getPath();
@@ -87,7 +126,7 @@ class RouteResolver {
     /**
      * Resolve a controller within an initial directory using path segments
      *
-     * @return [mixed]
+     * @return [ClassInspector|mixed]
      */
     private function resolveController($initialDirectory, $pathSegments) {
 
