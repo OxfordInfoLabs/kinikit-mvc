@@ -25,7 +25,7 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
     }
 
 
-    public function testCanExecuteAndSendResponseForSimpleGetControllerRequestWithNoParams() {
+    public function testCanExecuteAndSendResponseForSimpleRESTGetMethodWithNoParams() {
 
         $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("list");
 

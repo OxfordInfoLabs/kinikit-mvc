@@ -26,7 +26,7 @@ class FileContentSource extends ContentSource {
     public function __construct($filepath) {
         if (!file_exists($filepath)) {
             $fileResolver = Container::instance()->get(FileResolver::class);
-            $resolvedFilePath = $fileResolver->resolveFile($filepath);
+            $resolvedFilePath = $fileResolver->resolveFile($filepath, true);
             if (!$resolvedFilePath)
                 throw new FileNotFoundException($filepath);
             else
