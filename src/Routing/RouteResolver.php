@@ -142,7 +142,7 @@ class RouteResolver {
         $currentPath = $initialDirectory;
         foreach ($pathSegments as $index => $segment) {
             $currentPath .= "/$segment";
-            if ($resolved = $this->fileResolver->resolveFile($currentPath . ".php")) {
+            if ($resolved = $this->fileResolver->resolveFile($currentPath . ".php", true)) {
                 $controllerSource = file_get_contents($resolved);
                 preg_match("/namespace (.*?);/", $controllerSource, $namespaceMatches);
                 preg_match("/class (.*?) {/", $controllerSource, $classMatches);
