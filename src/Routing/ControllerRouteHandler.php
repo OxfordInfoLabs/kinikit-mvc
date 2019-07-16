@@ -10,6 +10,8 @@ use Kinikit\Core\Exception\StatusException;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\Core\Serialisation\JSON\JSONToObjectConverter;
 use Kinikit\Core\Util\Primitive;
+use Kinikit\MVC\Caching\CacheConfig;
+use Kinikit\MVC\RateLimiter\RateLimitConfig;
 use Kinikit\MVC\Request\FileUpload;
 use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\Request;
@@ -48,6 +50,10 @@ class ControllerRouteHandler extends RouteHandler {
         $this->targetMethod = $targetMethod;
         $this->request = $request;
         $this->methodRequestPath = $methodRequestPath;
+
+        // Populate rate limit and caching data.
+        list($rateLimiterConfig, $caching) = $this->getRateLimiterAndCaching();
+        parent::__construct($rateLimiterConfig, $caching);
     }
 
 
@@ -193,6 +199,48 @@ class ControllerRouteHandler extends RouteHandler {
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($view, $model);
 
+
+    }
+
+
+    // Populate rate limit and caching info from annotations if they are set.
+    private function getRateLimiterAndCaching() {
+
+        // Derive rate limit and caching rules by checking method and falling back to class
+        $methodAnnotations = $this->targetMethod->getMethodAnnotations();
+
+        $rateLimiter = isset($methodAnnotations["rateLimiter"][0]) ? $methodAnnotations["rateLimiter"][0]->getValue() : null;
+        $rateLimit = isset($methodAnnotations["rateLimit"][0]) ? $methodAnnotations["rateLimit"][0]->getValue() : null;
+        $rateLimitMultiplier = isset($methodAnnotations["rateLimitMultiplier"][0]) ? $methodAnnotations["rateLimitMultiplier"][0]->getValue() : null;
+
+        $cache = isset($methodAnnotations["cache"][0]) ? $methodAnnotations["cache"][0]->getValue() : null;
+        $cacheTime = isset($methodAnnotations["cacheTime"][0]) ? $methodAnnotations["cacheTime"][0]->getValue() : null;
+
+
+        $controllerAnnotations = $this->targetMethod->getDeclaringClassInspector()->getClassAnnotations();
+
+        if (!$rateLimiter)
+            $rateLimiter = isset($controllerAnnotations["rateLimiter"][0]) ? $controllerAnnotations["rateLimiter"][0]->getValue() : null;
+
+        // Only check rate limits if none already set.
+        if (!$rateLimitMultiplier && !$rateLimit) {
+            if (isset($controllerAnnotations["rateLimit"][0])) {
+                $rateLimit = $controllerAnnotations["rateLimit"][0]->getValue();
+            } else if (isset($controllerAnnotations["rateLimitMultiplier"][0])) {
+                $rateLimitMultiplier = $controllerAnnotations["rateLimitMultiplier"][0]->getValue();
+            }
+        }
+
+        if (!$cache)
+            $cache = isset($controllerAnnotations["cache"][0]) ? $controllerAnnotations["cache"][0]->getValue() : null;
+
+
+        if (!$cacheTime)
+            $cacheTime = isset($controllerAnnotations["cacheTime"][0]) ? $controllerAnnotations["cacheTime"][0]->getValue() : null;
+
+
+        return array($rateLimiter || $rateLimit || $rateLimitMultiplier ? new RateLimitConfig($rateLimiter, $rateLimit, $rateLimitMultiplier) : null,
+            $cacheTime ? new CacheConfig($cache, $cacheTime) : null);
 
     }
 

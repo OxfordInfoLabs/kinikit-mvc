@@ -2,7 +2,9 @@
 
 namespace Kinikit\MVC\Caching;
 
+use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Util\Annotation\ClassAnnotations;
+use Kinikit\MVC\Request\Request;
 
 /**
  * Read / Write data to the cache if a cache value is set for a specific method.
@@ -15,9 +17,6 @@ class CacheEvaluator {
      * @var Cache
      */
     private $defaultCache;
-
-    private $controllerCaches = array();
-
 
     /**
      * Construct with default cache implementation.
@@ -32,74 +31,43 @@ class CacheEvaluator {
 
 
     /**
-     * Get cached result for a controller using class annotations.
+     * Get a cached result for current request using passed config.
      *
-     * @param $controllerObject
-     * @param $methodName
-     * @param $params
-     * @param $classAnnotations ClassAnnotations
+     * @param CacheConfig $config
+     * @param string $url
      */
-    public function getCachedResult($controllerObject, $methodName, $params, $classAnnotations) {
+    public function getCachedResult($config, $url) {
+        return $this->getCache($config)->getCachedResult($url, $this->convertCacheTime($config->getCacheTime()));
+    }
 
-        $cacheTime = $classAnnotations->getMethodAnnotationsForMatchingTag("cacheTime", $methodName);
-        if ($cacheTime) {
-            $cacheTime = $cacheTime[0]->getValue();
-            return $this->getCache($controllerObject, $classAnnotations)->getCachedResult($controllerObject, $methodName, $params, $this->convertCacheTime($cacheTime));
-        }
+
+    /**
+     * Cache result using caching config
+     *
+     * @param CacheConfig $config
+     * @param string $url
+     * @param mixed $result
+     */
+    public function cacheResult($config, $url, $result) {
+
+        $this->getCache($config)->cacheResult($url, $this->convertCacheTime($config->getCacheTime()), $result);
 
     }
 
 
     /**
-     * Cache result if required.
+     * Get the cache from the config
      *
-     * @param $controllerObject
-     * @param $methodName
-     * @param $params
-     * @param $classAnnotations ClassAnnotations
-     */
-    public function cacheResult($controllerObject, $methodName, $params, $classAnnotations) {
-
-        $cacheTime = $classAnnotations->getMethodAnnotationsForMatchingTag("cacheTime", $methodName);
-        if ($cacheTime) {
-            $cacheTime = $cacheTime[0]->getValue();
-            return $this->getCache($controllerObject, $classAnnotations)->cacheResult($controllerObject, $methodName, $params, $this->convertCacheTime($cacheTime));
-        }
-
-    }
-
-
-    /**
-     * @param $controllerObject
-     * @param $classAnnotations
+     * @param CacheConfig $config
+     *
      * @return Cache
      */
-    private function getCache($controllerObject, $classAnnotations) {
-
-        $controllerName = get_class($controllerObject);
-
-        if (!isset($this->controllerCaches[$controllerName])) {
-
-            if (!$classAnnotations) {
-                $classAnnotations = ClassAnnotationParser::instance()->parse($controllerName);
-            }
-
-            // Look for an annotation based rate limiter
-            $cacheProvider = $classAnnotations->getClassAnnotationForMatchingTag("cache");
-
-            // Either use an explicit class configured cache or the default.
-            if ($cacheProvider) {
-                $cacheClass = $cacheProvider->getValue();
-                $cache = new $cacheClass();
-            } else {
-                $cache = $this->defaultCache;
-            }
-
-            $this->controllerCaches[$controllerName] = $cache;
+    private function getCache($config) {
+        if ($config->getCache()) {
+            return Container::instance()->get($config->getCache());
+        } else {
+            return $this->defaultCache;
         }
-
-        return $this->controllerCaches[$controllerName];
-
     }
 
 

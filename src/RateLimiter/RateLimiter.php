@@ -35,11 +35,11 @@ interface RateLimiter {
 
 
     /**
-     * Get the number of requests within the current window for a source IP Address, controller and method.
+     * Get the number of requests within the current window for a source IP Address.
      *
      * @return integer
      */
-    public function getNumberOfRequestsInWindow($windowStartTime, $sourceIPAddress, $controller, $method);
+    public function getNumberOfRequestsInWindow($windowStartTime, $sourceIPAddress);
 
 
 }

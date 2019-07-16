@@ -4,6 +4,7 @@
 namespace Kinikit\MVC\Routing;
 
 
+use Kinikit\MVC\Caching\CacheConfig;
 use Kinikit\MVC\RateLimiter\RateLimitConfig;
 use Kinikit\MVC\Response\Response;
 
@@ -19,9 +20,9 @@ abstract class RouteHandler {
     /**
      * Cache time as a string e.g. 3m, 1y etc if this route handler has configured caching.
      *
-     * @var string
+     * @var CacheConfig
      */
-    protected $cacheTime = null;
+    protected $cacheConfig = null;
 
 
     /**
@@ -31,11 +32,11 @@ abstract class RouteHandler {
      *
      * RouteHandler constructor.
      * @param RateLimitConfig $rateLimiterConfig
-     * @param string $cacheTime
+     * @param CacheConfig $cacheConfig
      */
-    public function __construct($rateLimiterConfig, $cacheTime) {
+    public function __construct($rateLimiterConfig, $cacheConfig) {
         $this->rateLimiterConfig = $rateLimiterConfig;
-        $this->cacheTime = $cacheTime;
+        $this->cacheConfig = $cacheConfig;
     }
 
 
@@ -49,8 +50,8 @@ abstract class RouteHandler {
     /**
      * @return string
      */
-    public function getCacheTime() {
-        return $this->cacheTime;
+    public function getCacheConfig() {
+        return $this->cacheConfig;
     }
 
 

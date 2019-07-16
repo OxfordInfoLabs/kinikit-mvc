@@ -5,36 +5,34 @@ namespace Kinikit\MVC\Caching;
 /**
  * Interface for a cache provider
  *
- * @defaultImplementation Kinikit\MVC\Framework\Caching\HeadersOnlyCache
+ * @defaultImplementation Kinikit\MVC\Caching\HeadersOnlyCache
  *
  * Interface CacheProvider
  */
 interface Cache {
 
     /**
-     * Get the cached result of a method.
+     * Get the cached result of a request URL.
      *
      * Return a value if a cached value is to be returned or null if we need to revalidate.
      *
-     * @param $controllerInstance
-     * @param $methodName
-     * @param $params
-     * @param $classAnnotations
+     * @param string $url
+     * @param int $maxAgeInMinutes
+     *
      * @return mixed
      */
-    public function getCachedResult($controllerInstance, $methodName, $params, $maxAgeInMinutes);
+    public function getCachedResult($url, $maxAgeInMinutes);
 
 
     /**
-     * Cache the result of a method for future performance.
+     * Cache the result of a request URL for future use.
      *
-     * @param $controllerInstance
-     * @param $methodName
-     * @param $params
-     * @param $classAnnotations
-     * @return mixed
+     * @param string $url
+     * @param int $maxAgeInMinutes
+     * @param mixed $result
+     *
      */
-    public function cacheResult($controllerInstance, $methodName, $params, $maxAgeInMinutes);
+    public function cacheResult($url, $maxAgeInMinutes, $result);
 
 
 }

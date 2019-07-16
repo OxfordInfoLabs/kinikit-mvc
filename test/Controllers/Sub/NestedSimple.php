@@ -1,6 +1,11 @@
 <?php
 
-
+/**
+ * Class NestedSimple
+ *
+ * @cacheTime 1d
+ *
+ */
 class NestedSimple {
 
     /**
@@ -15,6 +20,8 @@ class NestedSimple {
 
     /**
      * Non REST update method
+     *
+     *
      *
      * @param $data
      */

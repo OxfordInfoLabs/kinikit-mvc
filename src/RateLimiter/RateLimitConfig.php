@@ -6,11 +6,21 @@ namespace Kinikit\MVC\RateLimiter;
 
 class RateLimitConfig {
 
+    /**
+     * @var string
+     */
+    private $rateLimiter;
+
+    /**
+     * @var integer
+     */
     private $rateLimit;
 
+    /**
+     * @var integer
+     */
     private $rateLimitMultiplier;
 
-    private $timeWindowInMinutes;
 
     /**
      * RateLimitConfig constructor.
@@ -19,11 +29,26 @@ class RateLimitConfig {
      * @param $rateLimitMultiplier
      * @param $timeWindowInMinutes
      */
-    public function __construct($rateLimit, $rateLimitMultiplier, $timeWindowInMinutes) {
+    public function __construct($rateLimiter = null, $rateLimit = null, $rateLimitMultiplier = null) {
+        $this->rateLimiter = $rateLimiter;
         $this->rateLimit = $rateLimit;
         $this->rateLimitMultiplier = $rateLimitMultiplier;
-        $this->timeWindowInMinutes = $timeWindowInMinutes;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getRateLimiter() {
+        return $this->rateLimiter;
+    }
+
+    /**
+     * @param mixed $rateLimiter
+     */
+    public function setRateLimiter($rateLimiter): void {
+        $this->rateLimiter = $rateLimiter;
+    }
+
 
     /**
      * @return mixed
@@ -51,20 +76,6 @@ class RateLimitConfig {
      */
     public function setRateLimitMultiplier($rateLimitMultiplier): void {
         $this->rateLimitMultiplier = $rateLimitMultiplier;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTimeWindowInMinutes() {
-        return $this->timeWindowInMinutes;
-    }
-
-    /**
-     * @param mixed $timeWindowInMinutes
-     */
-    public function setTimeWindowInMinutes($timeWindowInMinutes): void {
-        $this->timeWindowInMinutes = $timeWindowInMinutes;
     }
 
 

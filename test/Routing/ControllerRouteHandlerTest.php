@@ -9,6 +9,7 @@ use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\MVC\Controllers\REST;
 use Kinikit\MVC\Objects\TestRESTObject;
+use Kinikit\MVC\RateLimiter\RateLimitConfig;
 use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\MockPHPInputStream;
 use Kinikit\MVC\Request\Request;
@@ -174,6 +175,90 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
         $handler = new ControllerRouteHandler($method, $request, "");
 
         $this->assertEquals([$request, $request->getUrl(), $request->getHeaders(), $request->getFileUploads()], $handler->handleRoute()->getObject());
+
+    }
+
+
+    public function testRateLimitingAndCachingRulesArePopulatedFromControllerAnnotationsWhenSet() {
+
+
+        // Check a method with no caching and class defined rate limit.
+        $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("list");
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+        $rateLimitConfig = $handler->getRateLimiterConfig();
+        $this->assertTrue($rateLimitConfig instanceof RateLimitConfig);
+        $this->assertEquals(25, $rateLimitConfig->getRateLimit());
+        $this->assertNull($rateLimitConfig->getRateLimitMultiplier());
+        $this->assertNull($rateLimitConfig->getRateLimiter());
+        $cacheConfig = $handler->getCacheConfig();
+        $this->assertNull($cacheConfig);
+
+        // Check a method with overloaded rate limiting
+        $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("get");
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+        $rateLimitConfig = $handler->getRateLimiterConfig();
+        $this->assertTrue($rateLimitConfig instanceof RateLimitConfig);
+        $this->assertEquals(50, $rateLimitConfig->getRateLimit());
+        $this->assertNull($rateLimitConfig->getRateLimitMultiplier());
+        $this->assertNull($rateLimitConfig->getRateLimiter());
+        $cacheConfig = $handler->getCacheConfig();
+        $this->assertNull($cacheConfig);
+
+
+        // Now try one with a multiplier.
+        $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("isTrue");
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+        $rateLimitConfig = $handler->getRateLimiterConfig();
+        $this->assertTrue($rateLimitConfig instanceof RateLimitConfig);
+        $this->assertNull($rateLimitConfig->getRateLimit());
+        $this->assertEquals(2, $rateLimitConfig->getRateLimitMultiplier());
+        $this->assertNull($rateLimitConfig->getRateLimiter());
+        $cacheConfig = $handler->getCacheConfig();
+        $this->assertNull($cacheConfig);
+
+
+        // Now try a class with a different rate limiter.
+        $method = $this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("handleRequest");
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+        $rateLimitConfig = $handler->getRateLimiterConfig();
+        $this->assertTrue($rateLimitConfig instanceof RateLimitConfig);
+        $this->assertNull($rateLimitConfig->getRateLimit());
+        $this->assertEquals(3, $rateLimitConfig->getRateLimitMultiplier());
+        $this->assertEquals("Kinikit\MVC\RateLimiter\TestRateLimiter", $rateLimitConfig->getRateLimiter());
+        $cacheConfig = $handler->getCacheConfig();
+        $this->assertNull($cacheConfig);
+
+
+        // Now try a caching one
+        $method = $this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("get");
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+        $rateLimitConfig = $handler->getRateLimiterConfig();
+        $this->assertTrue($rateLimitConfig instanceof RateLimitConfig);
+        $this->assertNull($rateLimitConfig->getRateLimit());
+        $this->assertEquals(3, $rateLimitConfig->getRateLimitMultiplier());
+        $this->assertEquals("Kinikit\MVC\RateLimiter\TestRateLimiter", $rateLimitConfig->getRateLimiter());
+        $cacheConfig = $handler->getCacheConfig();
+        $this->assertNull($cacheConfig->getCache());
+        $this->assertEquals("30d", $cacheConfig->getCacheTime());
+
+
+        // Finally try a class caching one
+        include_once "Controllers/Sub/NestedSimple.php";
+
+        $method = $this->classInspectorProvider->getClassInspector(\NestedSimple::class)->getPublicMethod("handleRequest");
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+        $rateLimitConfig = $handler->getRateLimiterConfig();
+        $this->assertNull($rateLimitConfig);
+        $cacheConfig = $handler->getCacheConfig();
+        $this->assertNull($cacheConfig->getCache());
+        $this->assertEquals("1d", $cacheConfig->getCacheTime());
+
 
     }
 

@@ -16,70 +16,64 @@ class RateLimiterEvaluatorTest extends \PHPUnit\Framework\TestCase {
 
 
     public function setUp(): void {
-        if (!file_exists("ratelimits"))
-            mkdir("ratelimits");
+
+        if (file_exists("ratelimits"))
+            passthru("rm -rf ratelimits");
+
+        mkdir("ratelimits");
 
     }
 
 
     public function testRateLimitsAreAppliedAndHeadersReturnedWhenControllerWithRateLimitsSuppliedToEvaluator() {
 
-        $rateLimited = new TestRateLimited();
+
+        // Set the X_FORWARDED Header for testing
+        $_SERVER["HTTPS"] = 1;
+        $_SERVER["SERVER_PORT"] = 443;
+        $_SERVER['HTTP_HOST'] = "www.myspace.com";
+        $_SERVER['REQUEST_URI'] = "/home/myshop";
+        $_SERVER['QUERY_STRING'] = "hello=mark&test=11";
+        $_SERVER["HTTP_X_FORWARDED_FOR"] = "100.100.100.100";
 
         $evaluator = Container::instance()->get(RateLimiterEvaluator::class);
 
 
-        // Set the X_FORWARDED Header for testing
-        $_SERVER["HTTP_X_FORWARDED_FOR"] = "100.100.100.100";
+        $config = new RateLimitConfig(null, 3);
 
         // First request should succeed.
-        $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "defaultHandler");
+        $evaluator->evaluateRateLimiter($config);
 
         // Second request should succeed.
-        $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "defaultHandler");
+        $evaluator->evaluateRateLimiter($config);
 
         // Third request should succeed.
-        $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "defaultHandler");
-
-        // Fourth request should succeed.
-        $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "defaultHandler");
-
-        // Fifth request should fail.
-        try {
-            $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "defaultHandler");
-            $this->fail("should have thrown here");
-        } catch (RateLimitExceededException $e) {
-            // Yaah
-        }
-
-
-        // First request should succeed.
-        $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "explicitLimitMethod");
-
-        // Second request should succeed.
-        $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "explicitLimitMethod");
-
-        // Third request should succeed.
-        $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "explicitLimitMethod");
+        $evaluator->evaluateRateLimiter($config);
 
         // Fourth request should fail.
         try {
-            $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "explicitLimitMethod");
+            $evaluator->evaluateRateLimiter($config);
             $this->fail("should have thrown here");
         } catch (RateLimitExceededException $e) {
             // Yaah
         }
 
 
+        $_SERVER["HTTP_X_FORWARDED_FOR"] = "100.100.100.10";
+
+
+        $config = new RateLimitConfig(TestRateLimiter::class, null, 0.25);
+
+
         // First request should succeed.
-        $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "multiplierLimitMethod");
+        $evaluator->evaluateRateLimiter($config);
 
         // Second request should succeed.
-        $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "multiplierLimitMethod");
+        $evaluator->evaluateRateLimiter($config);
 
         // Third request should fail.
         try {
-            $evaluator->evaluateRateLimitersForControllerMethod($rateLimited, "multiplierLimitMethod");
+            $evaluator->evaluateRateLimiter($config);
             $this->fail("should have thrown here");
         } catch (RateLimitExceededException $e) {
             // Yaah

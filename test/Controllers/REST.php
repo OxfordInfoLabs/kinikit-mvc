@@ -6,6 +6,12 @@ namespace Kinikit\MVC\Controllers;
 use Kinikit\Core\Exception\StatusException;
 use Kinikit\MVC\Objects\TestRESTObject;
 
+/**
+ * Class REST
+ * @package Kinikit\MVC\Controllers
+ *
+ * @rateLimit 25
+ */
 class REST {
 
     /**
@@ -51,6 +57,8 @@ class REST {
      * Get a test object by id.
      * @http GET /$id
      *
+     * @rateLimit 50
+     *
      * @param integer $id
      * @return TestRESTObject
      *
@@ -65,6 +73,8 @@ class REST {
      *
      * @http GET /true/$boolValue
      *
+     * @rateLimitMultiplier 2
+     *
      * @param bool $boolValue
      * @return bool
      */
@@ -77,6 +87,8 @@ class REST {
      * Get only method
      *
      * @http GET /getOnly
+     *
+     * @rateLimiter Kinikit\MVC\RateLimiter\TestRateLimiter
      *
      * @param $param1
      * @param float $param2
@@ -171,7 +183,7 @@ class REST {
      * @throws \Exception
      */
     public function throwsException() {
-        throw new \Exception("Bad REST Call",22);
+        throw new \Exception("Bad REST Call", 22);
     }
 
 
@@ -181,7 +193,7 @@ class REST {
      * @throws StatusException
      */
     public function throwsStatusException() {
-        throw new StatusException("Should return a custom error response code", 406,50);
+        throw new StatusException("Should return a custom error response code", 406, 50);
     }
 
 

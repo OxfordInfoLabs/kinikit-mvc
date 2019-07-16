@@ -50,27 +50,20 @@ class TestRateLimiter implements RateLimiter {
      *
      * @return integer
      */
-    public function getNumberOfRequestsInWindow($windowStartTime, $sourceIPAddress, $controller, $method) {
+    public function getNumberOfRequestsInWindow($windowStartTime, $sourceIPAddress) {
+
 
         if (!isset(self::$requests[$windowStartTime])) {
             self::$requests[$windowStartTime] = array();
         }
 
         if (!isset(self::$requests[$windowStartTime][$sourceIPAddress])) {
-            self::$requests[$windowStartTime][$sourceIPAddress] = array();
+            self::$requests[$windowStartTime][$sourceIPAddress] = 0;
         }
 
-        if (!isset(self::$requests[$windowStartTime][$sourceIPAddress][$controller])) {
-            self::$requests[$windowStartTime][$sourceIPAddress][$controller] = array();
-        }
+        self::$requests[$windowStartTime][$sourceIPAddress]++;
 
-        if (!isset(self::$requests[$windowStartTime][$sourceIPAddress][$controller][$method])) {
-            self::$requests[$windowStartTime][$sourceIPAddress][$controller][$method] = 1;
-        } else {
-            self::$requests[$windowStartTime][$sourceIPAddress][$controller][$method]++;
-        }
-
-        return self::$requests[$windowStartTime][$sourceIPAddress][$controller][$method];
+        return self::$requests[$windowStartTime][$sourceIPAddress];
 
     }
 }

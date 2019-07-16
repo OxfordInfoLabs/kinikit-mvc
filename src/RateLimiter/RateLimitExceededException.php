@@ -8,7 +8,9 @@
 
 namespace Kinikit\MVC\RateLimiter;
 
-class RateLimitExceededException extends \Exception {
+use Kinikit\Core\Exception\StatusException;
+
+class RateLimitExceededException extends StatusException {
 
     /**
      * Construct a rate limit exceeded exception.
@@ -20,7 +22,7 @@ class RateLimitExceededException extends \Exception {
      */
     public function __construct($ipAddress = null, $limit = null, $resetTime = null) {
         $resetDate = date_create_from_format("U", $resetTime)->format("d/m/Y H:i:s");
-        parent::__construct("Rate limit of $limit exceeded for $ipAddress.  You can make another request after $resetDate");
+        parent::__construct("Rate limit of $limit exceeded for $ipAddress.  You can make another request after $resetDate", 429);
     }
 
 }

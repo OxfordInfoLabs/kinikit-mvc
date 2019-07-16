@@ -1,6 +1,11 @@
 <?php
 
-
+/**
+ * Class Simple
+ *
+ * @rateLimiter Kinikit\MVC\RateLimiter\TestRateLimiter
+ * @rateLimitMultiplier 3
+ */
 class Simple {
 
     /**
@@ -15,6 +20,8 @@ class Simple {
 
     /**
      * Get a simple title one.
+     *
+     * @cacheTime 30d
      *
      * @param $title
      */
@@ -44,6 +51,9 @@ class Simple {
 
 
     /**
+     *
+     * @cacheTime 1y
+     *
      * @return \Kinikit\MVC\Response\Response
      */
     public function redirect() {

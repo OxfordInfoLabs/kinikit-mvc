@@ -11,6 +11,9 @@ namespace Kinikit\MVC\RateLimiter;
 
 use Kinikit\Core\Annotation\ClassAnnotationParser;
 use Kinikit\Core\Annotation\ClassAnnotations;
+use Kinikit\Core\DependencyInjection\Container;
+use Kinikit\MVC\Request\Request;
+use Kinikit\MVC\Response\Headers;
 
 /**
  * Evaluate rate limits if a rate limiter has been configured on a controller.
@@ -28,93 +31,41 @@ class RateLimiterEvaluator {
     private $defaultRateLimiter;
 
     /**
-     * @var ClassAnnotationParser
+     * @var Request
      */
-    private $classAnnotationParser;
+    private $request;
+
+
+    /**
+     * @var Headers
+     */
+    private $responseHeaders;
 
     /**
      * RateLimiterEvaluator constructor.
      *
      * @param RateLimiter $defaultRateLimiter
-     * @param ClassAnnotationParser $classAnnotationParser
+     * @param Request $request
+     * @param Headers $responseHeaders
      */
-    public function __construct($defaultRateLimiter, $classAnnotationParser) {
+    public function __construct($defaultRateLimiter, $request, $responseHeaders) {
         $this->defaultRateLimiter = $defaultRateLimiter;
-        $this->classAnnotationParser = $classAnnotationParser;
-    }
-
-    public function getRateLimitsForControllerMethod($controllerName, $methodName, $annotations = null) {
-
-        if (!$annotations) {
-            $annotations = $this->classAnnotationParser->parse($controllerName);
-        }
-
-
-        $rateLimit = null;
-        $rateLimitMultiplier = null;
-
-        if ($annotations->getClassAnnotationForMatchingTag("ratelimit")) {
-            $rateLimit = $annotations->getClassAnnotationForMatchingTag("ratelimit")->getValue();
-            $rateLimitMultiplier = null;
-        } else if ($annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")) {
-            $rateLimitMultiplier = $annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")->getValue();
-        }
-
-        if ($annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)) {
-            $rateLimit = $annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)[0]->getValue();
-            $rateLimitMultiplier = null;
-        } else if ($annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)) {
-            $rateLimitMultiplier = $annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)[0]->getValue();
-        }
-
-
-        // Only carry on if there is a configuration.
-        if ($rateLimit || $rateLimitMultiplier) {
-
-            // Look for an annotation based rate limiter
-            $classRateLimiters = $annotations->getClassAnnotationForMatchingTag("ratelimiter");
-
-            if ($classRateLimiters) {
-
-                $rateLimiterClass = $classRateLimiters->getValue();
-                $rateLimiter = new $rateLimiterClass();
-            } else {
-                $rateLimiter = $this->defaultRateLimiter;
-            }
-
-            return array($rateLimit, $rateLimitMultiplier, $rateLimiter->getTimeWindowInMinutes());
-        } else {
-            return null;
-        }
-
-
+        $this->request = $request;
+        $this->responseHeaders = $responseHeaders;
     }
 
 
     /**
-     * Evaluate any rate limits for the controller and method if one is defined.
+     * Evaluate a rate limiter for the current request using the supplied config
      *
-     * @param Controller $controllerInstance
-     * @param string $methodName
-     * @param ClassAnnotations $annotations
-     * @return bool
+     * @param RateLimitConfig $rateLimiterConfig
+     * @throws RateLimitExceededException
      */
-    public function evaluateRateLimitersForControllerMethod($controllerInstance, $methodName, $annotations = null) {
+    public function evaluateRateLimiter($rateLimiterConfig) {
 
-        $controllerClass = get_class($controllerInstance);
-
-        if (!$annotations) {
-            $annotations = $this->classAnnotationParser->parse($controllerClass);
-        }
-
-        // Look for an annotation based rate limiter
-        $classRateLimiters = $annotations->getClassAnnotationForMatchingTag("ratelimiter");
-
-        if ($classRateLimiters) {
-            $rateLimiterClass = $classRateLimiters->getValue();
-
-            // Create the rate limiter.
-            $rateLimiter = new $rateLimiterClass();
+        // Grab a rate limiter instance or use the default.
+        if ($rateLimiterConfig->getRateLimiter()) {
+            $rateLimiter = Container::instance()->get($rateLimiterConfig->getRateLimiter());
         } else {
             $rateLimiter = $this->defaultRateLimiter;
         }
@@ -130,29 +81,21 @@ class RateLimiterEvaluator {
         // Derive the appropriate rate limit depending upon how specific this has been defined.
         $defaultRateLimit = $rateLimit = $rateLimiter->getDefaultRateLimit();
 
-        if ($annotations->getClassAnnotationForMatchingTag("ratelimit")) {
-            $rateLimit = $annotations->getClassAnnotationForMatchingTag("ratelimit")->getValue();
-        } else if ($annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")) {
-            $rateLimit = $defaultRateLimit * $annotations->getClassAnnotationForMatchingTag("ratelimitmultiplier")->getValue();
+        if ($rateLimiterConfig->getRateLimit()) {
+            $rateLimit = $rateLimiterConfig->getRateLimit();
+        } else if ($rateLimiterConfig->getRateLimitMultiplier()) {
+            $rateLimit = $defaultRateLimit * $rateLimiterConfig->getRateLimitMultiplier();
         }
 
-        if ($annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)) {
-            $rateLimit = $annotations->getMethodAnnotationsForMatchingTag("ratelimit", $methodName)[0]->getValue();
-        } else if ($annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)) {
-            $rateLimit = $defaultRateLimit * $annotations->getMethodAnnotationsForMatchingTag("ratelimitmultiplier", $methodName)[0]->getValue();
-        }
-
-        // Now get the number of requests from the current IP address since
-        $sourceIp = isset($_SERVER["HTTP_X_FORWARDED_FOR"]) ? $_SERVER["HTTP_X_FORWARDED_FOR"] : (isset($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : "");
-
-        // Get current rate
-        $numberOfRequests = $rateLimiter->getNumberOfRequestsInWindow($windowStart, $sourceIp, $controllerClass, $methodName);
+        // Now get the number of requests from the current IP address
+        $sourceIp = $this->request->getRemoteIPAddress();
+        $numberOfRequests = $rateLimiter->getNumberOfRequestsInWindow($windowStart, $sourceIp);
 
         // Set headers
         if (!headers_sent()) {
-            header("X-RateLimit-Limit: $rateLimit");
-            header("X-RateLimit-Remaining: " . max($rateLimit - $numberOfRequests, 0));
-            header("X-RateLimit-Reset: " . ($windowStart + $windowSizeInSeconds));
+            $this->responseHeaders->set(Headers::HEADER_RATELIMIT_LIMIT, $rateLimit);
+            $this->responseHeaders->set(Headers::HEADER_RATELIMIT_REMAINING, max($rateLimit - $numberOfRequests, 0));
+            $this->responseHeaders->set(Headers::HEADER_RATELIMIT_RESET, ($windowStart + $windowSizeInSeconds));
         }
 
         if ($numberOfRequests > $rateLimit) {
