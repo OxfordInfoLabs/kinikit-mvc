@@ -4,13 +4,14 @@
 namespace Kinikit\MVC\Decorators;
 
 
-class Zone {
+use Kinikit\MVC\Response\View;
 
+class Zone {
 
     /**
      * Handle request method
      */
     public function handleRequest() {
-        return new View("Zone");
+        return new View("Zone", ["menu" => "standard"]);
     }
 }

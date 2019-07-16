@@ -7,23 +7,14 @@ namespace Kinikit\MVC\Routing;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\MVC\Request\Request;
 use Kinikit\MVC\Response\Response;
+use Kinikit\MVC\Response\View;
 
-class DecoratorRouteHandler extends RouteHandler {
-
-    /**
-     * @var Method
-     */
-    private $targetDecoratorMethod;
+class DecoratorRouteHandler extends ControllerRouteHandler {
 
     /**
      * @var RouteHandler
      */
     private $contentRouteHandler;
-
-    /**
-     * @var Request
-     */
-    private $request;
 
 
     /**
@@ -34,9 +25,8 @@ class DecoratorRouteHandler extends RouteHandler {
      * @param Request $request
      */
     public function __construct($targetDecoratorMethod, $contentRouteHandler, $request) {
-        $this->targetDecoratorMethod = $targetDecoratorMethod;
+        parent::__construct($targetDecoratorMethod, $request, "");
         $this->contentRouteHandler = $contentRouteHandler;
-        $this->request = $request;
     }
 
 
@@ -46,7 +36,38 @@ class DecoratorRouteHandler extends RouteHandler {
      * @return Response
      */
     public function handleRoute() {
-        // TODO: Implement executeAndSendResponse() method.
+
+        // Firstly handle the content route handler to see whether we need to proceed.
+        $contentResponse = $this->contentRouteHandler->handleRoute();
+
+        if ($contentResponse instanceof View) {
+
+            // Process decorator
+            $myResponse = parent::handleRoute();
+
+            // If our response is a view, continue.
+            if ($myResponse instanceof View) {
+
+                $contentModel = $contentResponse->getModel();
+
+                // Get content as string
+                ob_start();
+                $contentResponse->send();
+                $content = ob_get_contents();
+                ob_end_clean();
+
+                // Literally poke in additional model.
+                $this->injectParamsIntoViewModel($myResponse, ["contentModel" => $contentModel, "content" => $content]);
+
+            }
+
+            return $myResponse;
+
+
+        } else {
+            return $contentResponse;
+        }
+
     }
 
 }

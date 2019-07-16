@@ -14,6 +14,7 @@ use Kinikit\MVC\Request\MockPHPInputStream;
 use Kinikit\MVC\Request\Request;
 use Kinikit\MVC\Response\JSONResponse;
 use Kinikit\MVC\Response\View;
+use Kinikit\MVC\Response\WebErrorResponse;
 
 include_once "autoloader.php";
 
@@ -105,7 +106,7 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
     }
 
 
-    public function testCanHandleRouteForViewControllerAndResponseReturnedIntact() {
+    public function testCanHandleRouteForViewControllerAndResponseReturnedIntactWithAugmentedRequestParam() {
 
         include_once "Controllers/Zone/Simple.php";
 
@@ -116,7 +117,7 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
         $request = new Request(new Headers());
         $handler = new ControllerRouteHandler($method, $request, "");
 
-        $this->assertEquals(new View("Simple", ["title" => "HELLO WORLD"]), $handler->handleRoute());
+        $this->assertEquals(new View("Simple", ["title" => "HELLO WORLD", "request" => $request]), $handler->handleRoute());
 
     }
 
@@ -140,5 +141,41 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
 
 
     }
+
+
+    public function testExceptionsForWebMethodsAreReturnedAsErrorResponses() {
+
+        $method = $this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("throwsError");
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+
+        $this->assertEquals(new WebErrorResponse("Bad Web Request", 22, 500), $handler->handleRoute());
+
+
+        $method = $this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("throwsStatusError");
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+
+        $this->assertEquals(new WebErrorResponse("Bad Custom Web Request", 22, 402), $handler->handleRoute());
+
+    }
+
+
+    public function testRequestObjectsAreAutowiredIfSuppliedToControllerMethods() {
+
+        $_GET = [];
+        stream_wrapper_restore("php");
+
+        $method = $this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("autowired");
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+
+        $this->assertEquals([$request, $request->getUrl(), $request->getHeaders(), $request->getFileUploads()], $handler->handleRoute()->getObject());
+
+    }
+
 
 }

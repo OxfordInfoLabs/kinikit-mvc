@@ -22,4 +22,53 @@ class Simple {
         return new \Kinikit\MVC\Response\View("Simple", ["title" => $title]);
     }
 
+
+    /**
+     *
+     * @return \Kinikit\MVC\Response\View
+     * @throws Exception
+     */
+    public function throwsError() {
+        throw new \Exception("Bad Web Request", 22);
+    }
+
+
+    /**
+     *
+     * @return \Kinikit\MVC\Response\View
+     * @throws Exception
+     */
+    public function throwsStatusError() {
+        throw new \Kinikit\Core\Exception\StatusException("Bad Custom Web Request", 402, 22);
+    }
+
+
+    /**
+     * @return \Kinikit\MVC\Response\Response
+     */
+    public function redirect() {
+        return new \Kinikit\MVC\Response\Redirect("http://www.google.com");
+    }
+
+
+    /**
+     * @return \Kinikit\MVC\Response\Response
+     */
+    public function download() {
+        return new \Kinikit\MVC\Response\Download("BINGO", "bingo.txt");
+    }
+
+
+    /**
+     * Autowiring test
+     *
+     * @param \Kinikit\MVC\Request\Request $request
+     * @param \Kinikit\MVC\Request\URL $url
+     * @param \Kinikit\MVC\Request\Headers $headers
+     * @param \Kinikit\MVC\Request\FileUpload[] $fileuploads
+     */
+    public function autowired($request, $url, $headers, $fileuploads) {
+        return [$request, $url, $headers, $fileuploads];
+    }
+
 }

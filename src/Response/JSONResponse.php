@@ -17,6 +17,8 @@ use Kinikit\MVC\ContentSource\StringContentSource;
  */
 class JSONResponse extends SimpleResponse {
 
+    private $object;
+
     /**
      * Create a json response - this takes a mixed object to convert to JSON format and an optional
      * response code and content type if required for overload.
@@ -28,8 +30,19 @@ class JSONResponse extends SimpleResponse {
      * @param string $contentType
      */
     public function __construct($jsonObject, $responseCode = 200, $contentType = "application/json") {
+        $this->object = $jsonObject;
         $converter = Container::instance()->get(ObjectToJSONConverter::class);
         parent::__construct(new StringContentSource($converter->convert($jsonObject), $contentType), $responseCode);
     }
+
+    /**
+     * Get the object used to construct this
+     *
+     * @return mixed
+     */
+    public function getObject() {
+        return $this->object;
+    }
+
 
 }

@@ -48,6 +48,15 @@ class View extends Response {
         $this->model = $model;
     }
 
+    /**
+     * Get the model
+     *
+     * @return array
+     */
+    public function getModel() {
+        return $this->model;
+    }
+
 
     /**
      * Return the content type. This is obtained by looking directly at the view file.

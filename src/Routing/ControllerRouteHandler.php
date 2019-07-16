@@ -10,9 +10,14 @@ use Kinikit\Core\Exception\StatusException;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\Core\Serialisation\JSON\JSONToObjectConverter;
 use Kinikit\Core\Util\Primitive;
+use Kinikit\MVC\Request\FileUpload;
+use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\Request;
+use Kinikit\MVC\Request\URL;
 use Kinikit\MVC\Response\JSONResponse;
 use Kinikit\MVC\Response\Response;
+use Kinikit\MVC\Response\View;
+use Kinikit\MVC\Response\WebErrorResponse;
 
 class ControllerRouteHandler extends RouteHandler {
 
@@ -79,9 +84,10 @@ class ControllerRouteHandler extends RouteHandler {
         }
 
 
+        $methodParams = $this->targetMethod->getParameters();
+
         // if we have a payload, ensure we de-jsonify it and assume the next sequential parameter by default.
         if ($this->request->getPayload()) {
-            $methodParams = $this->targetMethod->getParameters();
             if (sizeof($methodParams) > sizeof($params)) {
                 $payloadParam = $methodParams[sizeof($params)];
                 $converter = Container::instance()->get(JSONToObjectConverter::class);
@@ -95,12 +101,38 @@ class ControllerRouteHandler extends RouteHandler {
             $params[$key] = $this->sanitiseParamValue($key, $value);
         }
 
+        // Finally poke in any other unresolved request objects as autowires.
+        foreach ($methodParams as $methodParam) {
+            if (!isset($params[$methodParam->getName()])) {
+                switch (ltrim($methodParam->getType(), "\\")) {
+                    case Request::class:
+                        $params[$methodParam->getName()] = $this->request;
+                        break;
+                    case URL::class:
+                        $params[$methodParam->getName()] = $this->request->getUrl();
+                        break;
+                    case Headers::class:
+                        $params[$methodParam->getName()] = $this->request->getHeaders();
+                        break;
+                    case FileUpload::class . "[]":
+                        $params[$methodParam->getName()] = $this->request->getFileUploads();
+                        break;
+                }
+            }
+        }
+
 
         // Execute the method
         try {
             $result = $this->targetMethod->call($instance, $params);
 
             if ($result instanceof Response) {
+
+                // Inject common view params to model for convenience.
+                if ($result instanceof View) {
+                    $this->injectParamsIntoViewModel($result, ["request" => $this->request]);
+                }
+
                 return $result;
             } else {
                 return new JSONResponse($result);
@@ -108,13 +140,14 @@ class ControllerRouteHandler extends RouteHandler {
 
         } catch (\Throwable $e) {
 
+            $statusCode = $e instanceof StatusException ? $e->getStatusCode() : 500;
+
             // Non JSON responses are assumed to be HTML web based
             if ($this->targetMethod->getReturnType()->isInstanceOf(Response::class) &&
                 !$this->targetMethod->getReturnType()->isInstanceOf(JSONResponse::class)) {
-
-
+                return new WebErrorResponse($e->getMessage(), $e->getCode(), $statusCode);
             } else {
-                return new JSONResponse(["errorMessage" => $e->getMessage(), "errorCode" => $e->getCode()], $e instanceof StatusException ? $e->getStatusCode() : 500);
+                return new JSONResponse(["errorMessage" => $e->getMessage(), "errorCode" => $e->getCode()], $statusCode);
             }
 
         }
@@ -141,4 +174,26 @@ class ControllerRouteHandler extends RouteHandler {
 
 
     }
+
+
+    /**
+     * Inject params into the view model using reflection
+     *
+     * @param View $view
+     * @param array $params
+     */
+    protected function injectParamsIntoViewModel($view, $params) {
+
+        // Get the model and merge.
+        $model = $view->getModel();
+        $model = array_merge($model, $params);
+
+        // Make accessible and update the view model
+        $reflectionProperty = (new \ReflectionClass(View::class))->getProperty("model");
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue($view, $model);
+
+
+    }
+
 }
