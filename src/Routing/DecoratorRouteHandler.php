@@ -16,9 +16,9 @@ class DecoratorRouteHandler extends RouteHandler {
     private $targetDecoratorMethod;
 
     /**
-     * @var Method
+     * @var RouteHandler
      */
-    private $targetControllerMethod;
+    private $contentRouteHandler;
 
     /**
      * @var Request
@@ -30,12 +30,12 @@ class DecoratorRouteHandler extends RouteHandler {
      * ControllerRouteHandler constructor.
      *
      * @param Method $targetDecoratorMethod
-     * @param Method $targetControllerMethod
+     * @param RouteHandler $contentRouteHandler
      * @param Request $request
      */
-    public function __construct($targetDecoratorMethod, $targetControllerMethod, $request) {
+    public function __construct($targetDecoratorMethod, $contentRouteHandler, $request) {
         $this->targetDecoratorMethod = $targetDecoratorMethod;
-        $this->targetControllerMethod = $targetControllerMethod;
+        $this->contentRouteHandler = $contentRouteHandler;
         $this->request = $request;
     }
 

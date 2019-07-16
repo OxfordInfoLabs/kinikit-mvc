@@ -10,6 +10,7 @@ use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\MVC\Controllers\REST;
 use Kinikit\MVC\Decorators\BespokeDecorator;
 use Kinikit\MVC\Decorators\DefaultDecorator;
+use Kinikit\MVC\Decorators\Zone;
 use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\Request;
 
@@ -43,7 +44,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("list");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolver->resolve());
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, ""), $resolver->resolve());
 
 
         $_SERVER["REQUEST_METHOD"] = "GET";
@@ -54,7 +55,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("get");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolver->resolve());
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, "256"), $resolver->resolve());
 
 
         $_SERVER["REQUEST_METHOD"] = "POST";
@@ -65,7 +66,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("create");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolver->resolve());
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, ""), $resolver->resolve());
 
 
         $_SERVER["REQUEST_METHOD"] = "PUT";
@@ -76,7 +77,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("update");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolver->resolve());
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, "256"), $resolver->resolve());
 
 
         $_SERVER["REQUEST_METHOD"] = "PATCH";
@@ -87,7 +88,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("patch");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolver->resolve());
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, "12"), $resolver->resolve());
 
         $_SERVER["REQUEST_METHOD"] = "DELETE";
         $_SERVER["REQUEST_URI"] = "/rest/123";
@@ -97,7 +98,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("delete");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolver->resolve());
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, "123"), $resolver->resolve());
 
     }
 
@@ -111,7 +112,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("nestedGet");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolver->resolve());
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, "nested/123"), $resolver->resolve());
 
 
         $_SERVER["REQUEST_METHOD"] = "POST";
@@ -122,7 +123,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("nestedCreate");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolver->resolve());
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, "nested"), $resolver->resolve());
 
 
         $_SERVER["REQUEST_METHOD"] = "GET";
@@ -133,7 +134,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("nestedVariableGet");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolver->resolve());
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, "nested/23/mark"), $resolver->resolve());
 
     }
 
@@ -149,7 +150,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(\NestedSimple::class)->getPublicMethod("update");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolved);
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, "update"), $resolved);
 
 
     }
@@ -168,7 +169,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(\NestedSimple::class)->getPublicMethod("handleRequest");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolved);
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, ""), $resolved);
 
 
         $_SERVER["REQUEST_URI"] = "/sub/nestedsimple/arbitrary";
@@ -180,66 +181,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
 
         $targetMethod = $this->classInspectorProvider->getClassInspector(\NestedSimple::class)->getPublicMethod("handleRequest");
 
-        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request), $resolved);
-
-    }
-
-
-    public function testExplicitDecoratorRequestsAreResolvedToDecoratorRouteHandlerWithDecoratorAndControllerMethodInfo() {
-
-        $_SERVER["REQUEST_METHOD"] = "GET";
-        $_SERVER["REQUEST_URI"] = "/bespoke/sub/nestedsimple";
-
-        $request = new Request(new Headers());
-        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
-        $resolved = $resolver->resolve();
-
-
-        $targetDecoratorMethod = $this->classInspectorProvider->getClassInspector(BespokeDecorator::class)->getPublicMethod("handleRequest");
-        $targetControllerMethod = $this->classInspectorProvider->getClassInspector(\NestedSimple::class)->getPublicMethod("handleRequest");
-
-        $this->assertEquals(new DecoratorRouteHandler($targetDecoratorMethod, $targetControllerMethod, $request), $resolved);
-
-
-    }
-
-
-    public function testImplicitDecoratoRequestsAreResolvedToDecoratorHandleIfDefaultDecoratorConfigParameterSet() {
-
-        Configuration::instance()->addParameter("default.decorator", "DefaultDecorator");
-
-        $_SERVER["REQUEST_METHOD"] = "GET";
-        $_SERVER["REQUEST_URI"] = "/sub/nestedsimple";
-
-        $request = new Request(new Headers());
-        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
-        $resolved = $resolver->resolve();
-
-
-        $targetDecoratorMethod = $this->classInspectorProvider->getClassInspector(DefaultDecorator::class)->getPublicMethod("handleRequest");
-        $targetControllerMethod = $this->classInspectorProvider->getClassInspector(\NestedSimple::class)->getPublicMethod("handleRequest");
-
-        $this->assertEquals(new DecoratorRouteHandler($targetDecoratorMethod, $targetControllerMethod, $request), $resolved);
-
-    }
-
-
-    public function testMissingDecoratorHandlerExceptionThrownIfNoHandleRequestMethodInDecorator() {
-
-
-        $_SERVER["REQUEST_METHOD"] = "GET";
-        $_SERVER["REQUEST_URI"] = "/baddecorator/sub/nestedsimple";
-
-        $request = new Request(new Headers());
-        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
-
-        try {
-            $resolved = $resolver->resolve();
-            $this->fail("Should have thrown here");
-        } catch (MissingDecoratorHandlerException $e) {
-            $this->assertTrue(true);
-        }
-
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, "arbitrary"), $resolved);
 
     }
 
@@ -272,6 +214,125 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
         } catch (RouteNotFoundException $e) {
             $this->assertTrue(true);
         }
+
+    }
+
+
+    public function testExplicitDecoratorRequestsAreResolvedToDecoratorRouteHandlerWithDecoratorAndControllerMethodInfo() {
+
+        Configuration::instance()->addParameter("default.decorator", "DefaultDecorator");
+
+
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_URI"] = "/bespoke/sub/nestedsimple";
+
+        $request = new Request(new Headers());
+        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
+        $resolved = $resolver->resolve();
+
+
+        $targetDecoratorMethod = $this->classInspectorProvider->getClassInspector(BespokeDecorator::class)->getPublicMethod("handleRequest");
+        $contentRouteHandler = new ControllerRouteHandler($this->classInspectorProvider->getClassInspector(\NestedSimple::class)->getPublicMethod("handleRequest"), $request, "");
+
+        $this->assertEquals(new DecoratorRouteHandler($targetDecoratorMethod, $contentRouteHandler, $request), $resolved);
+
+
+    }
+
+
+    public function testPathBasedDecoratorRequestsAreResolvedToDecoratorRouteHandlerWithDecoratorAndControllerMethodInfo() {
+
+        Configuration::instance()->addParameter("default.decorator", "DefaultDecorator");
+
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_URI"] = "/zone/simple";
+
+        $request = new Request(new Headers());
+        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
+        $resolved = $resolver->resolve();
+
+
+        $targetDecoratorMethod = $this->classInspectorProvider->getClassInspector(Zone::class)->getPublicMethod("handleRequest");
+        $contentRouteHandler = new ControllerRouteHandler($this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("handleRequest"), $request, "");
+
+        $this->assertEquals(new DecoratorRouteHandler($targetDecoratorMethod, $contentRouteHandler, $request), $resolved);
+
+
+    }
+
+
+    public function testDefaultDecoratorRequestsAreResolvedToDecoratorRouteHandlerWhenDefaultDecoratorConfigParameterSet() {
+
+        Configuration::instance()->addParameter("default.decorator", "DefaultDecorator");
+
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_URI"] = "/sub/nestedsimple";
+
+        $request = new Request(new Headers());
+        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
+        $resolved = $resolver->resolve();
+
+
+        $targetDecoratorMethod = $this->classInspectorProvider->getClassInspector(DefaultDecorator::class)->getPublicMethod("handleRequest");
+        $contentRouteHandler = new ControllerRouteHandler($this->classInspectorProvider->getClassInspector(\NestedSimple::class)->getPublicMethod("handleRequest"), $request, "");
+
+        $this->assertEquals(new DecoratorRouteHandler($targetDecoratorMethod, $contentRouteHandler, $request), $resolved);
+
+    }
+
+
+    public function testViewOnlyRequestsCanBeDecorated() {
+
+        Configuration::instance()->addParameter("default.decorator", "DefaultDecorator");
+
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_URI"] = "/simple";
+
+        $request = new Request(new Headers());
+        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
+        $resolved = $resolver->resolve();
+
+
+        $targetDecoratorMethod = $this->classInspectorProvider->getClassInspector(DefaultDecorator::class)->getPublicMethod("handleRequest");
+        $contentRouteHandler = new ViewOnlyRouteHandler("simple");
+
+        $this->assertEquals(new DecoratorRouteHandler($targetDecoratorMethod, $contentRouteHandler, $request), $resolved);
+
+
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_URI"] = "/bespoke/simple";
+
+        $request = new Request(new Headers());
+        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
+        $resolved = $resolver->resolve();
+
+
+        $targetDecoratorMethod = $this->classInspectorProvider->getClassInspector(BespokeDecorator::class)->getPublicMethod("handleRequest");
+        $contentRouteHandler = new ViewOnlyRouteHandler("simple");
+
+        $this->assertEquals(new DecoratorRouteHandler($targetDecoratorMethod, $contentRouteHandler, $request), $resolved);
+
+
+
+    }
+
+
+    public function testMissingDecoratorHandlerExceptionThrownIfNoHandleRequestMethodInDecorator() {
+
+
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_URI"] = "/baddecorator/sub/nestedsimple";
+
+        $request = new Request(new Headers());
+        $resolver = new RouteResolver($request, $this->classInspectorProvider, $this->fileResolver);
+
+        try {
+            $resolved = $resolver->resolve();
+            $this->fail("Should have thrown here");
+        } catch (MissingDecoratorHandlerException $e) {
+            $this->assertTrue(true);
+        }
+
 
     }
 

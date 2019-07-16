@@ -15,7 +15,7 @@ class REST {
      * @return TestRESTObject
      */
     public function nestedGet($id) {
-        return new TestRESTObject($id, "TEST " . $id, "test$id@test.com", "GET NESTED SINGLE");
+        return new TestRESTObject("TEST " . $id, "test$id@test.com", "GET NESTED SINGLE");
     }
 
 
@@ -42,7 +42,7 @@ class REST {
      * @param string $name
      */
     public function nestedVariableGet($id, $name) {
-        return new TestRESTObject($id, $name, "test$id@test.com", "GET NESTED VARIABLE SINGLE");
+        return new TestRESTObject($name, "test$id@test.com", "GET NESTED VARIABLE SINGLE");
     }
 
 
@@ -55,7 +55,34 @@ class REST {
      *
      */
     public function get($id) {
-        return new TestRESTObject($id, "TEST " . $id, "test$id@test.com", "GET SINGLE");
+        return new TestRESTObject("TEST " . $id, "test$id@test.com", "GET SINGLE");
+    }
+
+
+    /**
+     * Test boolean REST method
+     *
+     * @http GET /true/$boolValue
+     *
+     * @param bool $boolValue
+     * @return bool
+     */
+    public function isTrue($boolValue) {
+        return $boolValue;
+    }
+
+
+    /**
+     * Get only method
+     *
+     * @http GET /getOnly
+     *
+     * @param $param1
+     * @param float $param2
+     * @param boolean $param3
+     */
+    public function getOnly($param1, $param2, $param3) {
+        return array($param1, $param2, $param3);
     }
 
 
@@ -69,7 +96,7 @@ class REST {
     public function list() {
         $list = array();
         for ($i = 0; $i < 10; $i++) {
-            $list[] = new TestRESTObject("$i", "TEST " . $i, "test$i@test.com");
+            $list[] = new TestRESTObject("TEST " . $i, "test$i@test.com");
         }
 
         return $list;
@@ -135,9 +162,6 @@ class REST {
         $testObject->setLastStatus("DELETED $objectId");
         return $testObject;
     }
-
-
-
 
 
 }

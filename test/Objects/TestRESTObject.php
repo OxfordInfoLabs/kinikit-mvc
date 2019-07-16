@@ -47,10 +47,19 @@ class TestRESTObject {
     private $comments;
 
 
-    public function __construct($name = null, $email = null, $lastStatus = null) {
+    /**
+     * TestRESTObject constructor.
+     *
+     * @param string $name
+     * @param string $email
+     * @param string $lastStatus
+     * @param integer $id
+     */
+    public function __construct($name = null, $email = null, $lastStatus = null, $id = null) {
         $this->name = $name;
         $this->email = $email;
         $this->lastStatus = $lastStatus;
+        $this->id = $id;
     }
 
     /**
