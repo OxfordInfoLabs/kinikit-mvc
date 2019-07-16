@@ -13,4 +13,13 @@ class Simple {
     }
 
 
+    /**
+     * Get a simple title one.
+     *
+     * @param $title
+     */
+    public function get($title) {
+        return new \Kinikit\MVC\Response\View("Simple", ["title" => $title]);
+    }
+
 }

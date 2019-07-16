@@ -3,6 +3,7 @@
 namespace Kinikit\MVC\Controllers;
 
 
+use Kinikit\Core\Exception\StatusException;
 use Kinikit\MVC\Objects\TestRESTObject;
 
 class REST {
@@ -161,6 +162,26 @@ class REST {
         $testObject = $this->get($objectId);
         $testObject->setLastStatus("DELETED $objectId");
         return $testObject;
+    }
+
+
+    /**
+     * Throws exception function
+     *
+     * @throws \Exception
+     */
+    public function throwsException() {
+        throw new \Exception("Bad REST Call",22);
+    }
+
+
+    /**
+     * Status exception
+     *
+     * @throws StatusException
+     */
+    public function throwsStatusException() {
+        throw new StatusException("Should return a custom error response code", 406,50);
     }
 
 

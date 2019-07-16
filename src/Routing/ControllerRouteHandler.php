@@ -6,6 +6,7 @@ namespace Kinikit\MVC\Routing;
 
 use Kinikit\Core\Binding\ObjectBinder;
 use Kinikit\Core\DependencyInjection\Container;
+use Kinikit\Core\Exception\StatusException;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\Core\Serialisation\JSON\JSONToObjectConverter;
 use Kinikit\Core\Util\Primitive;
@@ -80,9 +81,12 @@ class ControllerRouteHandler extends RouteHandler {
 
         // if we have a payload, ensure we de-jsonify it and assume the next sequential parameter by default.
         if ($this->request->getPayload()) {
-            $converter = Container::instance()->get(JSONToObjectConverter::class);
-            $payloadParam = $this->targetMethod->getParameters()[sizeof($params)];
-            $params[$payloadParam->getName()] = $converter->convert($this->request->getPayload(), $payloadParam->getType());
+            $methodParams = $this->targetMethod->getParameters();
+            if (sizeof($methodParams) > sizeof($params)) {
+                $payloadParam = $methodParams[sizeof($params)];
+                $converter = Container::instance()->get(JSONToObjectConverter::class);
+                $params[$payloadParam->getName()] = $converter->convert($this->request->getPayload(), $payloadParam->getType());
+            }
         }
 
 
@@ -93,9 +97,27 @@ class ControllerRouteHandler extends RouteHandler {
 
 
         // Execute the method
-        $result = $this->targetMethod->call($instance, $params);
+        try {
+            $result = $this->targetMethod->call($instance, $params);
 
-        return new JSONResponse($result);
+            if ($result instanceof Response) {
+                return $result;
+            } else {
+                return new JSONResponse($result);
+            }
+
+        } catch (\Throwable $e) {
+
+            // Non JSON responses are assumed to be HTML web based
+            if ($this->targetMethod->getReturnType()->isInstanceOf(Response::class) &&
+                !$this->targetMethod->getReturnType()->isInstanceOf(JSONResponse::class)) {
+
+
+            } else {
+                return new JSONResponse(["errorMessage" => $e->getMessage(), "errorCode" => $e->getCode()], $e instanceof StatusException ? $e->getStatusCode() : 500);
+            }
+
+        }
 
 
     }

@@ -13,6 +13,7 @@ use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\MockPHPInputStream;
 use Kinikit\MVC\Request\Request;
 use Kinikit\MVC\Response\JSONResponse;
+use Kinikit\MVC\Response\View;
 
 include_once "autoloader.php";
 
@@ -103,5 +104,41 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
 
     }
 
+
+    public function testCanHandleRouteForViewControllerAndResponseReturnedIntact() {
+
+        include_once "Controllers/Zone/Simple.php";
+
+        $method = $this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("get");
+
+        $_GET["title"] = "HELLO WORLD";
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+
+        $this->assertEquals(new View("Simple", ["title" => "HELLO WORLD"]), $handler->handleRoute());
+
+    }
+
+
+    public function testExceptionsForJSONMethodsAreEncodedAsJSONResponsesWithAppropriateStatusCode() {
+
+        $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("throwsException");
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+
+        $this->assertEquals(new JSONResponse(["errorMessage" => "Bad REST Call", "errorCode" => 22], 500), $handler->handleRoute());
+
+
+        $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("throwsStatusException");
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+
+        $this->assertEquals(new JSONResponse(["errorMessage" => "Should return a custom error response code", "errorCode" => 50], 406), $handler->handleRoute());
+
+
+    }
 
 }
