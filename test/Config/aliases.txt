@@ -1,0 +1,17 @@
+/magic = /bespoke/sub/nestedsimple
+
+/test = /rest
+
+/wizard/$1 = /zone/simple/get?title=$1
+
+/wildcard$1 = /rest$1
+
+/mark = /zone/simple 302
+
+/john = /zone/simple 301
+
+/external = https://www.google.com
+
+/temp = http://www.microsoft.com 302
+
+

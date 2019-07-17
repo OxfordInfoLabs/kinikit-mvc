@@ -3,7 +3,6 @@
 /**
  * Class Simple
  *
- * @rateLimiter Kinikit\MVC\RateLimiter\TestRateLimiter
  * @rateLimitMultiplier 3
  */
 class Simple {
@@ -62,6 +61,8 @@ class Simple {
 
 
     /**
+     * @cached
+     *
      * @return \Kinikit\MVC\Response\Response
      */
     public function download() {

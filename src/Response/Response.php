@@ -60,6 +60,14 @@ abstract class Response {
     }
 
     /**
+     * @param int $responseCode
+     */
+    public function setResponseCode(int $responseCode): void {
+        $this->responseCode = $responseCode;
+    }
+
+
+    /**
      * Get the headers for this response.
      *
      * @return Headers

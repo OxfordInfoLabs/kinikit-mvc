@@ -28,7 +28,7 @@ class RateLimiterEvaluator {
     /**
      * @var RateLimiter
      */
-    private $defaultRateLimiter;
+    private $rateLimiter;
 
     /**
      * @var Request
@@ -44,12 +44,12 @@ class RateLimiterEvaluator {
     /**
      * RateLimiterEvaluator constructor.
      *
-     * @param RateLimiter $defaultRateLimiter
+     * @param RateLimiter $rateLimiter
      * @param Request $request
      * @param Headers $responseHeaders
      */
-    public function __construct($defaultRateLimiter, $request, $responseHeaders) {
-        $this->defaultRateLimiter = $defaultRateLimiter;
+    public function __construct($rateLimiter, $request, $responseHeaders) {
+        $this->rateLimiter = $rateLimiter;
         $this->request = $request;
         $this->responseHeaders = $responseHeaders;
     }
@@ -58,20 +58,14 @@ class RateLimiterEvaluator {
     /**
      * Evaluate a rate limiter for the current request using the supplied config
      *
-     * @param RateLimitConfig $rateLimiterConfig
+     * @param RateLimiterConfig $rateLimiterConfig
      * @throws RateLimitExceededException
      */
     public function evaluateRateLimiter($rateLimiterConfig) {
 
-        // Grab a rate limiter instance or use the default.
-        if ($rateLimiterConfig->getRateLimiter()) {
-            $rateLimiter = Container::instance()->get($rateLimiterConfig->getRateLimiter());
-        } else {
-            $rateLimiter = $this->defaultRateLimiter;
-        }
 
         // Grab the window size and default rate
-        $windowSizeInSeconds = $rateLimiter->getTimeWindowInMinutes() * 60;
+        $windowSizeInSeconds = $this->rateLimiter->getTimeWindowInMinutes() * 60;
 
         // Work out the start of the window.
         $startOfDay = date_create_from_format("d/m/Y H:i:s", date("d/m/Y 00:00:00"))->format("U");
@@ -79,7 +73,7 @@ class RateLimiterEvaluator {
         $windowStart = time() - ($secondsSinceStart % $windowSizeInSeconds);
 
         // Derive the appropriate rate limit depending upon how specific this has been defined.
-        $defaultRateLimit = $rateLimit = $rateLimiter->getDefaultRateLimit();
+        $defaultRateLimit = $rateLimit = $this->rateLimiter->getDefaultRateLimit();
 
         if ($rateLimiterConfig->getRateLimit()) {
             $rateLimit = $rateLimiterConfig->getRateLimit();
@@ -89,7 +83,7 @@ class RateLimiterEvaluator {
 
         // Now get the number of requests from the current IP address
         $sourceIp = $this->request->getRemoteIPAddress();
-        $numberOfRequests = $rateLimiter->getNumberOfRequestsInWindow($windowStart, $sourceIp);
+        $numberOfRequests = $this->rateLimiter->getNumberOfRequestsInWindow($windowStart, $sourceIp);
 
         // Set headers
         if (!headers_sent()) {

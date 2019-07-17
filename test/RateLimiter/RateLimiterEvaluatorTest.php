@@ -3,6 +3,8 @@
 namespace Kinikit\MVC\RateLimiter;
 
 use Kinikit\Core\DependencyInjection\Container;
+use Kinikit\MVC\Request\Headers;
+use Kinikit\MVC\Request\Request;
 
 
 include_once "autoloader.php";
@@ -39,7 +41,7 @@ class RateLimiterEvaluatorTest extends \PHPUnit\Framework\TestCase {
         $evaluator = Container::instance()->get(RateLimiterEvaluator::class);
 
 
-        $config = new RateLimitConfig(null, 3);
+        $config = new RateLimiterConfig(3);
 
         // First request should succeed.
         $evaluator->evaluateRateLimiter($config);
@@ -62,7 +64,9 @@ class RateLimiterEvaluatorTest extends \PHPUnit\Framework\TestCase {
         $_SERVER["HTTP_X_FORWARDED_FOR"] = "100.100.100.10";
 
 
-        $config = new RateLimitConfig(TestRateLimiter::class, null, 0.25);
+        $evaluator = new RateLimiterEvaluator(new TestRateLimiter(),new Request(new Headers()),new \Kinikit\MVC\Response\Headers());
+
+        $config = new RateLimiterConfig( null, 0.25);
 
 
         // First request should succeed.

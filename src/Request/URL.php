@@ -72,8 +72,12 @@ class URL {
     /**
      * Get the request path without leading /
      */
-    public function getPath() {
-        return join("/", $this->pathSegments);
+    public function getPath($includeQueryParams = false) {
+        $path = join("/", $this->pathSegments);
+        if ($includeQueryParams && $this->queryParameters) {
+            $path .= "?" . join("&", $this->queryParameters);
+        }
+        return $path;
     }
 
 

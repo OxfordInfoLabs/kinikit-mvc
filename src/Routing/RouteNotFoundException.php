@@ -4,9 +4,9 @@
 namespace Kinikit\MVC\Routing;
 
 
-use Kinikit\Core\Exception\AccessDeniedException;
+use Kinikit\Core\Exception\ItemNotFoundException;
 
-class RouteNotFoundException extends AccessDeniedException {
+class RouteNotFoundException extends ItemNotFoundException {
 
     public function __construct($route) {
         parent::__construct("The route $route cannot be found.");

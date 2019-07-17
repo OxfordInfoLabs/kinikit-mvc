@@ -25,6 +25,7 @@ class View extends Response {
     private $viewContentSource;
 
     private $model;
+    private $viewName;
     private $evaluatedContent;
 
 
@@ -44,7 +45,7 @@ class View extends Response {
         } catch (FileNotFoundException $e) {
             throw new ViewNotFoundException($viewName);
         }
-
+        $this->viewName = $viewName;
         $this->model = $model;
     }
 
@@ -55,6 +56,13 @@ class View extends Response {
      */
     public function getModel() {
         return $this->model;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getViewName() {
+        return $this->viewName;
     }
 
 

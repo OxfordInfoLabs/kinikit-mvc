@@ -44,7 +44,7 @@ class FileStoreRateLimiter implements RateLimiter {
         $handle = @fopen(Configuration::readParameter("ratelimiter.storedir") . "/" . $sourceIPAddress, "a+");
 
         if (!$handle) {
-            mkdir(Configuration::readParameter("ratelimiter.storedir"));
+            @mkdir(Configuration::readParameter("ratelimiter.storedir"));
             $handle = @fopen(Configuration::readParameter("ratelimiter.storedir") . "/" . $sourceIPAddress, "a+");
         }
         if ($handle) {

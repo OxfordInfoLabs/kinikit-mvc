@@ -10,7 +10,7 @@ use Kinikit\MVC\Objects\TestRESTObject;
  * Class REST
  * @package Kinikit\MVC\Controllers
  *
- * @rateLimit 25
+ * @rateLimited
  */
 class REST {
 

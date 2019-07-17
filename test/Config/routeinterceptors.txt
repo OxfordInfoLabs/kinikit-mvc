@@ -1,0 +1,3 @@
+* = Kinikit\MVC\Routing\TestRouteInterceptor1
+zone/* = Kinikit\MVC\Routing\TestRouteInterceptor2
+sub/nestedsimple = Kinikit\MVC\Routing\TestRouteInterceptor3

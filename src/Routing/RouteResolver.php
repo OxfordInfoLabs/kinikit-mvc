@@ -13,6 +13,11 @@ use Kinikit\MVC\Request\URL;
 use Kinikit\MVC\Response\JSONResponse;
 use Kinikit\MVC\Response\Response;
 use Kinikit\MVC\Response\ViewNotFoundException;
+use Kinikit\MVC\RouteHandler\ControllerRouteHandler;
+use Kinikit\MVC\RouteHandler\RouteHandler;
+use Kinikit\MVC\RouteHandler\ViewOnlyRouteHandler;
+use Kinikit\MVC\RouteHandler\DecoratorRouteHandler;
+use Kinikit\MVC\RouteHandler\MissingDecoratorHandlerException;
 
 /**
  * Resolve the current request route to a handler which is an instance of RouteHandler.
@@ -21,11 +26,6 @@ use Kinikit\MVC\Response\ViewNotFoundException;
  * Class ControllerMethodResolver
  */
 class RouteResolver {
-
-    /**
-     * @var Request
-     */
-    private $request;
 
     /**
      * @var ClassInspectorProvider
@@ -43,12 +43,10 @@ class RouteResolver {
      *
      * ControllerMethodResolver constructor.
      *
-     * @param Request $request
      * @param ClassInspectorProvider $classInspectorProvider
      * @param FileResolver $fileResolver
      */
-    public function __construct($request, $classInspectorProvider, $fileResolver) {
-        $this->request = $request;
+    public function __construct($classInspectorProvider, $fileResolver) {
         $this->classInspectorProvider = $classInspectorProvider;
         $this->fileResolver = $fileResolver;
     }
@@ -57,14 +55,17 @@ class RouteResolver {
     /**
      * Main resolve method, uses the current request and maps to a RouteHandler if possible.
      *
+     * @param Request $request
+     * @param string $url
+     * @param bool $allowDecoration
      *
      * @return RouteHandler
      * @throws RouteNotFoundException
      */
-    public function resolve($url = null, $allowDecoration = true) {
+    public function resolve($request, $url = null, $allowDecoration = true) {
 
         if (!$url)
-            $url = $this->request->getUrl();
+            $url = $request->getUrl();
 
 
         $routeHandler = null;
@@ -73,25 +74,23 @@ class RouteResolver {
         // This is prioritised because it is the most usual scenario for REST APIs etc.
         list($controllerClassInspector, $remainingSegments) = $this->resolveController("Controllers", $url->getPathSegments());
         if ($controllerClassInspector) {
-            $method = $this->resolveMethod($controllerClassInspector, $remainingSegments);
+            $method = $this->resolveMethod($request, $controllerClassInspector, $remainingSegments);
             if ($method) {
-                $routeHandler = new ControllerRouteHandler($method, $this->request, join("/", $remainingSegments));
+                $routeHandler = new ControllerRouteHandler($method, $request, join("/", $remainingSegments));
             }
         }
 
 
         // Now look for any direct views mathing the full request path.
         try {
-            $routeHandler = new ViewOnlyRouteHandler($url->getPath());
+            $routeHandler = new ViewOnlyRouteHandler($url->getPath(), $request);
         } catch (ViewNotFoundException $e) {
         }
 
 
         // If no route handler has been found, or if it is a view only route handler or if not a
         // JSON response method, check for decoration.
-        if ($allowDecoration && (!$routeHandler || $routeHandler instanceof ViewOnlyRouteHandler || ($method->getReturnType() &&
-                    $method->getReturnType()->isInstanceOf(Response::class) &&
-                    !$method->getReturnType()->isInstanceOf(JSONResponse::class)))) {
+        if ($allowDecoration && (!$routeHandler || $routeHandler->getRouteType() == RouteHandler::ROUTE_TYPE_WEB)) {
 
             // Check for decorators in the path and failing that for a default decorator.
             list($decoratorClassInspector, $remainingSegments) = $this->resolveController("Decorators", $url->getPathSegments());
@@ -112,11 +111,11 @@ class RouteResolver {
 
                 if (!$routeHandler) {
 
-                    $routeHandler = $this->resolve(new URL(strtolower($url->getProtocol()) . "://" . $url->getHost() . "/" . join("/", $remainingSegments)), false);
+                    $routeHandler = $this->resolve($request, new URL(strtolower($url->getProtocol()) . "://" . $url->getHost() . "/" . join("/", $remainingSegments)), false);
                 }
 
                 if ($routeHandler)
-                    $routeHandler = new DecoratorRouteHandler($decoratorMethod, $routeHandler, $this->request);
+                    $routeHandler = new DecoratorRouteHandler($decoratorMethod, $routeHandler, $request);
             }
 
         }
@@ -164,18 +163,19 @@ class RouteResolver {
     /**
      * Resolve a method for a controller using remaining path segments
      *
+     * @param $request
      * @param ClassInspector $controllerClassInspector
      * @param string[] $pathSegments
      *
      * @return Method
      */
-    private function resolveMethod($controllerClassInspector, $pathSegments) {
+    private function resolveMethod($request, $controllerClassInspector, $pathSegments) {
 
         // Get a match string for matching below
         $requestPath = join("/", $pathSegments);
 
         // Obtain Request Method for matching below.
-        $requestMethod = $this->request->getRequestMethod();
+        $requestMethod = $request->getRequestMethod();
 
         // Loop through all public methods looking for viable matches
         $methodMatch = null;
