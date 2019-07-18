@@ -6,6 +6,11 @@ use Kinikit\MVC\API\APIConfiguration;
 
 include_once "autoloader.php";
 
+/**
+ * Class APIInfoTest
+ * @package Kinikit\MVC\API\Descriptor
+ *
+ */
 class APIInfoTest extends \PHPUnit\Framework\TestCase {
 
 //
@@ -130,5 +135,9 @@ class APIInfoTest extends \PHPUnit\Framework\TestCase {
 //
 //    }
 
+
+    public function testTest() {
+        $this->assertTrue(true);
+    }
 
 }

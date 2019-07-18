@@ -1,1 +1,0 @@
-Hello {{var1}}, The current user is {{session.user}} and the passed request parameter was {{request.baby}}.  I wonder if {{session.count}} times is quite enough for the current {{request.page}}.

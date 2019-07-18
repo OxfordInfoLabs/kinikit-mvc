@@ -15,7 +15,7 @@ use Kinikit\MVC\Framework\API\Descriptor\APIInfo;
 use Kinikit\MVC\Framework\Controller;
 use Kinikit\MVC\Framework\ModelAndView;
 
-class apidoc extends Controller {
+class APIDoc extends Controller {
 
 
     public function defaultHandler($format = "HTML") {

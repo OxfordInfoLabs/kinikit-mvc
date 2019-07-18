@@ -1,4 +1,0 @@
-<FieldValidators>
-    <RegexpFieldValidator phpNameSpace="Kinikit\Core\Validation\FieldValidators" key="macaroni"
-                          regexp="[0-9][A-Z]" validationMessage="This field is not Macaroni"/>
-</FieldValidators>

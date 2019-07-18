@@ -1,1 +1,0 @@
-Hello <?php echo $var1; ?> and <?php echo $var2; ?>, You are all waiting for <?php echo $var3; ?>.  Too bad <?php echo $var1; ?> and <?php echo $var2; ?>:  You will never meet <?php echo $var3; ?>.
