@@ -187,12 +187,13 @@ class Request {
 
             // Grab the PHP input stream.
             $directPHPInput = file_get_contents("php://input");
-            $explodedParams = explode("&", $directPHPInput);
 
             // If only one param and not a key value pair, assume payload.
-            if (sizeof($explodedParams) == 1 && !preg_match("/^[a-z0-9A-Z]+\=/", $explodedParams[0])) {
-                $this->payload = rawurldecode($explodedParams[0]);
+            if (!preg_match("/^[a-z0-9A-Z]+\=/", $directPHPInput)) {
+                $this->payload = rawurldecode($directPHPInput);
             } else {
+
+                $explodedParams = explode("&", $directPHPInput);
 
                 // Convert post params
                 foreach ($explodedParams as $param) {
