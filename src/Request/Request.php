@@ -166,11 +166,13 @@ class Request {
 
         // Do the URL first
         $url = isset($_SERVER["HTTPS"]) ? "https" : "http";
-        $url .= "://" . $_SERVER["HTTP_HOST"] . ":" . $_SERVER["SERVER_PORT"];
+        $url .= "://" . ($_SERVER["HTTP_HOST"] ?? "") . ":" . ($_SERVER["SERVER_PORT"] ?? 80);
         $url .= $_SERVER["REQUEST_URI"];
         if (isset($_SERVER['QUERY_STRING'])) {
             $url .= "?" . $_SERVER['QUERY_STRING'];
         }
+
+
         $this->url = new URL($url);
 
 
