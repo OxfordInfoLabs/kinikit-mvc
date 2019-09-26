@@ -4,7 +4,7 @@ php:
 before_script: composer install; cd test
 script: phpunit .
 after_success:
-  - "../trigger_travis_build.sh kinicart"
+  - "../trigger_travis_build.sh kiniauth"
 env:
   global:
     secure: l+KQ83uwAnlAwfWs3J36+Bdrbe0Vz2CrF0smcUaY1i9F4gMi6TcoUxdSSIJ2CKxZalH60o0na7IYdjTRaEybS7a5DXv8+yuU0fZyjqpVRJqeTn4Y/PUzBnAaOgOwInSjCgVTYzmR5+I5gAlFA/B/YY8ZchTYrzz9CNKasEqHGFlld4nvjpJVNmKPJ6S6QHejsXUdsxuG7lnRSEA8TrTxmJJswV+PzHDbzfMeYblIOEppWcH2P1mPj8AgTK5U1WPGl3cX5/OrhgmCg278YMKXhum6u/ZP8tbEC/e6Vhx7Ur3jBrPmsgJeUh3fLpbr7SL4gduJLFR1KxorwMOEt7aYf9BmQI/5BS4onto0t6LxOmpbxj2m8SamNoQOH/qrWs/TWDaAjqrIOPK/Z+f5gzk07cmcMMS/TdMTYceSAD79mxVI7jU4JOzo7xbV5MHc2xSwuDKLHP4jwkv65t4VR1PIJ5A6XizVrnYIMHn9JfU+xaLa3f0gOiwHsgcrMTTOFiHxWlQRLYs8m1ewTa25oQYx5+MVmaq6PrVgfIpbNMVkEzvjSyJdhowm41mzn+JC7BG1Xq3Tmo9YYE1634mF/XEtkmqCxVLHLb3BUHlH7BQJAJ0ms9uEDbxlrCjpd8Zrr+soUYDO6u/6TxxfzjAeDd+zP4f1dTpx7oilHwv7/U1oRwQ=
