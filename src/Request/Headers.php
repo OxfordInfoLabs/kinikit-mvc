@@ -3,7 +3,11 @@
 
 namespace Kinikit\MVC\Request;
 
-
+/**
+ * Class Headers
+ * @package Kinikit\MVC\Request
+ * @noProxy
+ */
 class Headers {
 
     private $acceptContentType;

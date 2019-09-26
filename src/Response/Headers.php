@@ -2,7 +2,11 @@
 
 namespace Kinikit\MVC\Response;
 
-
+/**
+ * Class Headers
+ * @package Kinikit\MVC\Response
+ * @noProxy
+ */
 class Headers {
 
 

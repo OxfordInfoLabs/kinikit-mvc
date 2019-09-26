@@ -25,7 +25,6 @@ class RouterTest extends \PHPUnit\Framework\TestCase {
 
     public function setUp(): void {
         $_SERVER["HTTP_HOST"] = "localhost";
-        $_SERVER["SERVER_PORT"] = 80;
         $_SERVER["REQUEST_METHOD"] = "GET";
         $_SERVER["REQUEST_URI"] = "/";
         $this->router = Container::instance()->get(Router::class);
@@ -251,7 +250,6 @@ class RouterTest extends \PHPUnit\Framework\TestCase {
 
         $request = new Request(new Headers());
         $response = $this->router->processRequest($request);
-
 
         $this->assertTrue($response instanceof View);
         $this->assertEquals("error/error404", $response->getViewName());

@@ -38,7 +38,7 @@ class View extends Response {
      */
     public function __construct($viewName, $model = [], $responseCode = 200) {
         parent::__construct($responseCode);
-
+        
         // Wrap any file not founds for views as custom exception
         try {
             $this->viewContentSource = new FileContentSource("Views/" . $viewName . ".php");

@@ -7,6 +7,7 @@ namespace Kinikit\MVC\RouteHandler;
 use Kinikit\Core\Binding\ObjectBinder;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\StatusException;
+use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\Core\Serialisation\JSON\JSONToObjectConverter;
 use Kinikit\Core\Util\Primitive;
@@ -133,8 +134,17 @@ class ControllerRouteHandler extends RouteHandler {
         }
 
 
+        /**
+         * @var ClassInspectorProvider $classInspectorProvider
+         */
+        $classInspectorProvider = Container::instance()->get(ClassInspectorProvider::class);
+        $classInspector = $classInspectorProvider->getClassInspector(get_class($instance));
+        
+        // Grab the proxied method
+        $proxiedMethod = $classInspector->getPublicMethod($this->targetMethod->getMethodName());
+
         // Execute the method - Exceptions are handled higher up the food chain.
-        $result = $this->targetMethod->call($instance, $params);
+        $result = $proxiedMethod->call($instance, $params);
 
         if ($result instanceof Response) {
 

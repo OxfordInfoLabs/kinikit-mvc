@@ -256,9 +256,9 @@ class Router {
         $_SERVER["REQUEST_URI"] = $route;
         $_GET = ["errorMessage" => $errorMessage, "errorCode" => $errorCode];
 
+       
         $routeHandler = $this->routeResolver->resolve(new Request(new Headers()));
         $response = $routeHandler->handleRoute();
-
 
         if (!$response->getResponseCode() || $response->getResponseCode() == 200) {
             $response->setResponseCode($responseCode);

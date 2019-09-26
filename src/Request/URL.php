@@ -154,8 +154,9 @@ class URL {
      * Process this url
      */
     private function process($url) {
-        preg_match("/^(https*):\/\/([^:\/]+)(:*[0-9]*)([^\?]*)(\?*.*)$/", $url, $matches);
 
+        preg_match("/^(https*):\/\/([^:\/]+)(:*[0-9]*)([^\?]*)(\?*.*)$/", $url, $matches);
+        
         if (sizeof($matches) > 1) {
             $this->protocol = strtoupper($matches[1]);
         }
@@ -172,6 +173,7 @@ class URL {
         if (sizeof($matches) > 4) {
             $this->pathSegments = explode("/", ltrim($matches[4], "/"));
         }
+
 
         if (sizeof($matches) > 5) {
             $rawParams = explode("&", ltrim($matches[5], "?"));

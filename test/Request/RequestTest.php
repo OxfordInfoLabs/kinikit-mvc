@@ -22,8 +22,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase {
 
 
         unset($_SERVER["HTTPS"]);
-        $_SERVER["SERVER_PORT"] = 8080;
-        $_SERVER['HTTP_HOST'] = "www.myspace.com";
+        $_SERVER['HTTP_HOST'] = "www.myspace.com:8080";
         $_SERVER['REQUEST_URI'] = "/";
         unset($_SERVER['QUERY_STRING']);
 

@@ -23,6 +23,7 @@ use Kinikit\MVC\RouteHandler\MissingDecoratorHandlerException;
  * Resolve the current request route to a handler which is an instance of RouteHandler.
  * Throw a RouteNotFound exception if the route doesn't map to a handler.
  *
+ * @noProxy
  * Class ControllerMethodResolver
  */
 class RouteResolver {
@@ -145,7 +146,7 @@ class RouteResolver {
                 preg_match("/class (.*?) {/", $controllerSource, $classMatches);
                 if (sizeof($classMatches) > 1) {
 
-                    $className = ($namespaceMatches[1] ?? "") . "\\" . $classMatches[1];
+                    $className = trim(($namespaceMatches[1] ?? "") . "\\" . $classMatches[1]);
 
                     if (!class_exists($className))
                         include_once $resolved;
