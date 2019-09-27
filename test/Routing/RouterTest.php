@@ -240,6 +240,9 @@ class RouterTest extends \PHPUnit\Framework\TestCase {
     }
 
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testRouteNotFoundExceptionsAreAlwaysMappedToGeneralErrorWebResponse() {
 
         Configuration::instance()->addParameter("default.decorator", null);
@@ -289,6 +292,9 @@ class RouterTest extends \PHPUnit\Framework\TestCase {
     }
 
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testExceptionsForJSONMethodsAreEncodedAsJSONResponsesWithAppropriateStatusCode() {
 
         $_SERVER["REQUEST_METHOD"] = "GET";
