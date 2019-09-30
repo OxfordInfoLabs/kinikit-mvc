@@ -216,8 +216,10 @@ class Router {
             $accessControlOrigin = "*";
         } else if ($accessControlOrigin == "REFERRER") {
             $referrer = $request->getReferringURL();
-            $accessControlOrigin = strtolower($referrer->getProtocol()) . "://" . $referrer->getHost() . ($referrer->getPort() ? ":" . $referrer->getPort() : "");
-            $response->setHeader(\Kinikit\MVC\Response\Headers::HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+            if ($referrer) {
+                $accessControlOrigin = strtolower($referrer->getProtocol()) . "://" . $referrer->getHost() . ($referrer->getPort() ? ":" . $referrer->getPort() : "");
+                $response->setHeader(\Kinikit\MVC\Response\Headers::HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+            }
         }
         $response->setHeader(\Kinikit\MVC\Response\Headers::HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, $accessControlOrigin);
 
