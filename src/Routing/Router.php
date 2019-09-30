@@ -6,6 +6,7 @@ namespace Kinikit\MVC\Routing;
 use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\StatusException;
+use Kinikit\Core\Init;
 use Kinikit\MVC\Alias\AliasMapper;
 use Kinikit\MVC\ContentCaching\ContentCacheEvaluator;
 use Kinikit\MVC\ContentCaching\ContentCacheConfig;
@@ -80,6 +81,8 @@ class Router {
      */
     public static function route() {
 
+        // New initialiser
+        Container::instance()->get(Init::class);
 
         /**
          * @var Router $router
@@ -256,7 +259,7 @@ class Router {
         $_SERVER["REQUEST_URI"] = $route;
         $_GET = ["errorMessage" => $errorMessage, "errorCode" => $errorCode];
 
-       
+
         $routeHandler = $this->routeResolver->resolve(new Request(new Headers()));
         $response = $routeHandler->handleRoute();
 
