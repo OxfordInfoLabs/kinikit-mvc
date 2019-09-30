@@ -3,6 +3,7 @@
 
 namespace Kinikit\MVC\Routing;
 
+use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\StatusException;
@@ -208,6 +209,18 @@ class Router {
         if (isset($cacheConfig) && $cacheConfig) {
             $cacheEvaluator->cacheResult($cacheConfig, $request->getUrl()->getPath(true), $response);
         }
+
+        // Handle Cross Origin logic before return.
+        $accessControlOrigin = Configuration::readParameter("access.control.origin");
+        if (!$accessControlOrigin) {
+            $accessControlOrigin = "*";
+        } else if ($accessControlOrigin == "REFERRER") {
+            $referrer = $request->getReferringURL();
+            $accessControlOrigin = strtolower($referrer->getProtocol()) . "://" . $referrer->getHost() . ($referrer->getPort() ? ":" . $referrer->getPort() : "");
+            $response->setHeader(\Kinikit\MVC\Response\Headers::HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+        }
+        $response->setHeader(\Kinikit\MVC\Response\Headers::HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, $accessControlOrigin);
+
 
         // Finally return the response.
         return $response;
