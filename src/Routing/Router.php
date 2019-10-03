@@ -204,11 +204,15 @@ class Router {
             } // Handle JSON route errors.
             else {
                 $exceptionArray = $this->objectBinder->bindToArray($e);
-                unset($exceptionArray["file"]);
-                unset($exceptionArray["line"]);
-                unset($exceptionArray["previous"]);
-                unset($exceptionArray["trace"]);
-                unset($exceptionArray["traceAsString"]);
+
+                if (is_array($exceptionArray)) {
+                    unset($exceptionArray["file"]);
+                    unset($exceptionArray["line"]);
+                    unset($exceptionArray["previous"]);
+                    unset($exceptionArray["trace"]);
+                    unset($exceptionArray["traceAsString"]);
+                }
+
                 $response = new JSONResponse($exceptionArray, $responseCode);
             }
 
