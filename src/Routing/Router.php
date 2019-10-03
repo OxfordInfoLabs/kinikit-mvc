@@ -3,6 +3,7 @@
 
 namespace Kinikit\MVC\Routing;
 
+use Kinikit\Core\Binding\ObjectBinder;
 use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\DependencyInjection\Container;
@@ -61,6 +62,12 @@ class Router {
 
 
     /**
+     * @var ObjectBinder
+     */
+    private $objectBinder;
+
+
+    /**
      * Router constructor.
      *
      * @param Request $request
@@ -68,13 +75,15 @@ class Router {
      * @param RouteResolver $routeResolver
      * @param RouteInterceptorProcessor $routeInterceptorProcessor
      * @param FileResolver $fileResolver
+     * @param ObjectBinder $objectBinder
      */
-    public function __construct($request, $aliasMapper, $routeResolver, $routeInterceptorProcessor, $fileResolver) {
+    public function __construct($request, $aliasMapper, $routeResolver, $routeInterceptorProcessor, $fileResolver, $objectBinder) {
         $this->request = $request;
         $this->aliasMapper = $aliasMapper;
         $this->routeResolver = $routeResolver;
         $this->routeInterceptorProcessor = $routeInterceptorProcessor;
         $this->fileResolver = $fileResolver;
+        $this->objectBinder = $objectBinder;
     }
 
     /**
@@ -194,7 +203,13 @@ class Router {
 
             } // Handle JSON route errors.
             else {
-                $response = new JSONResponse(["errorMessage" => $e->getMessage(), "errorCode" => $e->getCode()], $responseCode);
+                $exceptionArray = $this->objectBinder->bindToArray($e);
+                unset($exceptionArray["file"]);
+                unset($exceptionArray["line"]);
+                unset($exceptionArray["previous"]);
+                unset($exceptionArray["trace"]);
+                unset($exceptionArray["traceAsString"]);
+                $response = new JSONResponse($exceptionArray, $responseCode);
             }
 
 
