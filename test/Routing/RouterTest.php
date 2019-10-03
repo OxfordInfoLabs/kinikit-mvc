@@ -303,7 +303,7 @@ class RouterTest extends \PHPUnit\Framework\TestCase {
         $request = new Request(new Headers());
         $response = $this->router->processRequest($request);
 
-        $this->assertEquals(new JSONResponse(["errorMessage" => "Should return a custom error response code", "errorCode" => 50], 406), $response);
+        $this->assertEquals(new JSONResponse(["statusCode" => 406, "message" => "Should return a custom error response code", "code" => 50 ], 406), $response);
 
 
         // Check interceptors still fire.
