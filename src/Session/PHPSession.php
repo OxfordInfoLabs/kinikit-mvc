@@ -8,6 +8,7 @@ use Kinikit\Core\Configuration\Configuration;
  * Convenient static class for accessing the http session.  Adds built in methods for the core stuff like getting
  * logged in user as well as a generic get / set property for user use.
  *
+ * @noProxy
  */
 class PHPSession implements Session {
 
