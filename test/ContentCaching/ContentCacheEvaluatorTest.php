@@ -13,7 +13,7 @@ class ContentCacheEvaluatorTest extends \PHPUnit\Framework\TestCase {
         /**
          * @var $testCache TestCache
          */
-        Container::instance()->addInterfaceMapping(ContentCache::class, TestCache::class);
+        Container::instance()->addClassMapping(ContentCache::class, TestCache::class);
 
 
         $testCache = Container::instance()->get(ContentCache::class);
