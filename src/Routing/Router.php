@@ -8,7 +8,7 @@ use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\StatusException;
-use Kinikit\Core\Init;
+use Kinikit\Core\Bootstrapper;
 use Kinikit\MVC\Alias\AliasMapper;
 use Kinikit\MVC\ContentCaching\ContentCacheEvaluator;
 use Kinikit\MVC\ContentCaching\ContentCacheConfig;
@@ -92,7 +92,7 @@ class Router {
     public static function route() {
 
         // New initialiser
-        Container::instance()->get(Init::class);
+        Container::instance()->get(Bootstrapper::class);
 
         /**
          * @var Router $router

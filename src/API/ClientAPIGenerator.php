@@ -3,7 +3,7 @@
 namespace Kinikit\MVC\API;
 
 use Kinikit\Core\Configuration;
-use Kinikit\Core\Init;
+use Kinikit\Core\Bootstrapper;
 use Kinikit\Core\Object\SerialisableObject;
 use Kinikit\Core\Template\Parser\MustacheTemplateParser;
 use Kinikit\Core\Util\Annotation\ClassAnnotationParser;
@@ -33,7 +33,7 @@ class ClientAPIGenerator {
     // Run the client API generator from composer.
     public static function runFromComposer($event) {
 
-        new Init();
+        new Bootstrapper();
 
         $sourceDirectory = $event && isset($event->getComposer()->getPackage()->getConfig()["source-directory"]) ?
             $event->getComposer()->getPackage()->getConfig()["source-directory"] : ".";
