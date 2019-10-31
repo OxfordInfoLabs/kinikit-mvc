@@ -171,8 +171,8 @@ class Request {
 
         // Do the URL first
         $url = isset($_SERVER["HTTPS"]) ? "https" : "http";
-        $url .= "://" . $_SERVER["HTTP_HOST"];
-        $url .= "/" . ltrim($_SERVER["REQUEST_URI"], "/");
+        $url .= "://" . ($_SERVER["HTTP_HOST"] ?? "localhost");
+        $url .= "/" . ltrim($_SERVER["REQUEST_URI"] ?? "/", "/");
         if (isset($_SERVER['QUERY_STRING'])) {
             $url .= "?" . $_SERVER['QUERY_STRING'];
         }
