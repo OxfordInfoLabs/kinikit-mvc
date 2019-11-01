@@ -51,6 +51,21 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, ""), $resolver->resolve($request));
 
 
+        // Check a query parameters only one, make sure it also resolves to the root.
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["REQUEST_URI"] = "/rest?param1=test&param2=test2";
+        $_SERVER["QUERY_STRING"] = "?param1=test&param2=test2";
+
+        $request = new Request(new Headers());
+        $resolver = new RouteResolver($this->classInspectorProvider, $this->fileResolver);
+
+        $targetMethod = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("list");
+
+        $this->assertEquals(new ControllerRouteHandler($targetMethod, $request, ""), $resolver->resolve($request));
+
+        unset($_SERVER["QUERY_STRING"]);
+
+
         $_SERVER["REQUEST_METHOD"] = "GET";
         $_SERVER["REQUEST_URI"] = "/rest/256";
 
@@ -200,7 +215,7 @@ class RouteResolverTest extends \PHPUnit\Framework\TestCase {
         $resolver = new RouteResolver($this->classInspectorProvider, $this->fileResolver);
 
         $handler = $resolver->resolve($request);
-        $this->assertEquals(new ViewOnlyRouteHandler("teststaticview",$request), $handler);
+        $this->assertEquals(new ViewOnlyRouteHandler("teststaticview", $request), $handler);
 
 
     }
