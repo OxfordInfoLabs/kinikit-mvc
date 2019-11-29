@@ -9,6 +9,7 @@ use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\StatusException;
 use Kinikit\Core\Bootstrapper;
+use Kinikit\Core\Logging\Logger;
 use Kinikit\MVC\Alias\AliasMapper;
 use Kinikit\MVC\ContentCaching\ContentCacheEvaluator;
 use Kinikit\MVC\ContentCaching\ContentCacheConfig;
@@ -175,8 +176,12 @@ class Router {
 
         } catch (\Throwable $e) {
 
+
+
             // Generate responses based upon the route type, falling back to web for exceptions raised at the first stage.
             $routeType = isset($routeHandler) ? $routeHandler->getRouteType() : RouteHandler::ROUTE_TYPE_WEB;
+
+
 
             // Get the status code
             $responseCode = $e instanceof StatusException ? $e->getStatusCode() : 500;
@@ -203,6 +208,7 @@ class Router {
 
             } // Handle JSON route errors.
             else {
+
                 $exceptionArray = $this->objectBinder->bindToArray($e);
 
                 if (is_array($exceptionArray)) {
