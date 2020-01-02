@@ -177,10 +177,8 @@ class Router {
         } catch (\Throwable $e) {
 
 
-
             // Generate responses based upon the route type, falling back to web for exceptions raised at the first stage.
             $routeType = isset($routeHandler) ? $routeHandler->getRouteType() : RouteHandler::ROUTE_TYPE_WEB;
-
 
 
             // Get the status code
@@ -242,7 +240,7 @@ class Router {
         } else if ($accessControlOrigin == "REFERRER") {
             $referrer = $request->getReferringURL();
             if ($referrer) {
-                $accessControlOrigin = strtolower($referrer->getProtocol()) . "://" . $referrer->getHost() . ($referrer->getPort() ? ":" . $referrer->getPort() : "");
+                $accessControlOrigin = strtolower($referrer->getProtocol()) . "://" . $referrer->getHost() . ($referrer->getPort() != "80" && $referrer->getPort() != "443" ? ":" . $referrer->getPort() : "");
                 $response->setHeader(\Kinikit\MVC\Response\Headers::HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
             }
         }
