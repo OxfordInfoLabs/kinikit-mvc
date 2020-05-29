@@ -6,7 +6,9 @@ namespace Kinikit\MVC\RouteHandler;
 
 use http\Env\Response;
 use Kinikit\Core\DependencyInjection\Container;
+use Kinikit\Core\Exception\WrongParameterTypeException;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
+use Kinikit\Core\Util\Primitive;
 use Kinikit\MVC\Controllers\REST;
 use Kinikit\MVC\Objects\TestRESTObject;
 use Kinikit\MVC\RateLimiter\RateLimiterConfig;
@@ -87,6 +89,30 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
 
 
     }
+
+
+    public function testExceptionRaisedIfBadPrimitiveParameterTypesPassedForMethod(){
+        // Handle boolean input params properly as well
+        $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("getOnly");
+
+        $_GET["param1"] = "Mark Polo";
+        $_GET["param2"] = "bingo";
+        $_GET["param3"] = "Goodbye";
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "getOnly");
+
+        echo Primitive::isOfPrimitiveType("float", "hello");
+
+
+        try {
+            $handler->handleRoute();
+            $this->fail("Should have thrown here");
+        } catch(WrongParameterTypeException $e){
+            $this->assertTrue(true);
+        }
+    }
+
 
 
     public function testCanHandleRoutesForPayloadRESTMethods() {

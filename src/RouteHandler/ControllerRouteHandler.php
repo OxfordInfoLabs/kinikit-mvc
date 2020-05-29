@@ -7,6 +7,7 @@ namespace Kinikit\MVC\RouteHandler;
 use Kinikit\Core\Binding\ObjectBinder;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\StatusException;
+use Kinikit\Core\Exception\WrongParameterTypeException;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\Core\Serialisation\JSON\JSONToObjectConverter;
@@ -113,6 +114,7 @@ class ControllerRouteHandler extends RouteHandler {
             $params[$key] = $this->sanitiseParamValue($key, $value);
         }
 
+
         // Finally poke in any other unresolved request objects as autowires.
         foreach ($methodParams as $methodParam) {
             if (!isset($params[$methodParam->getName()])) {
@@ -139,7 +141,7 @@ class ControllerRouteHandler extends RouteHandler {
          */
         $classInspectorProvider = Container::instance()->get(ClassInspectorProvider::class);
         $classInspector = $classInspectorProvider->getClassInspector(get_class($instance));
-        
+
         // Grab the proxied method
         $proxiedMethod = $classInspector->getPublicMethod($this->targetMethod->getMethodName());
 
@@ -167,10 +169,15 @@ class ControllerRouteHandler extends RouteHandler {
 
         $methodParams = $this->targetMethod->getIndexedParameters();
 
+
         // Only bother if there are method params matching our method.
         if (isset($methodParams[$paramKey])) {
 
             if ($methodParams[$paramKey]->isPrimitive()) {
+
+                if (!Primitive::isOfPrimitiveType($methodParams[$paramKey]->getType(), $paramValue))
+                    throw new WrongParameterTypeException("The parameter $paramKey is of the wrong type");
+
                 return Primitive::convertToPrimitive($methodParams[$paramKey]->getType(), $paramValue);
             }
 
