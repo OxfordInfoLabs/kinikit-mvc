@@ -5,7 +5,9 @@ namespace Kinikit\MVC\RouteHandler;
 
 
 use Kinikit\Core\Binding\ObjectBinder;
+use Kinikit\Core\Binding\ObjectBindingException;
 use Kinikit\Core\DependencyInjection\Container;
+use Kinikit\Core\Exception\InsufficientParametersException;
 use Kinikit\Core\Exception\StatusException;
 use Kinikit\Core\Exception\WrongParameterTypeException;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
@@ -104,7 +106,17 @@ class ControllerRouteHandler extends RouteHandler {
             if (sizeof($methodParams) > sizeof($params)) {
                 $payloadParam = $methodParams[sizeof($params)];
                 $converter = Container::instance()->get(JSONToObjectConverter::class);
-                $params[$payloadParam->getName()] = $converter->convert($this->request->getPayload(), $payloadParam->getType());
+
+                try {
+                    $params[$payloadParam->getName()] = $converter->convert($this->request->getPayload(), $payloadParam->getType());
+
+                    if ($payloadParam->isRequired() && !$params[$payloadParam->getName()]) {
+                        throw new WrongParameterTypeException("The parameter {$payloadParam->getName()} is of the wrong type or badly formed");
+                    }
+                } catch (ObjectBindingException $e) {
+                    throw new WrongParameterTypeException("the parameter {$payloadParam->getName()} is of the wrong type or badly formed");
+                }
+
             }
         }
 
@@ -145,8 +157,12 @@ class ControllerRouteHandler extends RouteHandler {
         // Grab the proxied method
         $proxiedMethod = $classInspector->getPublicMethod($this->targetMethod->getMethodName());
 
-        // Execute the method - Exceptions are handled higher up the food chain.
-        $result = $proxiedMethod->call($instance, $params);
+        // Execute the method - Trap insufficient parameters exception
+        try {
+            $result = $proxiedMethod->call($instance, $params);
+        } catch (InsufficientParametersException $e) {
+            throw new InsufficientParametersException("Insufficient parameters passed");
+        }
 
         if ($result instanceof Response) {
 
