@@ -28,6 +28,7 @@ class RouteInterceptor {
      * By default this method returns the response intact but an alternative response can be returned here if required.
      *
      * @param Response $response
+     * @return Response
      */
     public function afterRoute($response) {
         return $response;

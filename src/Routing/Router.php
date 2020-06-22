@@ -135,50 +135,55 @@ class Router {
                 $url = new URL(strtolower($url->getProtocol()) . "://" . $url->getHost() . ":" . $url->getPort() . "/" . $aliasMapped);
             }
 
-            // Resolve the route up front to help us with exception handling later
-            $routeHandler = $this->routeResolver->resolve($request, $url);
 
             // Get the interceptor handler for this request.
             $routeInterceptorHandler = $this->routeInterceptorProcessor->getInterceptorHandlerForRequest($url->getPath());
 
-            /**
-             * Grab any rate limiter config and / or cache config.
-             *
-             * @var RateLimiterConfig $rateLimiterConfig
-             * @var ContentCacheConfig $cacheConfig
-             */
-            list($rateLimiterConfig, $cacheConfig) = $this->getRateLimitAndCachingConfig($routeHandler, $routeInterceptorHandler);
-
-            // If rate limiter config, apply rate limiting now
-            if ($rateLimiterConfig) {
-                $rateLimiterEvaluator = Container::instance()->get(RateLimiterEvaluator::class);
-                $rateLimiterEvaluator->evaluateRateLimiter($rateLimiterConfig);
-            }
-
-
-            // If cache config, checked for cached response first.
-            if ($cacheConfig) {
-                $cacheEvaluator = Container::instance()->get(ContentCacheEvaluator::class);
-                $response = $cacheEvaluator->getCachedResult($cacheConfig, $request->getUrl()->getPath(true));
-                if ($response) {
-                    return $response;
-                }
-            }
-
-
-            // Run before interceptors.
+            // Run before interceptors as first stage.
             $response = $routeInterceptorHandler->processBeforeRoute($request);
 
-            // Handle the route and collect the response only if no response from before route
-            if (!$response)
+            // If no response from before route, proceed to resolve the route.
+            if (!$response) {
+
+                // Resolve the route up front to help us with exception handling later
+                $routeHandler = $this->routeResolver->resolve($request, $url);
+
+                /**
+                 * Grab any rate limiter config and / or cache config.
+                 *
+                 * @var RateLimiterConfig $rateLimiterConfig
+                 * @var ContentCacheConfig $cacheConfig
+                 */
+                list($rateLimiterConfig, $cacheConfig) = $this->getRateLimitAndCachingConfig($routeHandler, $routeInterceptorHandler);
+
+                // If rate limiter config, apply rate limiting now
+                if ($rateLimiterConfig) {
+                    $rateLimiterEvaluator = Container::instance()->get(RateLimiterEvaluator::class);
+                    $rateLimiterEvaluator->evaluateRateLimiter($rateLimiterConfig);
+                }
+
+
+                // If cache config, checked for cached response first.
+                if ($cacheConfig) {
+                    $cacheEvaluator = Container::instance()->get(ContentCacheEvaluator::class);
+                    $response = $cacheEvaluator->getCachedResult($cacheConfig, $request->getUrl()->getPath(true));
+                    if ($response) {
+                        return $response;
+                    }
+                }
+
+
+                // Handle the route and collect the response only if no response from before route
+
                 $response = $routeHandler->handleRoute();
+            }
 
 
         } catch (\Throwable $e) {
 
 
-            // Generate responses based upon the route type, falling back to web for exceptions raised at the first stage.
-            $routeType = isset($routeHandler) ? $routeHandler->getRouteType() : RouteHandler::ROUTE_TYPE_WEB;
+            // Generate responses based upon the route type, falling back to json for exceptions raised at the first stage.
+            $routeType = isset($routeHandler) ? $routeHandler->getRouteType() : RouteHandler::ROUTE_TYPE_JSON;
 
 
             // Get the status code
@@ -222,6 +227,7 @@ class Router {
 
 
         }
+
 
         // Run after routes if possible
         if (isset($routeInterceptorHandler)) {

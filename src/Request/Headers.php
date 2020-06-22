@@ -3,6 +3,8 @@
 
 namespace Kinikit\MVC\Request;
 
+use Kinikit\Core\Util\ObjectArrayUtils;
+
 /**
  * Class Headers
  * @package Kinikit\MVC\Request
@@ -16,6 +18,9 @@ class Headers {
     private $acceptLanguage;
     private $connection;
     private $userAgent;
+
+    // Custom headers
+    private $customHeaders = [];
 
 
     public function __construct() {
@@ -65,6 +70,17 @@ class Headers {
         return $this->userAgent;
     }
 
+
+    /**
+     * Get a custom header by name
+     *
+     * @param $name
+     */
+    public function getCustomHeader($name) {
+        return $this->customHeaders[$name] ?? null;
+    }
+
+
     // Populate from current request
     private function parseCurrentRequest() {
         $this->acceptContentType = isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : null;
@@ -73,6 +89,16 @@ class Headers {
         $this->acceptLanguage = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : null;;
         $this->connection = isset($_SERVER['HTTP_CONNECTION']) ? $_SERVER['HTTP_CONNECTION'] : null;;
         $this->userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;;
+
+        // Grab any custom headers
+        foreach ($_SERVER as $key => $value) {
+            if (substr($key, 0, 5) == "HTTP_") {
+                $header = substr($key, 5);
+                $this->customHeaders[$header] = $value;
+            }
+        }
+
+
     }
 
 

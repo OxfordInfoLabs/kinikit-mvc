@@ -243,7 +243,7 @@ class RouterTest extends \PHPUnit\Framework\TestCase {
     /**
      * @runInSeparateProcess
      */
-    public function testRouteNotFoundExceptionsAreAlwaysMappedToGeneralErrorWebResponse() {
+    public function testRouteNotFoundExceptionsAreAlwaysMappedToGeneralJSONResponse() {
 
         Configuration::instance()->addParameter("default.decorator", null);
 
@@ -254,15 +254,14 @@ class RouterTest extends \PHPUnit\Framework\TestCase {
         $request = new Request(new Headers());
         $response = $this->router->processRequest($request);
 
-        $this->assertTrue($response instanceof View);
-        $this->assertEquals("error/error404", $response->getViewName());
+        $this->assertTrue($response instanceof JSONResponse);
 
-        $this->assertEquals("The route idontexist cannot be found.", $response->getModel()["request"]->getParameter("errorMessage"));
+        $this->assertEquals("The route idontexist cannot be found.", $response->getObject()["message"]);
 
 
-        // Check no interceptors fired here.
-        $this->assertEquals(0, TestRouteInterceptor1::$beforeRoutes);
-        $this->assertEquals(0, TestRouteInterceptor1::$afterRoutes);
+        // Check interceptors still fire.
+        $this->assertEquals(1, TestRouteInterceptor1::$beforeRoutes);
+        $this->assertEquals(1, TestRouteInterceptor1::$afterRoutes);
 
 
     }
@@ -303,7 +302,7 @@ class RouterTest extends \PHPUnit\Framework\TestCase {
         $request = new Request(new Headers());
         $response = $this->router->processRequest($request);
 
-        $this->assertEquals(new JSONResponse(["statusCode" => 406, "message" => "Should return a custom error response code", "code" => 50 ], 406), $response);
+        $this->assertEquals(new JSONResponse(["statusCode" => 406, "message" => "Should return a custom error response code", "code" => 50], 406), $response);
 
 
         // Check interceptors still fire.
