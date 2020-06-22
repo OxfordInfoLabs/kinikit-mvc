@@ -8,6 +8,7 @@ use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\MVC\ContentCaching\ContentCacheConfig;
 use Kinikit\MVC\RateLimiter\RateLimiterConfig;
+use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\Request;
 use Kinikit\MVC\Response\SimpleResponse;
 
@@ -89,7 +90,7 @@ class RouteInterceptorHandlerTest extends \PHPUnit\Framework\TestCase {
     public function testAllAfterRouteMethodsCalledOnProcess() {
 
         $handler = new RouteInterceptorHandler([new TestRouteInterceptor1()], $this->classInspectorProvider);
-        $response = $handler->processAfterRoute(new SimpleResponse("Hello world"));
+        $response = $handler->processAfterRoute(new Request(new Headers()), new SimpleResponse("Hello world"));
         $this->assertEquals(new SimpleResponse("Hello world"), $response);
 
         $this->assertEquals(1, TestRouteInterceptor1::$afterRoutes);
@@ -97,7 +98,7 @@ class RouteInterceptorHandlerTest extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(0, TestRouteInterceptor3::$afterRoutes);
 
         $handler = new RouteInterceptorHandler([new TestRouteInterceptor2()], $this->classInspectorProvider);
-        $response = $handler->processAfterRoute(new SimpleResponse("Hello world"));
+        $response = $handler->processAfterRoute(new Request(new Headers()), new SimpleResponse("Hello world"));
         $this->assertEquals(new SimpleResponse("Hello world"), $response);
 
 
@@ -107,7 +108,7 @@ class RouteInterceptorHandlerTest extends \PHPUnit\Framework\TestCase {
 
 
         $handler = new RouteInterceptorHandler([new TestRouteInterceptor1(), new TestRouteInterceptor3()], $this->classInspectorProvider);
-        $response = $handler->processAfterRoute(new SimpleResponse("Hello world"));
+        $response = $handler->processAfterRoute(new Request(new Headers()), new SimpleResponse("Hello world"));
         $this->assertEquals(new SimpleResponse("Hello world"), $response);
 
 

@@ -139,6 +139,7 @@ class Router {
             // Get the interceptor handler for this request.
             $routeInterceptorHandler = $this->routeInterceptorProcessor->getInterceptorHandlerForRequest($url->getPath());
 
+
             // Run before interceptors as first stage.
             $response = $routeInterceptorHandler->processBeforeRoute($request);
 
@@ -228,30 +229,15 @@ class Router {
 
         }
 
-
         // Run after routes if possible
         if (isset($routeInterceptorHandler)) {
-            $response = $routeInterceptorHandler->processAfterRoute($response);
+            $response = $routeInterceptorHandler->processAfterRoute($request, $response);
         }
 
         // Add to cache if required.
         if (isset($cacheConfig) && $cacheConfig) {
             $cacheEvaluator->cacheResult($cacheConfig, $request->getUrl()->getPath(true), $response);
         }
-
-        // Handle Cross Origin logic before return.
-        $accessControlOrigin = Configuration::readParameter("access.control.origin");
-        if (!$accessControlOrigin) {
-            $accessControlOrigin = "*";
-        } else if ($accessControlOrigin == "REFERRER") {
-            $referrer = $request->getReferringURL();
-            if ($referrer) {
-                $accessControlOrigin = strtolower($referrer->getProtocol()) . "://" . $referrer->getHost() . ($referrer->getPort() != "80" && $referrer->getPort() != "443" ? ":" . $referrer->getPort() : "");
-                $response->setHeader(\Kinikit\MVC\Response\Headers::HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
-            }
-        }
-        $response->setHeader(\Kinikit\MVC\Response\Headers::HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, $accessControlOrigin);
-
 
         // Finally return the response.
         return $response;

@@ -27,10 +27,11 @@ class RouteInterceptor {
      * After route method.  Useful for e.g. logging etc.   Receives the response returned from the route.
      * By default this method returns the response intact but an alternative response can be returned here if required.
      *
+     * @param Request $request
      * @param Response $response
      * @return Response
      */
-    public function afterRoute($response) {
+    public function afterRoute($request, $response) {
         return $response;
     }
 

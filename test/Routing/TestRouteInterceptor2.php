@@ -22,9 +22,9 @@ class TestRouteInterceptor2 extends RouteInterceptor {
         parent::beforeRoute($request);
     }
 
-    public function afterRoute($response) {
+    public function afterRoute($request, $response) {
         self::$afterRoutes++;
-        return parent::afterRoute($response);
+        return parent::afterRoute($request, $response);
     }
 
 

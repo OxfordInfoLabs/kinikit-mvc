@@ -5,6 +5,7 @@ namespace Kinikit\MVC\Routing;
 
 
 use Kinikit\Core\DependencyInjection\Container;
+use Kinikit\Core\Logging\Logger;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\MVC\ContentCaching\ContentCacheConfig;
 use Kinikit\MVC\RateLimiter\RateLimiterConfig;
@@ -98,14 +99,15 @@ class RouteInterceptorHandler {
      * Process before route interceptors.  If a response is received
      * for any interceptors this will be immediately returned.
      *
+     * @param Request $request
      * @param Response $response
      * @return Response
      */
-    public function processAfterRoute($response) {
+    public function processAfterRoute($request, $response) {
 
-        // Call all interceptors, augment response at each stage.
+         // Call all interceptors, augment response at each stage.
         foreach ($this->interceptors as $interceptor) {
-            $response = $interceptor->afterRoute($response);
+            $response = $interceptor->afterRoute($request, $response);
         }
 
         return $response;
