@@ -4,6 +4,7 @@ namespace Kinikit\MVC\Session;
 
 use Kinikit\Core\Configuration\Configuration;
 
+
 /**
  * Convenient static class for accessing the http session.  Adds built in methods for the core stuff like getting
  * logged in user as well as a generic get / set property for user use.
@@ -13,6 +14,28 @@ use Kinikit\Core\Configuration\Configuration;
 class PHPSession implements Session {
 
     private $sessionData = null;
+
+    /**
+     * @var SessionCookieHandler
+     */
+    private $sessionCookieHandler;
+
+    // 8 hrs max length
+    const DEFAULT_COOKIE_LIFETIME = 28800;
+    const DEFAULT_COOKIE_PATH = "/";
+    const DEFAULT_COOKIE_SECURE = true;
+    const DEFAULT_COOKIE_HTTP_ONLY = true;
+    const DEFAULT_COOKIE_SAME_SITE = "Strict";
+
+
+    /**
+     * PHPSession constructor.
+     *
+     * @param SessionCookieHandler $sessionCookieHandler
+     */
+    public function __construct($sessionCookieHandler) {
+        $this->sessionCookieHandler = $sessionCookieHandler;
+    }
 
     /**
      * Set a session value by key and invalidate the session data
@@ -81,24 +104,36 @@ class PHPSession implements Session {
     // Start the session
     private function startSession() {
 
+        // Resolve the cookie domain
         $cookieDomain = Configuration::instance()->getParameter('session.cookie.domain');
+        $host = isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "";
+
         if ($cookieDomain) {
 
             if ($cookieDomain == "WILDCARD") {
-                $host = isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "";
                 if ($host) {
                     $splitHost = explode(".", $host);
                     $tld = array_pop($splitHost);
+                    $splitTld = explode(":", $tld);
                     $domain = array_pop($splitHost);
-                    $cookieDomain = ".$domain.$tld";
+                    $cookieDomain = ".$domain.$splitTld[0]";
                 } else {
                     return;
                 }
             }
 
-
-            ini_set("session.cookie_domain", $cookieDomain);
+        } else {
+            $cookieDomain = $host;
         }
+
+        // Set other parameters oveloadable by config
+        $cookieLifetime = Configuration::readParameter("session.cookie.lifetime") ?? self::DEFAULT_COOKIE_LIFETIME;
+        $cookieSecure = Configuration::readParameter("session.cookie.secure") ?? self::DEFAULT_COOKIE_SECURE;
+        $cookieHttpOnly = Configuration::readParameter("session.cookie.httponly") ?? self::DEFAULT_COOKIE_HTTP_ONLY;
+        $cookiePath = Configuration::readParameter("session.cookie.path") ?? self::DEFAULT_COOKIE_PATH;
+        $cookieSameSite = Configuration::readParameter("session.cookie.samesite") ?? self::DEFAULT_COOKIE_SAME_SITE;
+
+        $this->sessionCookieHandler->setCookieParameters($cookieLifetime, $cookiePath, $cookieDomain, $cookieSecure, $cookieHttpOnly, $cookieSameSite);
 
         if (!headers_sent())
             @session_start();
