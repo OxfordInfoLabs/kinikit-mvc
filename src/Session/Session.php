@@ -47,4 +47,13 @@ interface Session {
      */
     public function reload();
 
+
+    /**
+     * Regenerate a session - generally called in authentication
+     * scenarios to prevent session fixation
+     *
+     * @return mixed
+     */
+    public function regenerate();
+
 }

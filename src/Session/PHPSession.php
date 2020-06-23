@@ -101,6 +101,19 @@ class PHPSession implements Session {
     }
 
 
+    /**
+     * Regenerate a session - generally called in authentication
+     * scenarios to prevent session fixation
+     *
+     * @return mixed
+     */
+    public function regenerate() {
+        $this->startSession();
+        session_regenerate_id(true);
+        session_write_close();
+    }
+
+
     // Start the session
     private function startSession() {
 
@@ -135,11 +148,12 @@ class PHPSession implements Session {
 
         if (!headers_sent()) {
             $this->sessionCookieHandler->setCookieParameters($cookieLifetime, $cookiePath, $cookieDomain, $cookieSecure, $cookieHttpOnly, $cookieSameSite);
-            @session_start();
+            @session_start([
+                "use_strict_mode" => 1
+            ]);
         }
     }
 
 
 }
 
-?>
