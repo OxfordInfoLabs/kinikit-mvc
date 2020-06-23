@@ -133,11 +133,10 @@ class PHPSession implements Session {
         $cookiePath = Configuration::readParameter("session.cookie.path") ?? self::DEFAULT_COOKIE_PATH;
         $cookieSameSite = Configuration::readParameter("session.cookie.samesite") ?? self::DEFAULT_COOKIE_SAME_SITE;
 
-        $this->sessionCookieHandler->setCookieParameters($cookieLifetime, $cookiePath, $cookieDomain, $cookieSecure, $cookieHttpOnly, $cookieSameSite);
-
-        if (!headers_sent())
+        if (!headers_sent()) {
+            $this->sessionCookieHandler->setCookieParameters($cookieLifetime, $cookiePath, $cookieDomain, $cookieSecure, $cookieHttpOnly, $cookieSameSite);
             @session_start();
-
+        }
     }
 
 
