@@ -52,8 +52,34 @@ interface Session {
      * Regenerate a session - generally called in authentication
      * scenarios to prevent session fixation
      *
-     * @return mixed
+     * @return string
      */
     public function regenerate();
+
+
+    /**
+     * Get the current session id
+     *
+     * @return mixed
+     */
+    public function getId();
+
+
+    /**
+     * Return a boolean determining whether or not the passed session is active
+     *
+     * @param $id
+     * @return boolean
+     */
+    public function isActive($id);
+
+
+    /**
+     * Destroy a session by id
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function destroy($id);
 
 }

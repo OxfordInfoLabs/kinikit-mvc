@@ -54,6 +54,9 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
     }
 
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testStartingSessionSetsCookieValuesCorrectlyForDefaultValues() {
 
 
@@ -69,6 +72,7 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
         $session = new PHPSession($mockCookieHandler);
         $session->getAllValues();
 
+
         $this->assertTrue($mockCookieHandler->methodWasCalled("setCookieParameters", [
             PHPSession::DEFAULT_COOKIE_LIFETIME, PHPSession::DEFAULT_COOKIE_PATH, "tester.com", PHPSession::DEFAULT_COOKIE_SECURE,
             PHPSession::DEFAULT_COOKIE_HTTP_ONLY, PHPSession::DEFAULT_COOKIE_SAME_SITE
@@ -77,6 +81,9 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
 
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testStartingSessionSetsWildcardDomainsCorrectly() {
 
 
@@ -102,7 +109,9 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
 
     }
 
-
+    /**
+     * @runInSeparateProcess
+     */
     public function testStartingSessionUsesConfigurationParamsInsteadOfDefaultsIfSet() {
 
 
@@ -133,6 +142,9 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
 
 
     }
+
+
+
 }
 
 ?>

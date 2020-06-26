@@ -15,6 +15,8 @@ class PHPSession implements Session {
 
     private $sessionData = null;
 
+    private $sessionId = null;
+
     /**
      * @var SessionCookieHandler
      */
@@ -109,8 +111,73 @@ class PHPSession implements Session {
      */
     public function regenerate() {
         $this->startSession();
-        session_regenerate_id(true);
+        try {
+            session_regenerate_id(true);
+        } catch (\ErrorException $e) {
+            // OK as this will occur in testing
+        }
+
+        $this->sessionId = session_id();
         session_write_close();
+
+        return $this->sessionId;
+    }
+
+
+    /**
+     * Get the current session id
+     *
+     * @return mixed
+     */
+    public function getId() {
+        return $this->sessionId;
+    }
+
+
+    /**
+     * Check if a session is active
+     *
+     * @param $id
+     * @return bool|void
+     */
+    public function isActive($id) {
+
+
+        try {
+            // Attempt to start the session in strict mode
+            session_id($id);
+            session_start(["use_strict_mode" => 1]);
+            $active = session_id() == $id;
+            session_write_close();
+
+            // Reset to current session
+            session_id($this->sessionId);
+        } catch (\ErrorException $e) {
+            $active = false;
+        }
+
+        return $active;
+    }
+
+    /**
+     * Destroy a session by id
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function destroy($id) {
+        session_id($id);
+        session_start(["use_strict_mode" => 1]);
+        if (session_id() == $id) {
+            session_destroy();
+        }
+
+        // Reset to current session
+        if ($this->sessionId == $id) {
+            $this->sessionId = null;
+        } else {
+            session_id($this->sessionId);
+        }
     }
 
 
@@ -151,6 +218,7 @@ class PHPSession implements Session {
             @session_start([
                 "use_strict_mode" => 1
             ]);
+            $this->sessionId = session_id();
         }
     }
 
