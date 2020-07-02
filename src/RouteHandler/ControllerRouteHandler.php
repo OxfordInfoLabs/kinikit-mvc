@@ -251,7 +251,15 @@ class ControllerRouteHandler extends RouteHandler {
 
         // Sanitize primitive values
         if (Primitive::isPrimitive($value)) {
-            return $this->sanitiser->sanitize($value);
+
+            // Remove dangerous stuff
+            $sanitised = $this->sanitiser->sanitize($value);
+
+            // Re-permit HTML entities
+            $sanitised = html_entity_decode($sanitised);
+
+            // Return sanitised output
+            return $sanitised;
         }
 
 
