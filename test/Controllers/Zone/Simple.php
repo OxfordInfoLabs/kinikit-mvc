@@ -30,13 +30,17 @@ class Simple {
 
 
     /**
-     * @param bool $boolean
-     * @param int $integer
-     * @param float $float
-     * @param string $string
+     * @param string $param1
+     * @param string $param2
+     * @param string $param3
+     * @param string $param4
+     * @return array
+     *
+     * @unsanitise $param2,$param3
+     *
      */
-    public function parameterTest($boolean, $integer, $float, $string, $array, $object) {
-        return "SUCCESS";
+    public function sanitiseTest($param1, $param2, $param3, $param4) {
+        return [$param1, $param2, $param3, $param4];
     }
 
 

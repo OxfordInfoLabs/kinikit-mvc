@@ -280,6 +280,19 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
         $this->assertEquals('I am less dangerous', $result[0]);
 
 
+        // Check normal characters are restored
+        $_GET["param1"] = "Hello@test.com ' \" #£ Hello";
+        $_GET["param2"] = 1.3;
+        $_GET["param3"] = true;
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "getOnly");
+
+        $result = $handler->handleRoute()->getObject();
+
+        $this->assertEquals("Hello@test.com ' \" #£ Hello", $result[0]);
+
+
         // Check this happens on payloads recursively too.
         stream_wrapper_unregister("php");
         stream_wrapper_register("php", "Kinikit\MVC\Request\MockPHPInputStream");
@@ -292,6 +305,34 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
 
         $this->assertEquals(new JSONResponse(new TestRESTObject("", "pan@neverland.com", "POSTED", 23)), $handler->handleRoute());
 
+        stream_wrapper_restore("php");
+
+    }
+
+
+    public function testParametersMarkedAsUnsanitiseArePassedThroughWithoutSanitisation() {
+
+        // Check normal characters are restored
+        $_GET["param1"] = "<script type='text/javascript'>alert('pingu');</script>Test";
+        $_GET["param2"] = "<script type='text/javascript'>alert('pingu');</script>Test";
+        $_GET["param3"] = "<script type='text/javascript'>alert('pingu');</script>Test";
+        $_GET["param4"] = "<script type='text/javascript'>alert('pingu');</script>Test";
+
+        $request = new Request(new Headers());
+
+        // Handle boolean input params properly as well
+        $method = $this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("sanitiseTest");
+
+        $handler = new ControllerRouteHandler($method, $request, "sanitiseTest");
+
+        $result = $handler->handleRoute()->getObject();
+
+        $this->assertEquals([
+            "Test",
+            "<script type='text/javascript'>alert('pingu');</script>Test",
+            "<script type='text/javascript'>alert('pingu');</script>Test",
+            "Test"
+        ], $result);
 
     }
 

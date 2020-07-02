@@ -205,8 +205,15 @@ class ControllerRouteHandler extends RouteHandler {
         // Only bother if there are method params matching our method.
         if (isset($methodParams[$paramKey])) {
 
-            // Sanitise first
-            $paramValue = $this->sanitiseValueForHTML($paramValue);
+            $sanitise = true;
+            if (isset($this->targetMethod->getMethodAnnotations()["unsanitise"][0])) {
+                $unsanitisedParams = $this->targetMethod->getMethodAnnotations()["unsanitise"][0]->getValues();
+                $sanitise = !in_array($paramKey, $unsanitisedParams) && !in_array("$" . $paramKey, $unsanitisedParams);
+            }
+
+            // Sanitise if not excluded
+            if ($sanitise)
+                $paramValue = $this->sanitiseValueForHTML($paramValue);
 
             if ($methodParams[$paramKey]->isPrimitive()) {
 
@@ -258,7 +265,7 @@ class ControllerRouteHandler extends RouteHandler {
             $sanitised = $this->sanitiser->sanitize($value);
 
             // Re-permit HTML entities
-            $sanitised = html_entity_decode($sanitised);
+            $sanitised = html_entity_decode($sanitised, ENT_QUOTES);
 
             // Return sanitised output
             return $sanitised;
