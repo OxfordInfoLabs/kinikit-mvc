@@ -246,6 +246,8 @@ class ControllerRouteHandler extends RouteHandler {
             }
             $inspector->setPropertyData($value, $properties);
 
+            return $value;
+
         }
 
 
