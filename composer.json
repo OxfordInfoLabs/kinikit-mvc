@@ -14,7 +14,8 @@
   "homepage": "https://kinikit.com",
   "type": "library",
   "require": {
-    "oxil/kinikit-core": "dev-master"
+    "oxil/kinikit-core": "dev-master",
+    "tgalopin/html-sanitizer": "^1.4"
   },
   "autoload": {
     "psr-4": {

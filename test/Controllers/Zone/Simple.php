@@ -22,10 +22,21 @@ class Simple {
      *
      * @cacheTime 30d
      *
-     * @param $title
+     * @param string $title
      */
     public function get($title) {
         return new \Kinikit\MVC\Response\View("Simple", ["title" => $title]);
+    }
+
+
+    /**
+     * @param bool $boolean
+     * @param int $integer
+     * @param float $float
+     * @param string $string
+     */
+    public function parameterTest($boolean, $integer, $float, $string, $array, $object) {
+        return "SUCCESS";
     }
 
 

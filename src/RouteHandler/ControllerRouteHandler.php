@@ -10,6 +10,7 @@ use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\InsufficientParametersException;
 use Kinikit\Core\Exception\StatusException;
 use Kinikit\Core\Exception\WrongParameterTypeException;
+use Kinikit\Core\Logging\Logger;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\Core\Serialisation\JSON\JSONToObjectConverter;
@@ -24,6 +25,7 @@ use Kinikit\MVC\Response\JSONResponse;
 use Kinikit\MVC\Response\Response;
 use Kinikit\MVC\Response\View;
 use Kinikit\MVC\Response\WebErrorResponse;
+use HtmlSanitizer\Sanitizer;
 
 class ControllerRouteHandler extends RouteHandler {
 
@@ -43,6 +45,19 @@ class ControllerRouteHandler extends RouteHandler {
      */
     private $methodRequestPath;
 
+
+    /**
+     * @var Sanitizer
+     */
+    private $sanitiser;
+
+
+    /**
+     * @var ClassInspectorProvider
+     */
+    private $classInspectorProvider;
+
+
     /**
      * ControllerRouteHandler constructor.
      *
@@ -54,6 +69,8 @@ class ControllerRouteHandler extends RouteHandler {
         $this->targetMethod = $targetMethod;
         $this->request = $request;
         $this->methodRequestPath = $methodRequestPath;
+        $this->sanitiser = Sanitizer::create([]);
+        $this->classInspectorProvider = Container::instance()->get(ClassInspectorProvider::class);
 
         // Populate rate limit and caching data.
         list($rateLimiterConfig, $caching) = $this->getRateLimiterAndCaching();
@@ -91,7 +108,7 @@ class ControllerRouteHandler extends RouteHandler {
                 foreach ($methodPath as $index => $item) {
                     if (substr($item, 0, 1) == "$") {
                         $paramKey = substr($item, 1);
-                        $paramValue = $this->sanitiseParamValue($paramKey, $requestPath[$index]);
+                        $paramValue = $this->validateIncomingParameter($paramKey, $requestPath[$index]);
                         $params[$paramKey] = $paramValue;
                     }
                 }
@@ -108,7 +125,7 @@ class ControllerRouteHandler extends RouteHandler {
                 $converter = Container::instance()->get(JSONToObjectConverter::class);
 
                 try {
-                    $params[$payloadParam->getName()] = $converter->convert($this->request->getPayload(), $payloadParam->getType());
+                    $params[$payloadParam->getName()] = $this->validateIncomingParameter($payloadParam->getName(), $converter->convert($this->request->getPayload(), $payloadParam->getType()));
 
                     if ($payloadParam->isRequired() && !$params[$payloadParam->getName()]) {
                         throw new WrongParameterTypeException("The parameter {$payloadParam->getName()} is of the wrong type or badly formed");
@@ -123,7 +140,7 @@ class ControllerRouteHandler extends RouteHandler {
 
         // Poke in all other regular parameters at the end.
         foreach ($this->request->getParameters() as $key => $value) {
-            $params[$key] = $this->sanitiseParamValue($key, $value);
+            $params[$key] = $this->validateIncomingParameter($key, $value);
         }
 
 
@@ -151,8 +168,7 @@ class ControllerRouteHandler extends RouteHandler {
         /**
          * @var ClassInspectorProvider $classInspectorProvider
          */
-        $classInspectorProvider = Container::instance()->get(ClassInspectorProvider::class);
-        $classInspector = $classInspectorProvider->getClassInspector(get_class($instance));
+        $classInspector = $this->classInspectorProvider->getClassInspector(get_class($instance));
 
         // Grab the proxied method
         $proxiedMethod = $classInspector->getPublicMethod($this->targetMethod->getMethodName());
@@ -180,14 +196,17 @@ class ControllerRouteHandler extends RouteHandler {
     }
 
 
-    // Sanitise parameter values
-    private function sanitiseParamValue($paramKey, $paramValue) {
+    // Validate an incoming parameter - this includes HTML sanitisation
+    // As well as type checking
+    private function validateIncomingParameter($paramKey, $paramValue) {
 
         $methodParams = $this->targetMethod->getIndexedParameters();
 
-
         // Only bother if there are method params matching our method.
         if (isset($methodParams[$paramKey])) {
+
+            // Sanitise first
+            $paramValue = $this->sanitiseValueForHTML($paramValue);
 
             if ($methodParams[$paramKey]->isPrimitive()) {
 
@@ -200,6 +219,40 @@ class ControllerRouteHandler extends RouteHandler {
         }
 
         return $paramValue;
+
+
+    }
+
+
+    // Sanitise a value - call this recursively if in case of array or object
+    private function sanitiseValueForHTML($value) {
+
+        // If an array, call this recursively
+        if (is_array($value)) {
+            foreach ($value as $key => $item) {
+                $value[$key] = $this->sanitiseValueForHTML($item);
+            }
+            return $value;
+        }
+
+
+        if (is_object($value)) {
+
+            $inspector = $this->classInspectorProvider->getClassInspector(get_class($value));
+
+            $properties = $inspector->getPropertyData($value);
+            foreach ($properties as $property => $item) {
+                $properties[$property] = $this->sanitiseValueForHTML($item);
+            }
+            $inspector->setPropertyData($value, $properties);
+
+        }
+
+
+        // Sanitize primitive values
+        if (Primitive::isPrimitive($value)) {
+            return $this->sanitiser->sanitize($value);
+        }
 
 
     }

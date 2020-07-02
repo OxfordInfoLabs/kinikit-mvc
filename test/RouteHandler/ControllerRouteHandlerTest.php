@@ -91,7 +91,7 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
     }
 
 
-    public function testExceptionRaisedIfBadPrimitiveParameterTypesPassedForMethod(){
+    public function testExceptionRaisedIfBadPrimitiveParameterTypesPassedForMethod() {
         // Handle boolean input params properly as well
         $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("getOnly");
 
@@ -102,17 +102,13 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
         $request = new Request(new Headers());
         $handler = new ControllerRouteHandler($method, $request, "getOnly");
 
-        echo Primitive::isOfPrimitiveType("float", "hello");
-
-
         try {
             $handler->handleRoute();
             $this->fail("Should have thrown here");
-        } catch(WrongParameterTypeException $e){
+        } catch (WrongParameterTypeException $e) {
             $this->assertTrue(true);
         }
     }
-
 
 
     public function testCanHandleRoutesForPayloadRESTMethods() {
@@ -140,6 +136,7 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
         $method = $this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("get");
 
         $_GET["title"] = "HELLO WORLD";
+        stream_wrapper_restore("php");
 
         $request = new Request(new Headers());
         $handler = new ControllerRouteHandler($method, $request, "");
@@ -147,9 +144,6 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(new View("Simple", ["title" => "HELLO WORLD", "request" => $request]), $handler->handleRoute());
 
     }
-
-
-
 
 
     public function testRequestObjectsAreAutowiredIfSuppliedToControllerMethods() {
@@ -254,5 +248,51 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
 
     }
 
+
+    public function testAllParametersAreByDefaultSanitised() {
+
+        // Handle boolean input params properly as well
+        $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("getOnly");
+
+        // Check dangerous tags removed completely
+        $_GET["param1"] = '<script type="text/javascript">alert("I am dangerous");</script>';
+        $_GET["param2"] = 1.3;
+        $_GET["param3"] = true;
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "getOnly");
+
+        $result = $handler->handleRoute()->getObject();
+
+        $this->assertEquals('', $result[0]);
+
+
+        // Check regular tags removed as well
+        $_GET["param1"] = '<h1>I am less dangerous</h1>';
+        $_GET["param2"] = 1.3;
+        $_GET["param3"] = true;
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "getOnly");
+
+        $result = $handler->handleRoute()->getObject();
+
+        $this->assertEquals('I am less dangerous', $result[0]);
+
+
+        // Check this happens on payloads recursively too.
+        stream_wrapper_unregister("php");
+        stream_wrapper_register("php", "Kinikit\MVC\Request\MockPHPInputStream");
+        file_put_contents("php://input", '{"id": "23", "name": "<script type=\"text/javascript\">alert(\"bingo\");</script>", "email": "pan@neverland.com", "lastStatus": "SUCCESS"}');
+
+        $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("create");
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "");
+
+        $this->assertEquals(new JSONResponse(new TestRESTObject("", "pan@neverland.com", "POSTED", 23)), $handler->handleRoute());
+
+
+    }
 
 }
