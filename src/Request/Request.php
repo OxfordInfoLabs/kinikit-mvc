@@ -189,25 +189,35 @@ class Request {
             $this->referringURL = new URL($_SERVER["HTTP_REFERER"]);
         }
 
+
         // Now handle parameters.   We need to read these from input stream if not a get request.
         if ($this->requestMethod != self::METHOD_GET && $this->requestMethod != self::METHOD_HEAD) {
 
-            // Grab the PHP input stream.
-            $directPHPInput = file_get_contents("php://input");
 
-            // If only one param and not a key value pair, assume payload.
-            if (!preg_match("/^[a-z0-9A-Z]+\=/", $directPHPInput)) {
-                $this->payload = rawurldecode($directPHPInput);
+            if (strpos(strtolower($this->headers->getContentType()), "multipart/form-data") === 0) {
+
+                // Add Post Params to array
+                $this->addArrayToParams($_POST);
+
             } else {
 
-                $explodedParams = explode("&", $directPHPInput);
+                // Grab the PHP input stream.
+                $directPHPInput = file_get_contents("php://input");
 
-                // Convert post params
-                foreach ($explodedParams as $param) {
-                    $explodedParam = explode("=", $param);
+                // If only one param and not a key value pair, assume payload.
+                if (!preg_match("/^[a-z0-9A-Z]+\=/", $directPHPInput)) {
+                    $this->payload = rawurldecode($directPHPInput);
+                } else {
 
-                    if (sizeof($explodedParam) == 2) {
-                        $this->parameters [urldecode($explodedParam[0])] = urldecode($explodedParam[1]);
+                    $explodedParams = explode("&", $directPHPInput);
+
+                    // Convert post params
+                    foreach ($explodedParams as $param) {
+                        $explodedParam = explode("=", $param);
+
+                        if (sizeof($explodedParam) == 2) {
+                            $this->parameters [urldecode($explodedParam[0])] = urldecode($explodedParam[1]);
+                        }
                     }
                 }
             }
@@ -215,8 +225,27 @@ class Request {
 
         }
 
+
+        // Add Get params to our params array
+        $this->addArrayToParams($_GET);
+
+
+        // Finally handle File uploads
+        if (isset($_FILES) && sizeof($_FILES) > 0) {
+            foreach ($_FILES as $key => $file) {
+                $this->fileUploads[$key] = new FileUpload($key, $file);
+            }
+        }
+
+
+    }
+
+
+    // Add an array to params, decoding and handling booleans at top level
+    private function addArrayToParams($array) {
+
         // Always merge in Get params as well.
-        foreach ($_GET as $key => $value) {
+        foreach ($array as $key => $value) {
 
             if (is_array($value)) {
                 $decoded = array();
@@ -235,15 +264,6 @@ class Request {
 
             $this->parameters[urldecode($key)] = $decoded;
         }
-
-
-        // Finally handle File uploads
-        if (isset($_FILES) && sizeof($_FILES) > 0) {
-            foreach ($_FILES as $key => $file) {
-                $this->fileUploads[$key] = new FileUpload($key, $file);
-            }
-        }
-
 
     }
 

@@ -45,6 +45,18 @@ class Simple {
 
 
     /**
+     * @param string $test1
+     * @param string $test2
+     * @param string $test3
+     *
+     * @return array
+     */
+    public function classicPost($test1, $test2, $test3) {
+        return [$test1, $test2, $test3];
+    }
+
+
+    /**
      *
      * @return \Kinikit\MVC\Response\View
      * @throws Exception

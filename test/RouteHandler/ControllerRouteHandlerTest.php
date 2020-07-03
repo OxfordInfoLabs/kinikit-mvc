@@ -129,6 +129,33 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
     }
 
 
+    public function testPostParameterArrayIsUsedInsteadOfPHPInputIfContentTypeIsMultipart() {
+
+        include_once "Controllers/Zone/Simple.php";
+
+
+        stream_wrapper_restore("php");
+
+        $_SERVER["REQUEST_METHOD"] = "POST";
+        $_SERVER["CONTENT_TYPE"] = "multipart/form-data; some-extra-data=test";
+        $_POST = ["test1" => "Hello", "test2" => "Goodbye", "test3" => "Wonderful"];
+
+
+        $method = $this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("classicPost");
+
+
+        $request = new Request(new Headers());
+
+
+        $handler = new ControllerRouteHandler($method, $request, "");
+
+        $this->assertEquals(new JSONResponse(["Hello", "Goodbye", "Wonderful"]), $handler->handleRoute());
+
+        unset($_SERVER["CONTENT_TYPE"]);
+
+    }
+
+
     public function testCanHandleRouteForViewControllerAndResponseReturnedIntactWithAugmentedRequestParam() {
 
         include_once "Controllers/Zone/Simple.php";

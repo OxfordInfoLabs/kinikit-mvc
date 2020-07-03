@@ -12,6 +12,8 @@ use Kinikit\Core\Util\ObjectArrayUtils;
  */
 class Headers {
 
+    private $contentType;
+    private $contentLength;
     private $acceptContentType;
     private $acceptCharset;
     private $acceptEncoding;
@@ -25,6 +27,20 @@ class Headers {
 
     public function __construct() {
         $this->parseCurrentRequest();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContentType() {
+        return $this->contentType;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContentLength() {
+        return $this->contentLength;
     }
 
 
@@ -83,6 +99,9 @@ class Headers {
 
     // Populate from current request
     private function parseCurrentRequest() {
+
+        $this->contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : (isset($_SERVER['HTTP_CONTENT_TYPE']) ? $_SERVER["HTTP_CONTENT_TYPE"] : null);
+        $this->contentLength = isset($_SERVER['CONTENT_LENGTH']) ? $_SERVER['CONTENT_LENGTH'] : (isset($_SERVER['HTTP_CONTENT_LENGTH']) ? $_SERVER["HTTP_CONTENT_LENGTH"] : null);
         $this->acceptContentType = isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : null;
         $this->acceptCharset = isset($_SERVER['HTTP_ACCEPT_CHARSET']) ? $_SERVER['HTTP_ACCEPT_CHARSET'] : null;
         $this->acceptEncoding = isset($_SERVER['HTTP_ACCEPT_ENCODING']) ? $_SERVER['HTTP_ACCEPT_ENCODING'] : null;;
