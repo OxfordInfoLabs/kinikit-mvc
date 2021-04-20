@@ -51,7 +51,7 @@ class Headers {
     const HEADER_COOKIE = "cookie";
 
     // Multiple value headers
-    const MULTIPLE_VALUE_HEADERS = [self::HEADER_SET_COOKIE];
+    const MULTIPLE_VALUE_HEADERS = [self::HEADER_SET_COOKIE, self::HEADER_ACCESS_CONTROL_ALLOW_HEADERS];
 
     /**
      * Get a specific header by name - either returns an array if a multiple value header
