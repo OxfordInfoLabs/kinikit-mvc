@@ -15,6 +15,11 @@ use Kinikit\MVC\ContentSource\ContentSource;
 class Download extends SimpleResponse {
 
     /**
+     * @var string
+     */
+    private $targetFilename;
+
+    /**
      * Construct with source and target filename and optional response code.
      *
      * @param ContentSource|string $contentSource
@@ -23,6 +28,19 @@ class Download extends SimpleResponse {
      */
     public function __construct($contentSource, $targetFilename, $responseCode = 200) {
         parent::__construct($contentSource, $responseCode);
-        $this->setHeader(Headers::HEADER_CONTENT_DISPOSITION, 'attachment; filename="' . $targetFilename . '"');
+        $this->targetFilename = $targetFilename;
+
     }
+
+    /**
+     * Inject header for download before processing core functionality.
+     *
+     * @return mixed|void
+     */
+    public function streamContent() {
+        $this->setHeader(Headers::HEADER_CONTENT_DISPOSITION, 'attachment; filename="' . $this->targetFilename . '"');
+        parent::streamContent();
+    }
+
+
 }
