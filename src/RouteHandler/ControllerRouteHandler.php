@@ -4,6 +4,7 @@
 namespace Kinikit\MVC\RouteHandler;
 
 
+use AWS\CRT\Log;
 use Kinikit\Core\Binding\ObjectBinder;
 use Kinikit\Core\Binding\ObjectBindingException;
 use Kinikit\Core\DependencyInjection\Container;
@@ -127,6 +128,7 @@ class ControllerRouteHandler extends RouteHandler {
                 try {
                     $params[$payloadParam->getName()] = $this->validateIncomingParameter($payloadParam->getName(), $converter->convert($this->request->getPayload(), $payloadParam->getType()));
 
+
                     if ($payloadParam->isRequired() && !$params[$payloadParam->getName()]) {
                         throw new WrongParameterTypeException("The parameter {$payloadParam->getName()} is of the wrong type or badly formed");
                     }
@@ -200,6 +202,7 @@ class ControllerRouteHandler extends RouteHandler {
     // As well as type checking
     private function validateIncomingParameter($paramKey, $paramValue) {
 
+
         $methodParams = $this->targetMethod->getIndexedParameters();
 
         // Only bother if there are method params matching our method.
@@ -260,6 +263,9 @@ class ControllerRouteHandler extends RouteHandler {
 
         // Sanitize primitive values
         if (Primitive::isPrimitive($value)) {
+
+            if (is_bool($value) || is_numeric($value))
+                return $value;
 
             // Remove dangerous stuff
             $sanitised = $this->sanitiser->sanitize($value);
