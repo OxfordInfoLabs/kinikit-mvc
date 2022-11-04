@@ -26,8 +26,8 @@ class Download extends SimpleResponse {
      * @param string $targetFilename
      * @param int $responseCode
      */
-    public function __construct($contentSource, $targetFilename, $responseCode = 200) {
-        parent::__construct($contentSource, $responseCode);
+    public function __construct($contentSource, $targetFilename, $responseCode = 200, $customHeaders = []) {
+        parent::__construct($contentSource, $responseCode, $customHeaders);
         $this->targetFilename = $targetFilename;
 
     }

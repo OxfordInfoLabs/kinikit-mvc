@@ -70,6 +70,28 @@ class SimpleResponseTest extends \PHPUnit\Framework\TestCase {
 
     }
 
+    /**
+     * @runInSeparateProcess
+     */
+    public function testCanSendCustomHeadersAsArrayOnInitialisationAndTheseArePassedOnSend() {
+
+        $simpleResponse = new SimpleResponse(new StringContentSource("Hello World!", "text/javascript"), 503, [
+            Headers::HEADER_CACHE_CONTROL => "public, max-age=10",
+            Headers::HEADER_LOCATION => "https://hello.world"
+        ]);
+
+        ob_start();
+        $simpleResponse->send();
+        $this->assertEquals("Hello World!", ob_get_contents());
+        ob_end_clean();
+
+        $headers = new Headers();
+        $this->assertStringContainsString("text/javascript", $headers->get(Headers::HEADER_CONTENT_TYPE));
+        $this->assertEquals(12, $headers->get(Headers::HEADER_CONTENT_LENGTH));
+        $this->assertEquals("public, max-age=10", $headers->get(Headers::HEADER_CACHE_CONTROL));
+        $this->assertEquals("https://hello.world", $headers->get(Headers::HEADER_LOCATION));
+    }
+
     public function testExceptionRaisedIfAttemptToCreateSimpleResponseWithInvalidSource() {
 
         try {

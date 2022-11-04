@@ -19,6 +19,13 @@ abstract class Response {
      */
     private $responseCode;
 
+    /**
+     * Custom headers passed on construction
+     *
+     * @var string[]
+     */
+    private $customHeaders;
+
 
     /**
      * Headers static
@@ -45,8 +52,9 @@ abstract class Response {
      * @param integer $responseCode
      * @param string $contentType
      */
-    public function __construct($responseCode) {
+    public function __construct($responseCode, $customHeaders = []) {
         $this->responseCode = $responseCode;
+        $this->customHeaders = $customHeaders;
         $this->headers = Container::instance()->get(Headers::class);
     }
 
@@ -106,6 +114,11 @@ abstract class Response {
 
         if ($contentLength)
             $this->setHeader(Headers::HEADER_CONTENT_LENGTH, $contentLength);
+
+        // Apply any custom headers
+        foreach ($this->customHeaders as $key => $value) {
+            $this->setHeader($key, $value);
+        }
 
         // Stream content
         if (!$headersOnly)

@@ -18,12 +18,14 @@ class SimpleResponse extends Response {
 
     /**
      * Construct with a content source and an optional response code (defaults to 200).
+     * Custom headers can also be passed as key/value pairs which will be passed up to the parent
      *
      * @param ContentSource|string $contentSource
      * @param int $responseCode
+     * @param string[string] $customHeaders
      */
-    public function __construct($contentSource, $responseCode = 200) {
-        parent::__construct($responseCode);
+    public function __construct($contentSource, $responseCode = 200, $customHeaders = []) {
+        parent::__construct($responseCode, $customHeaders);
         $this->contentSource = ContentSource::resolveValueToSource($contentSource);
 
     }
