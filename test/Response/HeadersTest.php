@@ -66,4 +66,33 @@ class HeadersTest extends \PHPUnit\Framework\TestCase {
 
     }
 
+    /**
+     * @runInSeparateProcess
+     */
+//    public function testCanRemoveHeaders() {
+//
+//        $headers = new Headers();
+//        $headers->set(Headers::HEADER_SET_COOKIE, "MARK=test");
+//        $headers->set(Headers::HEADER_SET_COOKIE, "JOHN=bing");
+//        $headers->set(Headers::HEADER_SET_COOKIE, "CLARE=smile");
+//        $headers->set(Headers::HEADER_CACHE_CONTROL, "public");
+//
+//        $allHeaders = $headers->getAll();
+//        $this->assertEquals(2, sizeof($allHeaders));
+//
+//        // Remove cache control header
+//        $headers->remove(Headers::HEADER_CACHE_CONTROL);
+//
+//        $allHeaders = $headers->getAll();
+//        $this->assertEquals(1, sizeof($allHeaders));
+//        $this->assertEquals(3, sizeof($headers->get(Headers::HEADER_SET_COOKIE)));
+//
+//        $headers->remove(Headers::HEADER_SET_COOKIE);
+//
+//        $allHeaders = $headers->getAll();
+//        $this->assertEquals(0, sizeof($allHeaders));
+//
+//
+//    }
+
 }

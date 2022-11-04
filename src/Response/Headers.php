@@ -77,6 +77,16 @@ class Headers {
 
 
     /**
+     * Remove a header by name
+     *
+     * @param string $headerName
+     */
+    public function remove($headerName) {
+        header_remove($headerName);
+    }
+
+
+    /**
      * Get all headers
      */
     public function getAll() {
