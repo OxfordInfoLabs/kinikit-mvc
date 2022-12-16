@@ -58,6 +58,16 @@ interface Session {
 
 
     /**
+     * Join an existing session using the supplied id.  Use this
+     * method with caution !
+     *
+     * @return mixed
+     */
+    public function join($id);
+
+
+
+    /**
      * Get the current session id
      *
      * @return mixed

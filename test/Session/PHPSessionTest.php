@@ -17,6 +17,9 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
 
     private $session;
 
+
+    private $previousSessionId;
+
     public function setUp(): void {
         $this->session = Container::instance()->get(PHPSession::class);
     }
@@ -143,6 +146,32 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
 
     }
 
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testCanJoinExistingSessionById() {
+
+        $mockCookieHandler = MockObjectProvider::instance()->getMockInstance(SessionCookieHandler::class);
+
+        // Create a new session
+        $session = new PHPSession($mockCookieHandler);
+        $session->setValue("test", "Bingo");
+
+        $firstSessionId = $session->getId();
+
+        // Make new session
+        $session = new PHPSession($mockCookieHandler);
+        $this->assertNotEquals($session->getId(), $firstSessionId);
+
+        // Join original session
+        $session->join($firstSessionId);
+
+        // check match
+        $this->assertEquals($session->getId(), $firstSessionId);
+
+
+    }
 
 
 }

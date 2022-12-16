@@ -125,6 +125,19 @@ class PHPSession implements Session {
 
 
     /**
+     * Join an existing session by id.
+     *
+     * @param $id
+     * @return mixed|void
+     */
+    public function join($id) {
+        session_id($id);
+        $this->startSession();
+        session_write_close();
+    }
+
+
+    /**
      * Get the current session id
      *
      * @return mixed
