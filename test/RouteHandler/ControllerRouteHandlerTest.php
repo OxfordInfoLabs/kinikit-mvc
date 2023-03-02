@@ -163,7 +163,7 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
         $method = $this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("get");
 
         $_GET["title"] = "HELLO WORLD";
-        stream_wrapper_restore("php");
+//        stream_wrapper_restore("php");
 
         $request = new Request(new Headers());
         $handler = new ControllerRouteHandler($method, $request, "");
@@ -176,7 +176,7 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
     public function testRequestObjectsAreAutowiredIfSuppliedToControllerMethods() {
 
         $_GET = [];
-        stream_wrapper_restore("php");
+//        stream_wrapper_restore("php");
 
         $method = $this->classInspectorProvider->getClassInspector(\Simple::class)->getPublicMethod("autowired");
 

@@ -194,7 +194,7 @@ class Request {
         if ($this->requestMethod != self::METHOD_GET && $this->requestMethod != self::METHOD_HEAD) {
 
 
-            if (strpos(strtolower($this->headers->getContentType()), "multipart/form-data") === 0) {
+            if (strpos(strtolower($this->headers->getContentType() ?? ""), "multipart/form-data") === 0) {
 
                 // Add Post Params to array
                 $this->addArrayToParams($_POST);
