@@ -29,10 +29,10 @@ class JSONResponse extends SimpleResponse {
      * @param int $responseCode
      * @param string $contentType
      */
-    public function __construct($jsonObject, $responseCode = 200, $contentType = "application/json") {
+    public function __construct($jsonObject, $responseCode = 200, $contentType = "application/json", $customHeaders = []) {
         $this->object = $jsonObject;
         $converter = Container::instance()->get(ObjectToJSONConverter::class);
-        parent::__construct(new StringContentSource($converter->convert($jsonObject), $contentType), $responseCode);
+        parent::__construct(new StringContentSource($converter->convert($jsonObject), $contentType), $responseCode, $customHeaders);
     }
 
     /**
