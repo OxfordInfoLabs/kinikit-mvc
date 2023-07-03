@@ -5,6 +5,7 @@ namespace Kinikit\MVC\Routing;
 use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\DependencyInjection\Container;
+use Kinikit\Core\Logging\Logger;
 use Kinikit\Core\Reflection\ClassInspector;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\Core\Reflection\Method;
@@ -143,7 +144,7 @@ class RouteResolver {
             if ($resolved = $this->fileResolver->resolveFile($currentPath . ".php", true)) {
                 $controllerSource = file_get_contents($resolved);
                 preg_match("/namespace (.*?);/", $controllerSource, $namespaceMatches);
-                preg_match("/class (.*?) {/", $controllerSource, $classMatches);
+                preg_match("/class (.*?) /", $controllerSource, $classMatches);
                 if (sizeof($classMatches) > 1) {
 
                     $className = trim(($namespaceMatches[1] ?? "") . "\\" . $classMatches[1]);

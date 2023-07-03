@@ -140,6 +140,7 @@ class Router {
             $routeInterceptorHandler = $this->routeInterceptorProcessor->getInterceptorHandlerForRequest($url->getPath());
 
 
+
             // Run before interceptors as first stage.
             $response = $routeInterceptorHandler->processBeforeRoute($request);
 
