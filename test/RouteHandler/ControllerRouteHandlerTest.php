@@ -320,6 +320,16 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("Hello@test.com ' \" #£ Hello", $result[0]);
 
 
+        // Check long values are left intact
+        $_GET["param1"] = file_get_contents(__DIR__."/large-param.txt");
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "getOnly");
+
+        $result = $handler->handleRoute()->getObject();
+
+        $this->assertEquals(file_get_contents(__DIR__."/large-param.txt"), $result[0]);
+
+
         // Check this happens on payloads recursively too.
         stream_wrapper_unregister("php");
         stream_wrapper_register("php", "Kinikit\MVC\Request\MockPHPInputStream");

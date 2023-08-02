@@ -70,7 +70,7 @@ class ControllerRouteHandler extends RouteHandler {
         $this->targetMethod = $targetMethod;
         $this->request = $request;
         $this->methodRequestPath = $methodRequestPath;
-        $this->sanitiser = Sanitizer::create([]);
+        $this->sanitiser = Sanitizer::create(["max_input_length" => PHP_INT_MAX]);
         $this->classInspectorProvider = Container::instance()->get(ClassInspectorProvider::class);
 
         // Populate rate limit and caching data.
