@@ -43,6 +43,7 @@ abstract class Response {
     const RESPONSE_NOT_FOUND = 404;
     const RESPONSE_RATE_LIMITED = 429;
     const RESPONSE_GENERAL_ERROR = 500;
+    const RESPONSE_SERVICE_UNAVAILABLE = 503;
 
 
     /**
