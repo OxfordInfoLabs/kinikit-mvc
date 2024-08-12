@@ -13,6 +13,9 @@
   ],
   "homepage": "https://kinikit.com",
   "type": "library",
+  "scripts": {
+    "dev": "rm -rf vendor/oxil/kinikit-core; ln -s '../../../kinikit-core' vendor/oxil/kinikit-core"
+  },
   "require": {
     "oxil/kinikit-core": "dev-master",
     "tgalopin/html-sanitizer": "^1.4"
