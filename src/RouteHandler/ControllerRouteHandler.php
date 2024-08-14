@@ -8,6 +8,7 @@ use AWS\CRT\Log;
 use Kinikit\Core\Binding\ObjectBinder;
 use Kinikit\Core\Binding\ObjectBindingException;
 use Kinikit\Core\DependencyInjection\Container;
+use Kinikit\Core\DependencyInjection\SimpleEnum;
 use Kinikit\Core\Exception\InsufficientParametersException;
 use Kinikit\Core\Exception\StatusException;
 use Kinikit\Core\Exception\WrongParameterTypeException;
@@ -126,8 +127,12 @@ class ControllerRouteHandler extends RouteHandler {
                 $converter = Container::instance()->get(JSONToObjectConverter::class);
 
                 try {
-                    $params[$payloadParam->getName()] = $this->validateIncomingParameter($payloadParam->getName(), $converter->convert($this->request->getPayload(), $payloadParam->getType()));
-
+                    $params[$payloadParam->getName()] = $this->validateIncomingParameter(
+                        $payloadParam->getName(),
+                        $converter->convert(
+                            $this->request->getPayload(),
+                            $payloadParam->getType()
+                        ));
 
                     if ($payloadParam->isRequired() && !$params[$payloadParam->getName()]) {
                         throw new WrongParameterTypeException("The parameter {$payloadParam->getName()} is of the wrong type or badly formed");
@@ -141,6 +146,7 @@ class ControllerRouteHandler extends RouteHandler {
 
 
         // Poke in all other regular parameters at the end.
+        // Query parameters are NOT bound to objects
         foreach ($this->request->getParameters() as $key => $value) {
             $params[$key] = $this->validateIncomingParameter($key, $value);
         }
@@ -167,9 +173,6 @@ class ControllerRouteHandler extends RouteHandler {
         }
 
 
-        /**
-         * @var ClassInspectorProvider $classInspectorProvider
-         */
         $classInspector = $this->classInspectorProvider->getClassInspector(get_class($instance));
 
         // Grab the proxied method
@@ -247,6 +250,9 @@ class ControllerRouteHandler extends RouteHandler {
 
 
         if (is_object($value)) {
+            if (enum_exists(get_class($value))){
+                return $value;
+            }
 
             $inspector = $this->classInspectorProvider->getClassInspector(get_class($value));
 

@@ -3,8 +3,14 @@
 namespace Kinikit\MVC\Controllers;
 
 
+use Kinikit\Core\DependencyInjection\ExampleEnum;
+use Kinikit\Core\DependencyInjection\SimpleEnum;
 use Kinikit\Core\Exception\StatusException;
+use Kinikit\Core\Reflection\TestBackedEnum;
+use Kinikit\Core\Reflection\TestEnum;
 use Kinikit\MVC\Objects\TestRESTObject;
+use Kinikit\MVC\Test\Backed;
+use Kinikit\MVC\Test\Unbacked;
 
 /**
  * Class REST
@@ -98,6 +104,29 @@ class REST {
         return array($param1, $param2, $param3);
     }
 
+    /**
+     * @http POST /getBackedEnum
+     *
+     * @param Backed $backedParam
+     * @return string
+     */
+    public function getBackedEnum(Backed $backedParam) : string {
+        return "There are ".$backedParam->value;
+    }
+
+    /**
+     * @http POST /getUnbackedEnum
+     *
+     * @param Unbacked $unbackedParam
+     * @return string
+     */
+    public function getUnbackedEnum(Unbacked $unbackedParam) : string {
+        if ($unbackedParam == Unbacked::One){
+            return "Singular";
+        } else {
+            return "Plural";
+        }
+    }
 
     /**
      * List all test objects

@@ -90,6 +90,41 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
 
     }
 
+    public function testCanHandleRouteWithBackedEnum() {
+        stream_wrapper_unregister("php");
+        stream_wrapper_register("php", "Kinikit\MVC\Request\MockPHPInputStream");
+        file_put_contents("php://input", '"Uno"');
+
+        // Handle boolean input params properly as well
+        $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("getBackedEnum");
+
+        $_SERVER["REQUEST_METHOD"] = "POST";
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "getBackedEnum");
+
+        $this->assertEquals(new JSONResponse("There are Un"), $handler->handleRoute());
+
+        stream_wrapper_restore("php");
+    }
+    public function testCanHandleRouteWithUnbackedEnum() {
+        stream_wrapper_unregister("php");
+        stream_wrapper_register("php", "Kinikit\MVC\Request\MockPHPInputStream");
+        file_put_contents("php://input", '"One"');
+
+        // Handle boolean input params properly as well
+        $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("getUnbackedEnum");
+
+        $_SERVER["REQUEST_METHOD"] = "POST";
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "getUnbackedEnum");
+
+        $this->assertEquals(new JSONResponse("Singular"), $handler->handleRoute());
+
+        stream_wrapper_restore("php");
+    }
+
 
     public function testExceptionRaisedIfBadPrimitiveParameterTypesPassedForMethod() {
         // Handle boolean input params properly as well
