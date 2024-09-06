@@ -199,15 +199,22 @@ class PHPSession implements Session {
     // Start the session
     private function startSession() {
 
-        // Set session save path and handlers if set in config
-        if ($sessionSavePath = Configuration::instance()->getParameter("session.save.path")) {
-            ini_set("session.save_path", $sessionSavePath);
-        }
 
         // Set save handler instance if a handler class supplied in config
         if ($sessionSaveHandlerClass = Configuration::instance()->getParameter("session.save.handler.class")) {
             $this->sessionConfigHandler->setSaveHandler(Container::instance()->get($sessionSaveHandlerClass), true);
         }
+
+        // Set session save path and handlers if set in config
+        if ($sessionSaveHandler = Configuration::instance()->getParameter("session.save.handler")) {
+            ini_set("session.save_handler", $sessionSaveHandler);
+        }
+
+        // Set session save path and handlers if set in config
+        if ($sessionSavePath = Configuration::instance()->getParameter("session.save.path")) {
+            ini_set("session.save_path", $sessionSavePath);
+        }
+
 
 
         // Resolve the cookie domain
