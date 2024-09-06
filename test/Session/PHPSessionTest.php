@@ -195,7 +195,7 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
      * @runInSeparateProcess
      */
     public function testSettingCustomSessionSaveHandlerSetsIniCorrectly(){
-        Configuration::instance()->addParameter("session.save.handler", "test");
+        Configuration::instance()->addParameter("session.save.handler", "files");
 
         $mockConfigHandler = MockObjectProvider::instance()->getMockInstance(SessionConfigHandler::class);
 
@@ -203,7 +203,7 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
         $session = new PHPSession($mockConfigHandler);
         $session->setValue("test", "Bingo");
 
-        $this->assertEquals("test", ini_get("session.save_handler"));
+        $this->assertEquals("files", ini_get("session.save_handler"));
     }
 
     /**
