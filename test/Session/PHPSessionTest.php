@@ -79,7 +79,7 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
 
 
         $this->assertTrue($mockConfigHandler->methodWasCalled("setCookieParameters", [
-            PHPSession::DEFAULT_COOKIE_LIFETIME, PHPSession::DEFAULT_COOKIE_PATH, "tester.com", PHPSession::DEFAULT_COOKIE_SECURE,
+            PHPSession::DEFAULT_COOKIE_LIFETIME, PHPSession::DEFAULT_COOKIE_PATH, NULL, PHPSession::DEFAULT_COOKIE_SECURE,
             PHPSession::DEFAULT_COOKIE_HTTP_ONLY, PHPSession::DEFAULT_COOKIE_SAME_SITE
         ]));
 
@@ -113,6 +113,37 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
 
 
     }
+
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testStartingSessionSetsReferrerDomainsCorrectly() {
+
+
+        // Check default values first
+        $_SERVER["HTTP_REFERER"] = "http://mytestreferer.interaction.com/myhelper";
+
+        Configuration::instance()->addParameter("session.cookie.domain", "REFERRER");
+
+        /**
+         * @var MockObjectProvider $mockObjectProvider
+         */
+        $mockObjectProvider = Container::instance()->get(MockObjectProvider::class);
+        $mockConfigHandler = $mockObjectProvider->getMockInstance(SessionConfigHandler::class);
+
+        $session = new PHPSession($mockConfigHandler);
+        $session->getAllValues();
+
+        $this->assertTrue($mockConfigHandler->methodWasCalled("setCookieParameters", [
+            PHPSession::DEFAULT_COOKIE_LIFETIME, PHPSession::DEFAULT_COOKIE_PATH, "mytestreferer.interaction.com", PHPSession::DEFAULT_COOKIE_SECURE,
+            PHPSession::DEFAULT_COOKIE_HTTP_ONLY, PHPSession::DEFAULT_COOKIE_SAME_SITE
+        ]));
+
+
+    }
+
+
 
     /**
      * @runInSeparateProcess

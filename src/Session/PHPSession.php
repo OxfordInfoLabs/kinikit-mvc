@@ -4,6 +4,7 @@ namespace Kinikit\MVC\Session;
 
 use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\DependencyInjection\Container;
+use Kinikit\MVC\Request\URL;
 use PSpell\Config;
 
 
@@ -215,11 +216,10 @@ class PHPSession implements Session {
             ini_set("session.save_path", $sessionSavePath);
         }
 
-
-
         // Resolve the cookie domain
         $cookieDomain = Configuration::instance()->getParameter('session.cookie.domain');
         $host = isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "";
+        $referer = $_SERVER["HTTP_REFERER"] ?? "";
 
         if ($cookieDomain) {
 
@@ -233,10 +233,17 @@ class PHPSession implements Session {
                 } else {
                     return;
                 }
+            } else if ($cookieDomain == "REFERRER") {
+                if ($referer) {
+                    $url = new URL($_SERVER["HTTP_REFERER"]);
+                    $cookieDomain = $url->getHost();
+                } else {
+                    return;
+                }
             }
 
         } else {
-            $cookieDomain = $host;
+            $cookieDomain = NULL;
         }
 
         // Set other parameters oveloadable by config
