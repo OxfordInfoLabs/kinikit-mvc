@@ -291,7 +291,7 @@ abstract class Controller {
             header("Content-Type: {$contentHeader}; charset=utf8");
 
         if (!headers_sent() && !preg_grep("/Content-Length/", headers_list()))
-            header("Content-Length: " . strlen($result));
+            header("Content-Length: " . strlen($result ?? ""));
 
 
         // Strip out duplicate set cookie headers
