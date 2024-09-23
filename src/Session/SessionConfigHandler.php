@@ -3,8 +3,6 @@
 
 namespace Kinikit\MVC\Session;
 
-use Kinikit\Core\Logging\Logger;
-
 /**
  * Class SessionCookieHandler
  *
