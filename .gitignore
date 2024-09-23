@@ -4,3 +4,4 @@ test/php_input.txt
 .idea
 .phpunit.result.cache
 composer.lock
+test/Session/sess_*

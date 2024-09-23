@@ -3,6 +3,8 @@
 namespace Kinikit\MVC\Session;
 
 use Kinikit\Core\Configuration\Configuration;
+use Kinikit\Core\DependencyInjection\Container;
+use Kinikit\MVC\Request\URL;
 
 
 /**
@@ -18,9 +20,9 @@ class PHPSession implements Session {
     private $sessionId = null;
 
     /**
-     * @var SessionCookieHandler
+     * @var SessionConfigHandler
      */
-    private $sessionCookieHandler;
+    private $sessionConfigHandler;
 
     // 8 hrs max length
     const DEFAULT_COOKIE_LIFETIME = 28800;
@@ -33,10 +35,10 @@ class PHPSession implements Session {
     /**
      * PHPSession constructor.
      *
-     * @param SessionCookieHandler $sessionCookieHandler
+     * @param SessionConfigHandler $sessionConfigHandler
      */
-    public function __construct($sessionCookieHandler) {
-        $this->sessionCookieHandler = $sessionCookieHandler;
+    public function __construct($sessionConfigHandler) {
+        $this->sessionConfigHandler = $sessionConfigHandler;
     }
 
     /**
@@ -197,9 +199,26 @@ class PHPSession implements Session {
     // Start the session
     private function startSession() {
 
+
+        // Set save handler instance if a handler class supplied in config
+        if ($sessionSaveHandlerClass = Configuration::instance()->getParameter("session.save.handler.class")) {
+            $this->sessionConfigHandler->setSaveHandler(Container::instance()->get($sessionSaveHandlerClass), true);
+        }
+
+        // Set session save path and handlers if set in config
+        if ($sessionSaveHandler = Configuration::instance()->getParameter("session.save.handler")) {
+            ini_set("session.save_handler", $sessionSaveHandler);
+        }
+
+        // Set session save path and handlers if set in config
+        if ($sessionSavePath = Configuration::instance()->getParameter("session.save.path")) {
+            ini_set("session.save_path", $sessionSavePath);
+        }
+
         // Resolve the cookie domain
         $cookieDomain = Configuration::instance()->getParameter('session.cookie.domain');
         $host = isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "";
+        $referer = $_SERVER["HTTP_REFERER"] ?? "";
 
         if ($cookieDomain) {
 
@@ -213,10 +232,17 @@ class PHPSession implements Session {
                 } else {
                     return;
                 }
+            } else if ($cookieDomain == "REFERRER") {
+                if ($referer) {
+                    $url = new URL($_SERVER["HTTP_REFERER"]);
+                    $cookieDomain = $url->getHost();
+                } else {
+                    return;
+                }
             }
 
         } else {
-            $cookieDomain = $host;
+            $cookieDomain = NULL;
         }
 
         // Set other parameters oveloadable by config
@@ -227,7 +253,7 @@ class PHPSession implements Session {
         $cookieSameSite = Configuration::readParameter("session.cookie.samesite") ?? self::DEFAULT_COOKIE_SAME_SITE;
 
         if (!headers_sent()) {
-            $this->sessionCookieHandler->setCookieParameters($cookieLifetime, $cookiePath, $cookieDomain, $cookieSecure, $cookieHttpOnly, $cookieSameSite);
+            $this->sessionConfigHandler->setCookieParameters($cookieLifetime, $cookiePath, $cookieDomain, $cookieSecure, $cookieHttpOnly, $cookieSameSite);
             @session_start([
                 "use_strict_mode" => 1
             ]);

@@ -5,6 +5,7 @@ namespace Kinikit\MVC\Session;
 use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Testing\MockObjectProvider;
+use Kinikit\MVC\Objects\TestRESTObject;
 
 include_once "autoloader.php";
 
@@ -23,6 +24,7 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
     public function setUp(): void {
         $this->session = Container::instance()->get(PHPSession::class);
     }
+
 
     public function testSettingAValueActuallySetsTheSessionValue() {
         $_SESSION = array();
@@ -70,14 +72,14 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
          * @var MockObjectProvider $mockObjectProvider
          */
         $mockObjectProvider = Container::instance()->get(MockObjectProvider::class);
-        $mockCookieHandler = $mockObjectProvider->getMockInstance(SessionCookieHandler::class);
+        $mockConfigHandler = $mockObjectProvider->getMockInstance(SessionConfigHandler::class);
 
-        $session = new PHPSession($mockCookieHandler);
+        $session = new PHPSession($mockConfigHandler);
         $session->getAllValues();
 
 
-        $this->assertTrue($mockCookieHandler->methodWasCalled("setCookieParameters", [
-            PHPSession::DEFAULT_COOKIE_LIFETIME, PHPSession::DEFAULT_COOKIE_PATH, "tester.com", PHPSession::DEFAULT_COOKIE_SECURE,
+        $this->assertTrue($mockConfigHandler->methodWasCalled("setCookieParameters", [
+            PHPSession::DEFAULT_COOKIE_LIFETIME, PHPSession::DEFAULT_COOKIE_PATH, NULL, PHPSession::DEFAULT_COOKIE_SECURE,
             PHPSession::DEFAULT_COOKIE_HTTP_ONLY, PHPSession::DEFAULT_COOKIE_SAME_SITE
         ]));
 
@@ -99,18 +101,49 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
          * @var MockObjectProvider $mockObjectProvider
          */
         $mockObjectProvider = Container::instance()->get(MockObjectProvider::class);
-        $mockCookieHandler = $mockObjectProvider->getMockInstance(SessionCookieHandler::class);
+        $mockConfigHandler = $mockObjectProvider->getMockInstance(SessionConfigHandler::class);
 
-        $session = new PHPSession($mockCookieHandler);
+        $session = new PHPSession($mockConfigHandler);
         $session->getAllValues();
 
-        $this->assertTrue($mockCookieHandler->methodWasCalled("setCookieParameters", [
+        $this->assertTrue($mockConfigHandler->methodWasCalled("setCookieParameters", [
             PHPSession::DEFAULT_COOKIE_LIFETIME, PHPSession::DEFAULT_COOKIE_PATH, ".tester.com", PHPSession::DEFAULT_COOKIE_SECURE,
             PHPSession::DEFAULT_COOKIE_HTTP_ONLY, PHPSession::DEFAULT_COOKIE_SAME_SITE
         ]));
 
 
     }
+
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testStartingSessionSetsReferrerDomainsCorrectly() {
+
+
+        // Check default values first
+        $_SERVER["HTTP_REFERER"] = "http://mytestreferer.interaction.com/myhelper";
+
+        Configuration::instance()->addParameter("session.cookie.domain", "REFERRER");
+
+        /**
+         * @var MockObjectProvider $mockObjectProvider
+         */
+        $mockObjectProvider = Container::instance()->get(MockObjectProvider::class);
+        $mockConfigHandler = $mockObjectProvider->getMockInstance(SessionConfigHandler::class);
+
+        $session = new PHPSession($mockConfigHandler);
+        $session->getAllValues();
+
+        $this->assertTrue($mockConfigHandler->methodWasCalled("setCookieParameters", [
+            PHPSession::DEFAULT_COOKIE_LIFETIME, PHPSession::DEFAULT_COOKIE_PATH, "mytestreferer.interaction.com", PHPSession::DEFAULT_COOKIE_SECURE,
+            PHPSession::DEFAULT_COOKIE_HTTP_ONLY, PHPSession::DEFAULT_COOKIE_SAME_SITE
+        ]));
+
+
+    }
+
+
 
     /**
      * @runInSeparateProcess
@@ -133,12 +166,12 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
          * @var MockObjectProvider $mockObjectProvider
          */
         $mockObjectProvider = Container::instance()->get(MockObjectProvider::class);
-        $mockCookieHandler = $mockObjectProvider->getMockInstance(SessionCookieHandler::class);
+        $mockConfigHandler = $mockObjectProvider->getMockInstance(SessionConfigHandler::class);
 
-        $session = new PHPSession($mockCookieHandler);
+        $session = new PHPSession($mockConfigHandler);
         $session->getAllValues();
 
-        $this->assertTrue($mockCookieHandler->methodWasCalled("setCookieParameters", [
+        $this->assertTrue($mockConfigHandler->methodWasCalled("setCookieParameters", [
             3600, "/test", ".tester.com", false,
             false, "Test"
         ]));
@@ -152,16 +185,16 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
      */
     public function testCanJoinExistingSessionById() {
 
-        $mockCookieHandler = MockObjectProvider::instance()->getMockInstance(SessionCookieHandler::class);
+        $mockConfigHandler = MockObjectProvider::instance()->getMockInstance(SessionConfigHandler::class);
 
         // Create a new session
-        $session = new PHPSession($mockCookieHandler);
+        $session = new PHPSession($mockConfigHandler);
         $session->setValue("test", "Bingo");
 
         $firstSessionId = $session->getId();
 
         // Make new session
-        $session = new PHPSession($mockCookieHandler);
+        $session = new PHPSession($mockConfigHandler);
         $this->assertNotEquals($session->getId(), $firstSessionId);
 
         // Join original session
@@ -170,6 +203,56 @@ class PHPSessionTest extends \PHPUnit\Framework\TestCase {
         // check match
         $this->assertEquals($session->getId(), $firstSessionId);
 
+
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testSettingCustomSessionSavePathInConfigSetsIniCorrectly() {
+
+        Configuration::instance()->addParameter("session.save.path", __DIR__);
+
+        $mockConfigHandler = MockObjectProvider::instance()->getMockInstance(SessionConfigHandler::class);
+
+        // Create a new session and set a value
+        $session = new PHPSession($mockConfigHandler);
+        $session->setValue("test", "Bingo");
+
+        $this->assertEquals(__DIR__, ini_get("session.save_path"));
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testSettingCustomSessionSaveHandlerSetsIniCorrectly(){
+        Configuration::instance()->addParameter("session.save.handler", "files");
+
+        $mockConfigHandler = MockObjectProvider::instance()->getMockInstance(SessionConfigHandler::class);
+
+        // Create a new session and set a value
+        $session = new PHPSession($mockConfigHandler);
+        $session->setValue("test", "Bingo");
+
+        $this->assertEquals("files", ini_get("session.save_handler"));
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testSettingCustomSessionSaveHandlerClassInConfigSetsSaveHandlerCorrectlyWithNewInstance() {
+
+        Configuration::instance()->addParameter("session.save.handler.class", TestRESTObject::class);
+
+        $mockConfigHandler = MockObjectProvider::instance()->getMockInstance(SessionConfigHandler::class);
+
+        // Create a new session and set a value
+        $session = new PHPSession($mockConfigHandler);
+        $session->setValue("test", "Bingo");
+
+        $this->assertTrue($mockConfigHandler->methodWasCalled("setSaveHandler", [
+            Container::instance()->get(TestRESTObject::class), true
+        ]));
 
     }
 
