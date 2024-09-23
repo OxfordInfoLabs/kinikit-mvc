@@ -5,7 +5,6 @@ namespace Kinikit\MVC\Session;
 use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\MVC\Request\URL;
-use PSpell\Config;
 
 
 /**
