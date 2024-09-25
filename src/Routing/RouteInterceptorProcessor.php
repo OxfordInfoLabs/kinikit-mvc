@@ -7,7 +7,6 @@ namespace Kinikit\MVC\Routing;
 use Kinikit\Core\Configuration\ConfigFile;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
-use Kinikit\MVC\Request\Request;
 
 /**
  *

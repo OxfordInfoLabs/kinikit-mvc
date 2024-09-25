@@ -2,7 +2,6 @@
 
 namespace Kinikit\MVC\API;
 
-use Kinikit\Core\Configuration;
 use Kinikit\Core\Bootstrapper;
 use Kinikit\Core\Object\SerialisableObject;
 use Kinikit\Core\Template\Parser\MustacheTemplateParser;

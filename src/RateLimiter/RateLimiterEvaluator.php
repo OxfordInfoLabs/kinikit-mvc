@@ -9,9 +9,6 @@
 namespace Kinikit\MVC\RateLimiter;
 
 
-use Kinikit\Core\Annotation\ClassAnnotationParser;
-use Kinikit\Core\Annotation\ClassAnnotations;
-use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\MVC\Request\Request;
 use Kinikit\MVC\Response\Headers;
 

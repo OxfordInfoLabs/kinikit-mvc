@@ -5,14 +5,12 @@ namespace Kinikit\MVC\RouteHandler;
 
 
 use AWS\CRT\Log;
-use Kinikit\Core\Binding\ObjectBinder;
+use HtmlSanitizer\Sanitizer;
 use Kinikit\Core\Binding\ObjectBindingException;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\DependencyInjection\SimpleEnum;
 use Kinikit\Core\Exception\InsufficientParametersException;
-use Kinikit\Core\Exception\StatusException;
 use Kinikit\Core\Exception\WrongParameterTypeException;
-use Kinikit\Core\Logging\Logger;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\Core\Serialisation\JSON\JSONToObjectConverter;
@@ -27,7 +25,6 @@ use Kinikit\MVC\Response\JSONResponse;
 use Kinikit\MVC\Response\Response;
 use Kinikit\MVC\Response\View;
 use Kinikit\MVC\Response\WebErrorResponse;
-use HtmlSanitizer\Sanitizer;
 
 class ControllerRouteHandler extends RouteHandler {
 

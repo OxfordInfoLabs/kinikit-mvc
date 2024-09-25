@@ -3,8 +3,6 @@
 
 namespace Kinikit\MVC\Request;
 
-use Kinikit\Core\Util\ObjectArrayUtils;
-
 /**
  * Class Headers
  * @package Kinikit\MVC\Request

@@ -4,21 +4,17 @@ namespace Kinikit\MVC\Routing;
 
 use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\Configuration\FileResolver;
-use Kinikit\Core\DependencyInjection\Container;
-use Kinikit\Core\Logging\Logger;
 use Kinikit\Core\Reflection\ClassInspector;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\MVC\Request\Request;
 use Kinikit\MVC\Request\URL;
-use Kinikit\MVC\Response\JSONResponse;
-use Kinikit\MVC\Response\Response;
 use Kinikit\MVC\Response\ViewNotFoundException;
 use Kinikit\MVC\RouteHandler\ControllerRouteHandler;
-use Kinikit\MVC\RouteHandler\RouteHandler;
-use Kinikit\MVC\RouteHandler\ViewOnlyRouteHandler;
 use Kinikit\MVC\RouteHandler\DecoratorRouteHandler;
 use Kinikit\MVC\RouteHandler\MissingDecoratorHandlerException;
+use Kinikit\MVC\RouteHandler\RouteHandler;
+use Kinikit\MVC\RouteHandler\ViewOnlyRouteHandler;
 
 /**
  * Resolve the current request route to a handler which is an instance of RouteHandler.

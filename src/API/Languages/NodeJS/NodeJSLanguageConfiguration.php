@@ -14,7 +14,6 @@ use Kinikit\MVC\API\APIConfiguration;
 use Kinikit\MVC\API\ClientLanguageConfiguration;
 use Kinikit\MVC\API\Descriptor\APIController;
 use Kinikit\MVC\API\Descriptor\APIMetaData;
-use Kinikit\MVC\API\Descriptor\APIObject;
 
 class NodeJSLanguageConfiguration extends ClientLanguageConfiguration {
 

@@ -3,7 +3,6 @@
 
 namespace Kinikit\MVC\Response;
 
-use Kinikit\Core\Binding\ObjectBinder;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Serialisation\JSON\ObjectToJSONConverter;
 use Kinikit\MVC\ContentSource\StringContentSource;

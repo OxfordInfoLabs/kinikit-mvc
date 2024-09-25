@@ -4,8 +4,6 @@
 namespace Kinikit\MVC\Routing;
 
 
-use Kinikit\Core\DependencyInjection\Container;
-use Kinikit\Core\Logging\Logger;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\MVC\ContentCaching\ContentCacheConfig;
 use Kinikit\MVC\RateLimiter\RateLimiterConfig;

@@ -3,9 +3,7 @@
 namespace Kinikit\MVC\ContentCaching;
 
 use Kinikit\Core\Configuration\Configuration;
-use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Util\Annotation\ClassAnnotations;
-use Kinikit\MVC\Request\Request;
 
 /**
  * Read / Write data to the cache if a cache value is set for a specific method.

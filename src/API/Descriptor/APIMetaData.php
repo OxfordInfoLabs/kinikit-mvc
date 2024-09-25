@@ -9,7 +9,6 @@
 namespace Kinikit\MVC\API\Descriptor;
 
 
-use Kinikit\Core\Configuration;
 use Kinikit\Core\Object\DynamicSerialisableObject;
 
 

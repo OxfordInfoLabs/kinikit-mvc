@@ -4,7 +4,6 @@
 namespace Kinikit\MVC\Response;
 
 
-use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\FileNotFoundException;
 use Kinikit\Core\Template\TemplateParser;
