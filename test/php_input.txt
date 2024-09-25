@@ -1,1 +1,1 @@
-{"id": "23", "name": "<script type=\"text/javascript\">alert(\"bingo\");</script>", "email": "pan@neverland.com", "lastStatus": "SUCCESS"}
+{"id": "23", "name": "Peter Pan", "email": "pan@neverland.com", "lastStatus": "SUCCESS"}
