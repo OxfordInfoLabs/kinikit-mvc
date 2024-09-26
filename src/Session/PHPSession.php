@@ -49,8 +49,8 @@ class PHPSession implements Session {
      */
     public function setValue($key, $value) {
         $this->startSession();
-        $_SESSION [$key] = $value;
-        $this->sessionData = null;
+        $_SESSION[$key] = $value;
+        $this->sessionData = $_SESSION;
         session_write_close();
     }
 
@@ -61,6 +61,7 @@ class PHPSession implements Session {
      * @return mixed
      */
     public function getValue($key) {
+
         $allValues = $this->getAllValues();
         if (isset($allValues[$key])) {
             return $allValues[$key];
@@ -74,11 +75,13 @@ class PHPSession implements Session {
      */
     public function getAllValues() {
 
-        if (!$this->sessionData) {
+        if ($this->sessionData === null) {
             $this->startSession();
             $this->sessionData = isset($_SESSION) ? $_SESSION : array();
             session_write_close();
         }
+
+
 
         return $this->sessionData;
     }
@@ -199,7 +202,6 @@ class PHPSession implements Session {
     // Start the session
     private function startSession() {
 
-
         // Set save handler instance if a handler class supplied in config
         if ($sessionSaveHandlerClass = Configuration::instance()->getParameter("session.save.handler.class")) {
             $this->sessionConfigHandler->setSaveHandler(Container::instance()->get($sessionSaveHandlerClass), true);
@@ -257,8 +259,12 @@ class PHPSession implements Session {
             @session_start([
                 "use_strict_mode" => 1
             ]);
+
             $this->sessionId = session_id();
         }
+
+
+
     }
 
 
