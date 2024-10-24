@@ -14,7 +14,6 @@ class ContentCacheConfig {
 
     /**
      * CacheConfig constructor.
-     * @param string $cache
      * @param string $cacheTime
      */
     public function __construct($cacheTime = null) {

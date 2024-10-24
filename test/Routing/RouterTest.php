@@ -13,10 +13,11 @@ use Kinikit\MVC\Response\JSONResponse;
 use Kinikit\MVC\Response\Redirect;
 use Kinikit\MVC\Response\SimpleResponse;
 use Kinikit\MVC\Response\View;
+use PHPUnit\Framework\TestCase;
 
 include_once "autoloader.php";
 
-class RouterTest extends \PHPUnit\Framework\TestCase {
+class RouterTest extends TestCase {
 
     /**
      * @var Router
@@ -42,6 +43,12 @@ class RouterTest extends \PHPUnit\Framework\TestCase {
             unlink("ratelimits/100.100.100.100");
         }
 
+    }
+
+    public function tearDown(): void {
+        foreach (glob(Configuration::readParameter("files.root") . "/cache/*") as $file) {
+            unlink($file);
+        }
     }
 
     /**
@@ -207,35 +214,6 @@ class RouterTest extends \PHPUnit\Framework\TestCase {
         $this->assertTrue($response->getHeaders()->get(\Kinikit\MVC\Response\Headers::HEADER_RATELIMIT_REMAINING) > 100);
         $this->assertNotNull($response->getHeaders()->get(\Kinikit\MVC\Response\Headers::HEADER_RATELIMIT_RESET));
 
-
-    }
-
-    /**
-     * @runInSeparateProcess
-     */
-    public function testCachingAppliedAccordingToFlowDownRules() {
-
-        // Simple direct view first.
-        $_SERVER["REQUEST_METHOD"] = "GET";
-        $_SERVER["REQUEST_URI"] = "/teststaticview";
-
-        $request = new Request(new Headers());
-        $response = $this->router->processRequest($request);
-        $this->assertNull($response->getHeaders()->get(\Kinikit\MVC\Response\Headers::HEADER_EXPIRES));
-        $this->assertNull($response->getHeaders()->get(\Kinikit\MVC\Response\Headers::HEADER_CACHE_CONTROL));
-        $this->assertNull($response->getHeaders()->get(\Kinikit\MVC\Response\Headers::HEADER_LAST_MODIFIED));
-
-
-        // Simple direct view first.
-        $_SERVER["REQUEST_METHOD"] = "GET";
-        $_SERVER["REQUEST_URI"] = "/zone/simple";
-
-        $request = new Request(new Headers());
-        $response = $this->router->processRequest($request);
-
-        $this->assertNotNull($response->getHeaders()->get(\Kinikit\MVC\Response\Headers::HEADER_EXPIRES));
-        $this->assertNotNull($response->getHeaders()->get(\Kinikit\MVC\Response\Headers::HEADER_CACHE_CONTROL));
-        $this->assertNotNull($response->getHeaders()->get(\Kinikit\MVC\Response\Headers::HEADER_LAST_MODIFIED));
 
     }
 

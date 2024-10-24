@@ -2,8 +2,10 @@
 
 namespace Kinikit\MVC\ContentCaching;
 
-
+use Kinikit\Core\Caching\CacheProvider;
 use Kinikit\Core\DependencyInjection\Container;
+
+include_once "autoloader.php";
 
 class ContentCacheEvaluatorTest extends \PHPUnit\Framework\TestCase {
 
@@ -13,13 +15,13 @@ class ContentCacheEvaluatorTest extends \PHPUnit\Framework\TestCase {
         /**
          * @var $testCache TestCache
          */
-        Container::instance()->addClassMapping(ContentCache::class, TestCache::class);
+        Container::instance()->addClassMapping(CacheProvider::class, TestCache::class);
 
 
-        $testCache = Container::instance()->get(ContentCache::class);
+        $testCache = Container::instance()->get(CacheProvider::class);
 
         /**
-         * @var $cacheEvaluator CacheEvaluator
+         * @var $cacheEvaluator ContentCacheEvaluator
          */
         $cacheEvaluator = Container::instance()->get(ContentCacheEvaluator::class);
 

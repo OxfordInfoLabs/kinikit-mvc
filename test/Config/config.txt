@@ -3,3 +3,5 @@ log.file = /tmp/ooacorelog.log
 application.namespace = Kinikit\MVC
 
 ratelimiter.storedir = ratelimits
+
+files.root = Files

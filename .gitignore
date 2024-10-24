@@ -1,6 +1,7 @@
 vendor
 test/ratelimits
 test/php_input.txt
+test/Files
 .idea
 .phpunit.result.cache
 composer.lock

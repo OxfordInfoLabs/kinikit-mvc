@@ -4,9 +4,11 @@
 namespace Kinikit\MVC\ContentCaching;
 
 
-class TestCache implements ContentCache {
+use Kinikit\Core\Caching\CacheProvider;
 
-    private $cachedItems = array();
+class TestCache implements CacheProvider {
+
+    private array $cachedItems = [];
 
 
     /**
@@ -15,12 +17,11 @@ class TestCache implements ContentCache {
      * Return a value if a cached value is to be returned or null if we need to revalidate.
      *
      * @param string $url
-     * @param int $maxAgeInMinutes
      *
      * @return mixed
      */
-    public function getCachedResult($url, $maxAgeInMinutes) {
-        return isset($this->cachedItems[$url]) ? $this->cachedItems[$url][0] : null;
+    public function getCachedResult(string $url) {
+        return $this->cachedItems[$url][0] ?? null;
     }
 
 
@@ -30,18 +31,33 @@ class TestCache implements ContentCache {
      * @param string $url
      * @param int $maxAgeInMinutes
      * @param mixed $result
-     *
+     * @return void
      */
-    public function cacheResult($url, $maxAgeInMinutes, $result) {
-        $this->cachedItems[$url] = array($result, $maxAgeInMinutes);
+    public function cacheResult(string $url, int $maxAgeInMinutes, mixed $result): void {
+        $this->cachedItems[$url] =[$result, $maxAgeInMinutes];
     }
 
     /**
      * @return array
      */
-    public function getCachedItems() {
+    public function getCachedItems(): array {
         return $this->cachedItems;
     }
 
 
+    public function set(string $key, mixed $value, int $ttl): void {
+        $this->cacheResult($key, $ttl, $value);
+    }
+
+    public function get(string $key, ?string $returnClass = null) {
+        return $this->getCachedResult($key);
+    }
+
+    public function lookup(string $key, callable $generatorFunction, int $ttl, array $params = [], ?string $returnClass = null) {
+        // TODO: Implement lookup() method.
+    }
+
+    public function clearCache(): void {
+        // TODO: Implement clearCache() method.
+    }
 }
