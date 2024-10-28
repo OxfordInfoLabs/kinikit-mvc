@@ -12,12 +12,12 @@ class StringContentSource extends ContentSource {
     /**
      * @var string
      */
-    private $contentString;
+    private string $contentString;
 
     /**
      * @var string
      */
-    private $contentType;
+    private string $contentType;
 
     /**
      *
@@ -25,7 +25,7 @@ class StringContentSource extends ContentSource {
      *
      * StringContentSource constructor.
      */
-    public function __construct($contentString, $contentType = "text/html") {
+    public function __construct(string $contentString, string $contentType = "text/html") {
         $this->contentString = $contentString;
         $this->contentType = $contentType;
     }
@@ -35,7 +35,7 @@ class StringContentSource extends ContentSource {
      *
      * @return string
      */
-    public function getContentType() {
+    public function getContentType(): string {
         return $this->contentType;
     }
 
@@ -44,7 +44,7 @@ class StringContentSource extends ContentSource {
      *
      * @return integer
      */
-    public function getContentLength() {
+    public function getContentLength(): int {
         return strlen($this->contentString);
     }
 

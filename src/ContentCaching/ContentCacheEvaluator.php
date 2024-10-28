@@ -4,6 +4,7 @@ namespace Kinikit\MVC\ContentCaching;
 
 use Kinikit\Core\Caching\CacheProvider;
 use Kinikit\Core\Configuration\Configuration;
+use Kinikit\MVC\Response\JSONResponse;
 
 /**
  * Read / Write data to the cache if a cache value is set for a specific method.
@@ -35,11 +36,10 @@ class ContentCacheEvaluator {
     /**
      * Get a cached result for current request using passed config.
      *
-     * @param ContentCacheConfig $config
      * @param string $url
      */
-    public function getCachedResult($config, $url) {;
-        return $this->cache->get($url);
+    public function getCachedResult(string $url) {
+        return $this->cache->get($url, JSONResponse::class);
     }
 
 
@@ -91,7 +91,7 @@ class ContentCacheEvaluator {
             }
         }
 
-        return $cacheTime;
+        return $cacheTime * 60;     // Used to return minutes, now needs to do seconds
 
     }
 
