@@ -2,8 +2,9 @@
 
 namespace Kinikit\MVC\ContentCaching;
 
-
 use Kinikit\Core\DependencyInjection\Container;
+
+include_once "autoloader.php";
 
 class ContentCacheEvaluatorTest extends \PHPUnit\Framework\TestCase {
 

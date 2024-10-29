@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Kinikit\MVC\Routing;
-
 
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
@@ -11,6 +9,8 @@ use Kinikit\MVC\RateLimiter\RateLimiterConfig;
 use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\Request;
 use Kinikit\MVC\Response\SimpleResponse;
+
+include_once "autoloader.php";
 
 class RouteInterceptorHandlerTest extends \PHPUnit\Framework\TestCase {
 

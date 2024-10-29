@@ -2,7 +2,6 @@
 
 namespace Kinikit\MVC\Routing;
 
-
 use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\DependencyInjection\Container;

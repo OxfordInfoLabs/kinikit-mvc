@@ -1,8 +1,8 @@
 <?php
 
-
 namespace Kinikit\MVC\Response;
 
+include_once "autoloader.php";
 
 class RedirectTest extends \PHPUnit\Framework\TestCase {
 

@@ -8,14 +8,11 @@
 
 namespace Kinikit\MVC\RateLimiter;
 
-
 include_once "autoloader.php";
-
 
 class FileStoreRateLimiterTest extends \PHPUnit\Framework\TestCase {
 
     public function testDefaultRateLimiterUsesFileSystemToStoreRateLimits() {
-
 
         $rateLimiter = new FileStoreRateLimiter();
 

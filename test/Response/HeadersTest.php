@@ -4,7 +4,6 @@ namespace Kinikit\MVC\Response;
 
 include_once "autoloader.php";
 
-
 class HeadersTest extends \PHPUnit\Framework\TestCase {
 
 

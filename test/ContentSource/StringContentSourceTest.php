@@ -2,9 +2,9 @@
 
 namespace Kinikit\MVC\ContentSource;
 
+include_once "autoloader.php";
 
 class StringContentSourceTest extends \PHPUnit\Framework\TestCase {
-
 
     public function testCanCreateStringContentSource() {
 

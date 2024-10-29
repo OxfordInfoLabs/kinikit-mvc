@@ -6,7 +6,6 @@ use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\Request;
 
-
 include_once "autoloader.php";
 
 /**

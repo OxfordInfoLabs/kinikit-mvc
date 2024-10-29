@@ -1,14 +1,14 @@
 <?php
 
-
 namespace Kinikit\MVC\RouteHandler;
-
 
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Template\MustacheTemplateParser;
 use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\Request;
 use Kinikit\MVC\Response\View;
+
+include_once "autoloader.php";
 
 class ViewOnlyRouteHandlerTest extends \PHPUnit\Framework\TestCase {
 

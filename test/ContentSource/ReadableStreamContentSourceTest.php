@@ -1,10 +1,10 @@
 <?php
 
-
 namespace Kinikit\MVC\ContentSource;
 
-
 use Kinikit\Core\Stream\String\ReadOnlyStringStream;
+
+include_once "autoloader.php";
 
 class ReadableStreamContentSourceTest extends \PHPUnit\Framework\TestCase {
 
