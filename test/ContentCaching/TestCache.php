@@ -49,11 +49,11 @@ class TestCache implements CacheProvider {
         $this->cacheResult($key, $ttl, $value);
     }
 
-    public function get(string $key, ?string $returnClass = null) {
+    public function get(string $key) {
         return $this->getCachedResult($key);
     }
 
-    public function lookup(string $key, callable $generatorFunction, int $ttl, array $params = [], ?string $returnClass = null) {
+    public function lookup(string $key, callable $generatorFunction, int $ttl, array $params = []) {
         // TODO: Implement lookup() method.
     }
 

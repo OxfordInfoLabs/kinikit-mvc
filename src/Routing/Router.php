@@ -166,8 +166,6 @@ class Router {
                     $cacheEvaluator = Container::instance()->get(ContentCacheEvaluator::class);
                     $response = $cacheEvaluator->getCachedResult($request->getUrl()->getPath(true));
                     if ($response) {
-//                        Logger::log("Reading:");
-//                        Logger::log($response);
                         return $response;
                     }
                 }
@@ -237,8 +235,6 @@ class Router {
 
         // Add to cache if required.
         if (isset($cacheConfig) && $cacheConfig) {
-//            Logger::log("Caching:");
-//            Logger::log($response);
             $cacheEvaluator->cacheResult($cacheConfig, $request->getUrl()->getPath(true), $response);
         }
 
