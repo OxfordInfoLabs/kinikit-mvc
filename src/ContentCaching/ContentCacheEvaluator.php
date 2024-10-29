@@ -4,6 +4,7 @@ namespace Kinikit\MVC\ContentCaching;
 
 use Kinikit\Core\Caching\CacheProvider;
 use Kinikit\Core\Configuration\Configuration;
+use Kinikit\Core\Logging\Logger;
 use Kinikit\MVC\Response\JSONResponse;
 
 /**
@@ -39,7 +40,8 @@ class ContentCacheEvaluator {
      * @param string $url
      */
     public function getCachedResult(string $url) {
-        return $this->cache->get($url, JSONResponse::class);
+        $key = md5($url);
+        return $this->cache->get($key, JSONResponse::class);
     }
 
 
@@ -51,7 +53,8 @@ class ContentCacheEvaluator {
      * @param mixed $result
      */
     public function cacheResult($config, $url, $result) {
-        $this->cache->set($url, $result, $this->getCacheTime($config));
+        $key = md5($url);
+        $this->cache->set($key, $result, $this->getCacheTime($config));
     }
 
 
