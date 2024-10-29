@@ -102,7 +102,7 @@ class Router {
         $response = $router->processRequest($router->request);
         if ($response) {
             // Send the response, sending headers only if this was a HEAD request.
-            $response->send($router->request->getRequestMethod() == Request::METHOD_HEAD);
+            $response->send($router->request->getRequestMethod() === Request::METHOD_HEAD);
         }
     }
 
@@ -165,15 +165,15 @@ class Router {
                 if ($cacheConfig) {
                     $cacheEvaluator = Container::instance()->get(ContentCacheEvaluator::class);
                     $response = $cacheEvaluator->getCachedResult($request->getUrl()->getPath(true));
-                    if ($response) {
-                        return $response;
+
+                    if (!$response) {
+                        $response = $routeHandler->handleRoute();
                     }
+
+                } else {
+                    // Handle the route and collect the response only if no response from before route
+                    $response = $routeHandler->handleRoute();
                 }
-
-
-                // Handle the route and collect the response only if no response from before route
-
-                $response = $routeHandler->handleRoute();
             }
 
 
