@@ -1,12 +1,12 @@
 <?php
 
-
 namespace Kinikit\MVC\Routing;
-
 
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\Request;
+
+include_once "autoloader.php";
 
 class RouteInterceptorProcessorTest extends \PHPUnit\Framework\TestCase {
 

@@ -4,6 +4,8 @@ namespace Kinikit\MVC\Response;
 
 use PHPUnit\Framework\TestCase;
 
+include_once "autoloader.php";
+
 class JSONResponseTest extends TestCase {
 
     public function testPrimitiveValuesAreStreamedCorrectly() {

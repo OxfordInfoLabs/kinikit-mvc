@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Kinikit\MVC\Routing;
-
 
 use Kinikit\Core\Configuration\Configuration;
 use Kinikit\Core\DependencyInjection\Container;

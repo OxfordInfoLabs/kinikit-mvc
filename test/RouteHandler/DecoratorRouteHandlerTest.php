@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Kinikit\MVC\RouteHandler;
-
 
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
@@ -12,6 +10,8 @@ use Kinikit\MVC\Request\Request;
 use Kinikit\MVC\Response\Download;
 use Kinikit\MVC\Response\Redirect;
 use Kinikit\MVC\Response\View;
+
+include_once "autoloader.php";
 
 class DecoratorRouteHandlerTest extends \PHPUnit\Framework\TestCase {
 
