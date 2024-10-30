@@ -2,8 +2,8 @@
 
 namespace Kinikit\MVC\ContentCaching;
 
+use Kinikit\Core\Caching\CacheProvider;
 use Kinikit\Core\Configuration\Configuration;
-use Kinikit\Core\Util\Annotation\ClassAnnotations;
 
 /**
  * Read / Write data to the cache if a cache value is set for a specific method.
@@ -13,9 +13,9 @@ use Kinikit\Core\Util\Annotation\ClassAnnotations;
 class ContentCacheEvaluator {
 
     /**
-     * @var ContentCache
+     * @var CacheProvider
      */
-    private $cache;
+    private CacheProvider $cache;
 
 
     const DEFAULT_CACHE_TIME = "1d";
@@ -25,7 +25,7 @@ class ContentCacheEvaluator {
      *
      * CacheEvaluator constructor.
      *
-     * @param ContentCache $cache
+     * @param CacheProvider $cache
      */
     public function __construct($cache) {
         $this->cache = $cache;
@@ -35,11 +35,11 @@ class ContentCacheEvaluator {
     /**
      * Get a cached result for current request using passed config.
      *
-     * @param ContentCacheConfig $config
      * @param string $url
      */
-    public function getCachedResult($config, $url) {
-        return $this->cache->getCachedResult($url, $this->getCacheTime($config));
+    public function getCachedResult(string $url) {
+        $key = md5($url);
+        return $this->cache->get($key);
     }
 
 
@@ -51,19 +51,17 @@ class ContentCacheEvaluator {
      * @param mixed $result
      */
     public function cacheResult($config, $url, $result) {
-
-        $this->cache->cacheResult($url, $this->getCacheTime($config), $result);
-
+        $key = md5($url);
+        $this->cache->set($key, $result, $this->getCacheTime($config));
     }
 
 
     // Convert cache time
-    private function getCacheTime($config) {
+    private function getCacheTime(ContentCacheConfig $config): int {
 
-
-        if ($config->getCacheTime())
+        if ($config->getCacheTime()) {
             $cacheTime = $config->getCacheTime();
-        else if (Configuration::readParameter("content.cache.time")) {
+        } else if (Configuration::readParameter("content.cache.time")) {
             $cacheTime = Configuration::readParameter("content.cache.time");
         } else {
             $cacheTime = self::DEFAULT_CACHE_TIME;
@@ -72,29 +70,29 @@ class ContentCacheEvaluator {
         $cacheTime = trim($cacheTime);
 
 
-        if (is_numeric($cacheTime)) return $cacheTime;
-        else {
-            $period = substr($cacheTime, "-1");
-            $cacheTime = substr($cacheTime, 0, strlen($cacheTime) - 1);
-
-            if (is_numeric($cacheTime)) {
-                switch ($period) {
-                    case "h":
-                        $cacheTime = $cacheTime * 60;
-                        break;
-                    case "d":
-                        $cacheTime = $cacheTime * 60 * 24;
-                        break;
-                    case "y":
-                        $cacheTime = $cacheTime * 60 * 24 * 365;
-                        break;
-
-                }
-            }
-
+        if (is_numeric($cacheTime)) {
+            return $cacheTime;
         }
 
-        return $cacheTime;
+        $period = substr($cacheTime, "-1");
+        $cacheTime = substr($cacheTime, 0, -1);
+
+        if (is_numeric($cacheTime)) {
+            switch ($period) {
+                case "h":
+                    $cacheTime *= 60;
+                    break;
+                case "d":
+                    $cacheTime = $cacheTime * 60 * 24;
+                    break;
+                case "y":
+                    $cacheTime = $cacheTime * 60 * 24 * 365;
+                    break;
+
+            }
+        }
+
+        return $cacheTime * 60;     // Used to return minutes, now needs to do seconds
 
     }
 

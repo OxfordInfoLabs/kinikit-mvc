@@ -102,7 +102,7 @@ class Router {
         $response = $router->processRequest($router->request);
         if ($response) {
             // Send the response, sending headers only if this was a HEAD request.
-            $response->send($router->request->getRequestMethod() == Request::METHOD_HEAD);
+            $response->send($router->request->getRequestMethod() === Request::METHOD_HEAD);
         }
     }
 
@@ -130,15 +130,12 @@ class Router {
             // If we get a response, return it immediately as it represents a redirect.
             if ($aliasMapped instanceof Redirect) {
                 return $aliasMapped;
-            } else {
-                $url = new URL(strtolower($url->getProtocol()) . "://" . $url->getHost() . ":" . $url->getPort() . "/" . $aliasMapped);
             }
 
+            $url = new URL(strtolower($url->getProtocol()) . "://" . $url->getHost() . ":" . $url->getPort() . "/" . $aliasMapped);
 
             // Get the interceptor handler for this request.
             $routeInterceptorHandler = $this->routeInterceptorProcessor->getInterceptorHandlerForRequest($url->getPath());
-
-
 
             // Run before interceptors as first stage.
             $response = $routeInterceptorHandler->processBeforeRoute($request);
@@ -155,7 +152,7 @@ class Router {
                  * @var RateLimiterConfig $rateLimiterConfig
                  * @var ContentCacheConfig $cacheConfig
                  */
-                list($rateLimiterConfig, $cacheConfig) = $this->getRateLimitAndCachingConfig($routeHandler, $routeInterceptorHandler);
+                [$rateLimiterConfig, $cacheConfig] = $this->getRateLimitAndCachingConfig($routeHandler, $routeInterceptorHandler);
 
                 // If rate limiter config, apply rate limiting now
                 if ($rateLimiterConfig) {
@@ -167,16 +164,16 @@ class Router {
                 // If cache config, checked for cached response first.
                 if ($cacheConfig) {
                     $cacheEvaluator = Container::instance()->get(ContentCacheEvaluator::class);
-                    $response = $cacheEvaluator->getCachedResult($cacheConfig, $request->getUrl()->getPath(true));
-                    if ($response) {
-                        return $response;
+                    $response = $cacheEvaluator->getCachedResult($request->getUrl()->getPath(true));
+
+                    if (!$response) {
+                        $response = $routeHandler->handleRoute();
                     }
+
+                } else {
+                    // Handle the route and collect the response only if no response from before route
+                    $response = $routeHandler->handleRoute();
                 }
-
-
-                // Handle the route and collect the response only if no response from before route
-
-                $response = $routeHandler->handleRoute();
             }
 
 
@@ -191,7 +188,7 @@ class Router {
             $responseCode = $e instanceof StatusException ? $e->getStatusCode() : 500;
 
             // Handle web route errors.
-            if ($routeType == RouteHandler::ROUTE_TYPE_WEB) {
+            if ($routeType === RouteHandler::ROUTE_TYPE_WEB) {
 
                 // Configure route to specific one if a status exception or to the general one otherwise.
                 $route = $e instanceof StatusException ? "error/error" . $responseCode : "error/error";
@@ -199,7 +196,7 @@ class Router {
                 try {
                     $response = $this->callErrorRoute($route, $e->getMessage(), $e->getCode(), $responseCode);
                 } catch (RouteNotFoundException $e) {
-                    if ($route != "error/error") {
+                    if ($route !== "error/error") {
                         try {
                             $response = $this->callErrorRoute("error/error", $e->getMessage(), $e->getCode(), $responseCode);
                         } catch (RouteNotFoundException $e) {
