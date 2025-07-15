@@ -54,7 +54,7 @@ abstract class Controller {
 
         $annotations = ClassAnnotationParser::instance()->parse($className);
 
-        $acceptHeader = isset($_SERVER["HTTP_ACCEPT"]) ? $_SERVER["HTTP_ACCEPT"] : null;
+        $acceptHeader = isset($_SERVER["HTTP_ACCEPT"]) ? $_SERVER["HTTP_ACCEPT"] : "";
         $isJSON = is_numeric(strpos($acceptHeader, "application/json"));
         $isXML = is_numeric(strpos($acceptHeader, "application/xml")) && !is_numeric(strpos($acceptHeader, "text/html"));
         $isWebService = ($this instanceof WebService) || $isJSON || $isXML || $annotations->getMethodAnnotationsForMatchingTag("webservice", $methodName);
@@ -239,7 +239,7 @@ abstract class Controller {
      */
     protected function convertToWebServiceOutput($result, $headersOnly = false) {
 
-        $acceptHeader = isset($_SERVER["HTTP_ACCEPT"]) ? $_SERVER["HTTP_ACCEPT"] : null;
+        $acceptHeader = isset($_SERVER["HTTP_ACCEPT"]) ? $_SERVER["HTTP_ACCEPT"] : "";
         $isXML = is_numeric(strpos($acceptHeader, "application/xml")) && !is_numeric(strpos($acceptHeader, "text/html"));
 
         if ($isXML) {
