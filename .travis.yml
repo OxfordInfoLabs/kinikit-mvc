@@ -1,6 +1,7 @@
+dist: jammy
 language: php
 php:
-  - '8.1.12'
+  - '8.2'
 before_script: composer install; composer update; cd test
 script: phpunit .
 after_success:
