@@ -127,4 +127,8 @@ class TestRESTObject {
     }
 
 
+    public function bind($data){
+
+    }
+
 }
