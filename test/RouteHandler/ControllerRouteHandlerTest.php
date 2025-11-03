@@ -164,6 +164,23 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
     }
 
 
+    public function testCanSendBlankArraysAsValidPayloads(){
+        stream_wrapper_unregister("php");
+        stream_wrapper_register("php", "Kinikit\MVC\Request\MockPHPInputStream");
+        file_put_contents("php://input", '[]');
+
+        $method = $this->classInspectorProvider->getClassInspector(REST::class)->getPublicMethod("patch");
+
+        $request = new Request(new Headers());
+        $handler = new ControllerRouteHandler($method, $request, "25");
+
+        $jsonResponse = $handler->handleRoute();
+        $this->assertEquals("PATCHED 25", $jsonResponse->getObject()->getLastStatus());
+
+
+    }
+
+
     public function testPostParameterArrayIsUsedInsteadOfPHPInputIfContentTypeIsMultipart() {
 
         include_once "Controllers/Zone/Simple.php";

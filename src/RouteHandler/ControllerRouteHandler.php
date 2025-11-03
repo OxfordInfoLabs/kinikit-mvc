@@ -131,7 +131,7 @@ class ControllerRouteHandler extends RouteHandler {
                             $payloadParam->getType()
                         ));
 
-                    if ($payloadParam->isRequired() && !$params[$payloadParam->getName()]) {
+                    if ($payloadParam->isRequired() && ($params[$payloadParam->getName()] === null || $params[$payloadParam->getName()] === "")) {
                         throw new WrongParameterTypeException("The parameter {$payloadParam->getName()} is of the wrong type or badly formed");
                     }
                 } catch (ObjectBindingException $e) {
