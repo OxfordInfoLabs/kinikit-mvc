@@ -2,8 +2,6 @@
 
 namespace Kinikit\MVC\API\Descriptor;
 
-use Kinikit\MVC\API\APIConfiguration;
-
 include_once "autoloader.php";
 
 /**
