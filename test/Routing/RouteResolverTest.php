@@ -13,9 +13,9 @@ use Kinikit\MVC\Decorators\Zone;
 use Kinikit\MVC\Request\Headers;
 use Kinikit\MVC\Request\Request;
 use Kinikit\MVC\RouteHandler\ControllerRouteHandler;
-use Kinikit\MVC\RouteHandler\ViewOnlyRouteHandler;
 use Kinikit\MVC\RouteHandler\DecoratorRouteHandler;
 use Kinikit\MVC\RouteHandler\MissingDecoratorHandlerException;
+use Kinikit\MVC\RouteHandler\ViewOnlyRouteHandler;
 
 include_once "autoloader.php";
 

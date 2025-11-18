@@ -3,7 +3,6 @@
 namespace Kinikit\MVC\ContentSource;
 
 use Kinikit\Core\Configuration\Configuration;
-use Kinikit\Core\Configuration\FileResolver;
 use Kinikit\Core\Exception\FileNotFoundException;
 
 include_once "autoloader.php";

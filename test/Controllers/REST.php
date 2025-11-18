@@ -3,11 +3,8 @@
 namespace Kinikit\MVC\Controllers;
 
 
-use Kinikit\Core\DependencyInjection\ExampleEnum;
-use Kinikit\Core\DependencyInjection\SimpleEnum;
 use Kinikit\Core\Exception\StatusException;
 use Kinikit\Core\Reflection\TestBackedEnum;
-use Kinikit\Core\Reflection\TestEnum;
 use Kinikit\MVC\Objects\TestRESTObject;
 use Kinikit\MVC\Test\Backed;
 use Kinikit\MVC\Test\Unbacked;

@@ -4,8 +4,6 @@
 namespace Kinikit\MVC\Response;
 
 
-use Throwable;
-
 class ViewNotFoundException extends \Exception {
 
     public function __construct($viewPath) {

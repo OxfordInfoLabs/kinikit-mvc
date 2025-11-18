@@ -3,5 +3,6 @@ test/ratelimits
 test/php_input.txt
 .idea
 .phpunit.result.cache
+.phpunit.cache
 composer.lock
 test/Session/sess_*

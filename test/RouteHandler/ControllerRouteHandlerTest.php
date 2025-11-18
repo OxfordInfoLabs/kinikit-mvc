@@ -4,16 +4,13 @@
 namespace Kinikit\MVC\RouteHandler;
 
 
-use http\Env\Response;
 use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\Exception\WrongParameterTypeException;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
-use Kinikit\Core\Util\Primitive;
 use Kinikit\MVC\Controllers\REST;
 use Kinikit\MVC\Objects\TestRESTObject;
 use Kinikit\MVC\RateLimiter\RateLimiterConfig;
 use Kinikit\MVC\Request\Headers;
-use Kinikit\MVC\Request\MockPHPInputStream;
 use Kinikit\MVC\Request\Request;
 use Kinikit\MVC\Response\JSONResponse;
 use Kinikit\MVC\Response\View;
@@ -220,7 +217,7 @@ class ControllerRouteHandlerTest extends \PHPUnit\Framework\TestCase {
         $request = new Request(new Headers());
         $handler = new ControllerRouteHandler($method, $request, "");
 
-        $this->assertEquals(new View("Simple", ["title" => "HELLO WORLD", "request" => $request]), $handler->handleRoute());
+         $this->assertEquals(new View("Simple", ["title" => "HELLO WORLD", "request" => $request]), $handler->handleRoute());
 
     }
 
