@@ -178,6 +178,7 @@ class Router {
 
 
         } catch (\Throwable $e) {
+            Logger::log($e->getTraceAsString());
 
 
             // Generate responses based upon the route type, falling back to json for exceptions raised at the first stage.

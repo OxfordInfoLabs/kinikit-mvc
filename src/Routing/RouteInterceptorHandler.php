@@ -4,6 +4,7 @@
 namespace Kinikit\MVC\Routing;
 
 
+use Kinikit\Core\Logging\Logger;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\MVC\ContentCaching\ContentCacheConfig;
 use Kinikit\MVC\RateLimiter\RateLimiterConfig;
@@ -85,7 +86,12 @@ class RouteInterceptorHandler {
      */
     public function processBeforeRoute($request) {
         foreach ($this->interceptors as $interceptor) {
-            $response = $interceptor->beforeRoute($request);
+            try {
+                $response = $interceptor->beforeRoute($request);
+            } catch (\Exception $e) {
+                Logger::log($e->getTraceAsString());
+                throw $e;
+            }
             if ($response) {
                 return $response;
             }
