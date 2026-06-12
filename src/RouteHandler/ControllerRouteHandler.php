@@ -176,10 +176,12 @@ class ControllerRouteHandler extends RouteHandler {
         // Grab the proxied method
         $proxiedMethod = $classInspector->getPublicMethod($this->targetMethod->getMethodName());
 
+        Logger::log(get_class($instance));
+        Logger::log($this->targetMethod->getMethodName());
+        
         // Execute the method - Trap insufficient parameters exception
         try {
-            Logger::log(get_class($instance));
-            Logger::log($this->targetMethod->getMethodName());
+
             $result = $proxiedMethod->call($instance, $params);
         } catch (InsufficientParametersException $e) {
             throw new InsufficientParametersException("Insufficient parameters passed");
