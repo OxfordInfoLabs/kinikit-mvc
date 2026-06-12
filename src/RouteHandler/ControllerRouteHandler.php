@@ -184,6 +184,7 @@ class ControllerRouteHandler extends RouteHandler {
 
             $result = $proxiedMethod->call($instance, $params);
         } catch (InsufficientParametersException $e) {
+            Logger::log($e->getMessage());
             Logger::log($e->getTraceAsString());
             throw new InsufficientParametersException("Insufficient parameters passed");
         }
