@@ -138,6 +138,7 @@ class Router {
             $routeInterceptorHandler = $this->routeInterceptorProcessor->getInterceptorHandlerForRequest($url->getPath());
 
             // Run before interceptors as first stage.
+            Logger::log($request);
             $response = $routeInterceptorHandler->processBeforeRoute($request);
 
             // If no response from before route, proceed to resolve the route.
