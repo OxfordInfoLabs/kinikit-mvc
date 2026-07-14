@@ -212,7 +212,8 @@ class Router {
 
                 $exceptionArray = $this->objectBinder->bindToArray($e);
 
-                Logger::log($e);
+                Logger::log($e->getMessage(), LOG_ERR);
+                Logger::log("File: {$e->getFile()} on line {$e->getLine()}");
 
                 if (is_array($exceptionArray)) {
                     unset($exceptionArray["file"]);
