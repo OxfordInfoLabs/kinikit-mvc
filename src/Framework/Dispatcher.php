@@ -31,7 +31,7 @@ class Dispatcher {
         date_default_timezone_set("Europe/London");
 
         // Set a catch all error handler
-        set_error_handler(array($this, "genericErrorHandler"), E_ALL);
+        set_error_handler(array($this, "genericErrorHandler"), E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 
 
 
