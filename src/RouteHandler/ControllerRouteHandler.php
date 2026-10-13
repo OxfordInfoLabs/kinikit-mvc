@@ -11,6 +11,7 @@ use Kinikit\Core\DependencyInjection\Container;
 use Kinikit\Core\DependencyInjection\SimpleEnum;
 use Kinikit\Core\Exception\InsufficientParametersException;
 use Kinikit\Core\Exception\WrongParameterTypeException;
+use Kinikit\Core\Logging\Logger;
 use Kinikit\Core\Reflection\ClassInspectorProvider;
 use Kinikit\Core\Reflection\Method;
 use Kinikit\Core\Serialisation\JSON\JSONToObjectConverter;
@@ -179,6 +180,7 @@ class ControllerRouteHandler extends RouteHandler {
         try {
             $result = $proxiedMethod->call($instance, $params);
         } catch (InsufficientParametersException $e) {
+            Logger::log($e->getTraceAsString());
             throw new InsufficientParametersException("Insufficient parameters passed");
         }
 
