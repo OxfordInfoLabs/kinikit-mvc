@@ -298,7 +298,6 @@ class ControllerRouteHandler extends RouteHandler {
 
         // Make accessible and update the view model
         $reflectionProperty = (new \ReflectionClass(View::class))->getProperty("model");
-        $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($view, $model);
 
 
